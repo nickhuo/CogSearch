@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Timer</title>
+    <script>
+        var remainingTime = parseInt("{{ remaining_time }}", 10); // Ensure it's an integer
+        function countdown() {
+            if (remainingTime > 0) {
+                document.getElementById('timer').innerText = remainingTime + ' seconds remaining';
+                remainingTime--;
+                setTimeout(countdown, 1000);
+            } else {
+                document.getElementById('timer').innerText = 'Time is UP!';
+            }
+        }
+        window.onload = countdown;
+    </script>
+</head>
+<body>
+    <p><b>TIME REMAINS:</b></p>
+    <p id="timer"></p>
+</body>
+</html>

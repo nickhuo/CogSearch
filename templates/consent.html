@@ -1,0 +1,42 @@
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    {% if error %}
+    <div style="color: red;">{{ error }}</div>
+    {% endif %}
+    
+    <div class="cl0">
+        <h2><b>Informed Consent</b></h2>
+        <!-- Consent text same as original -->
+    </div>
+
+    <div class="cl0" style="font-size:20pt">
+        <span><b>
+            I have read and understand the above consent form, I certify that I am 18 years old or older and, by clicking the box below, I indicate my willingness voluntarily take part in the study.
+        </b></span>
+        <br><br>
+        <form id="form_consent" action="{{ url_for('consent') }}" method="POST" onsubmit="return saveConsent()">
+            <b>mTurk Worker ID: <input type="text" name="mturkid" style="width:300px;" required /></b> (required)<br><br>
+            <input type="checkbox" name="consentCheck" id="consentCheck" value="Yes" class="regular-checkbox big-checkbox" required>
+            <label for="consentCheck"></label>
+            <span><b>Yes, I consent.</b></span>
+            <br><br>
+            <button type="submit" name="submit" style="background: url('{{ url_for('static', filename='images/start_button.gif') }}'); 
+                    width: 200px; height: 50px; border: none; cursor: pointer;"></button>
+        </form>
+    </div>
+
+    <script type="text/javascript">
+        function saveConsent() {
+            const checkbox = document.getElementById('consentCheck');
+            if (!checkbox.checked) {
+                alert('You must consent to participate in the study.');
+                return false;
+            }
+            return true;
+        }
+    </script>
+</body>
+</html>

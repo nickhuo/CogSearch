@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Demographic Information</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        .cl0 { margin: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        td { padding: 8px; vertical-align: top; border: 1px solid #ddd; }
+        input[type="number"] { width: 80px; }
+        input[type="text"] { width: 300px; }
+        .error { color: red; margin: 15px 0; }
+        .radio-group { margin: 5px 0; }
+    </style>
+</head>
+<body>
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+    
+    <div class="cl0">
+        <h2><b>Demographic Information</b></h2>
+        <h3>Please answer the following questions:</h3>
+        
+        <form id="form_demog" method="POST" action="{{ url_for('demographic') }}" onsubmit="return saveDemog()">
+            <table class="cl0">
+                <tr>
+                    <td>Date of Birth:</td>
+                    <td colspan="3">
+                        <input type="number" name="demog_bm" id="demog_bm" min="1" max="12" required />(Month, MM)/
+                        <input type="number" name="demog_bd" id="demog_bd" min="1" max="31" required />(Day, DD)/
+                        <input type="number" name="demog_by" id="demog_by" min="1900" max="2015" required />(Year, YYYY)
+                    </td>
+                </tr>
+                <tr>
+                    <td>Age:</td>
+                    <td colspan="3">
+                        <input type="number" name="demog_age" id="demog_age" min="18" max="100" required /> Years Old
+                    </td>
+                </tr>
+                <tr>
+                    <td>Gender:</td>
+                    <td colspan="3">
+                        <div class="radio-group">
+                            <input type="radio" name="demog_gen" id="demog_gen_male" value="1" required /> Male
+                            <input type="radio" name="demog_gen" id="demog_gen_female" value="2" /> Female
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        Using the scale below, how many years of formal education did you complete?
+                        <input type="number" name="demog_edu" id="demog_edu" step="0.5" min="1" max="30" required /> Years
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        Fewer than 8 years (1-7.5)<br>
+                        Some high school (9-11.5)<br>
+                        Some college (12.5-15.5)<br>
+                        Master's degree (18)
+                    </td>
+                    <td>
+                        Completed 8th grade (8)<br>
+                        Graduated high school (12)<br>
+                        Graduated college (16)<br>
+                        Doctoral or medical degree (20)
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        Are you a native speaker of English?
+                        <div class="radio-group">
+                            <input type="radio" name="demog_eng" id="demog_eng_yes" value="1" required /> Yes
+                            <input type="radio" name="demog_eng" id="demog_eng_no" value="0" /> No
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div style="margin-left: 20px;">
+                            <p>- What is your first language?
+                                <input type="text" name="demog_firlan" id="demog_firlan" />
+                            </p>
+                            <p>- At what age did you begin to acquire English?
+                                <input type="number" name="demog_ageeng" id="demog_ageeng" min="1" /> Years Old
+                            </p>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        Are you Hispanic or Latino?
+                        <div class="radio-group">
+                            <input type="radio" name="demog_hislat" id="demog_hislat_yes" value="1" required /> Yes
+                            <input type="radio" name="demog_hislat" id="demog_hislat_no" value="0" /> No
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        Please check one of the following ethnic or racial categories that best describe you:
+                        <div class="radio-group">
+                            <input type="radio" name="demog_race" id="demog_race_native" value="1" required /> Native American/Alaska Native<br>
+                            <input type="radio" name="demog_race" id="demog_race_asian" value="2" /> Asian<br>
+                            <input type="radio" name="demog_race" id="demog_race_hawaian" value="3" /> Native Hawaiian or Other Pacific Islander<br>
+                            <input type="radio" name="demog_race" id="demog_race_african" value="4" /> Black or African American<br>
+                            <input type="radio" name="demog_race" id="demog_race_white" value="5" /> White or Caucasian<br>
+                            <input type="radio" name="demog_race" id="demog_race_multi" value="6" /> Multiple categories
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <input type="hidden" name="mturkid" id="mturkid" value="{{ session.get('sid', '') }}">
+                        <button type="submit" class="submit-button">
+                            <img src="{{ url_for('static', filename='images/nextpage_button.gif') }}" alt="Next">
+                        </button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+
+    <script>
+        function saveDemog() {
+            // Client-side validation
+            const bm = document.getElementById('demog_bm').value;
+            const bd = document.getElementById('demog_bd').value;
+            const by = document.getElementById('demog_by').value;
+            
+            if (!bm || !bd || !by) {
+                alert('Please fill in all required fields');
+                return false;
+            }
+            
+            // Add additional validation as needed
+            return true;
+        }
+
+        function getRadioVal(form, name) {
+            const radios = form.elements[name];
+            for (let i = 0; i < radios.length; i++) {
+                if (radios[i].checked) {
+                    return radios[i].value;
+                }
+            }
+            return null;
+        }
+    </script>
+</body>
+</html>
