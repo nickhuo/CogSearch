@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Interface</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <!-- Timer Section -->
+    <div id="timer" class="timer">
+        Remaining Time: {{ remainingTime }} seconds
+    </div>
+
+    <!-- Topic Display -->
+    <div id="topic">
+        <table id="subtopic" style="width: 100%; table-layout: fixed;">
+            <tr>
+                <td colspan="2" class="cl4">
+                    <p>{{ topic['topTitle'] }}</p>
+                </td>
+            </tr>
+            {% for subtopic in subtopics %}
+                {% if loop.index0 % 2 == 0 %}<tr>{% endif %}
+                
+                <td class="{% if subtopic.subtopID in visitedSubtop %}cl6{% else %}cl5{% endif %}">
+                    {% if subtopic.subtopID in visitedSubtop %}
+                        <font>{{ subtopic.subtopTitle }}</font>
+                    {% else %}
+                        <a href="{{ url_for('task_b', subtop=subtopic.subtopID, passOrd=1, lastPage='a') }}"
+                           style="text-decoration: underline;">
+                            {{ subtopic.subtopTitle }}
+                        </a>
+                    {% endif %}
+                </td>
+
+                {% if loop.index0 % 2 == 1 or loop.last %}</tr>{% endif %}
+            {% endfor %}
+        </table>
+    </div>
+
+    <!-- Add your timer JavaScript here -->
+    <script>
+    // JavaScript timer implementation would go here
+    </script>
+</body>
+</html>

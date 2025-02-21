@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Practice Task</title>
+</head>
+<body>
+    <!-- Timer -->
+    <div id="timer" name="timer" class="timer">
+        <!-- Include timer logic here -->
+        Remaining Time: {{ session['remainingTime'] }} seconds
+    </div>
+
+    <div id="topic" name="topic" style="text-align:center">
+        <table id="subtopic" width="100%" style="table-layout:fixed">
+            <tr>
+                <td class="cl4" colspan="2">
+                    <p>{{ topic['topTitle'] }}</p>
+                </td>
+            </tr>
+            {% for i, subtopic in enumerate(subtopics) %}
+                {% if i % 2 == 0 %}
+                    <tr>
+                {% endif %}
+
+                {% if subtopic['subtopID'] in visitedSubtop %}
+                    <td class="cl6"><font>{{ subtopic['subtopTitle'] }}</font></td>
+                {% else %}
+                    <td class="cl5">
+                        <a href="{{ url_for('prac_b', subtop=subtopic['subtopID'], passOrd=1, lastPage='a') }}" style="text-decoration:underline;">
+                            {{ subtopic['subtopTitle'] }}
+                        </a>
+                    </td>
+                {% endif %}
+
+                {% if i % 2 == 1 %}
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+    </div>
+</body>
+</html>

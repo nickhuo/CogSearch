@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Practice Article</title>
+</head>
+<body>
+    <!-- Timer -->
+    <div id="timer" name="timer" class="timer">
+        Remaining Time: {{ session['remainingTime'] }} seconds
+    </div>
+
+    <div class="b_down">
+        <!-- Article Content -->
+        <div id="article" class="article">
+            <div id="artText" class="artText">
+                <p>{{ passResult['passText'] }}</p>
+                <br>
+            </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <div id="back_a" class="back_a">
+            <p><a href="{{ url_for('prac_c1', fid='back') }}" style="color:#FFFFFF;">Go to OTHER TOPIC</a></p>
+        </div>
+
+        <div id="nextArt" class="nextArt">
+            {% if passOrder == 5 %}
+                <font><a href="{{ url_for('prac_c1', fid='back') }}" style="color:#FFFFFF;">Go to OTHER TOPIC</a></font>
+            {% else %}
+                <font><a href="{{ url_for('prac_c1', fid='same') }}" style="color:#FFFFFF;">Read NEXT ARTICLE</a></font>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
