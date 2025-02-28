@@ -1,45 +1,62 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Task Interface</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <meta charset="UTF-8">
+  <title>{{ topicResult[1] if topicResult else "Task A" }}</title>
 </head>
 <body>
-    <!-- Timer Section -->
-    <div id="timer" class="timer">
-        Remaining Time: {{ remainingTime }} seconds
-    </div>
-
-    <!-- Topic Display -->
-    <div id="topic">
-        <table id="subtopic" style="width: 100%; table-layout: fixed;">
-            <tr>
-                <td colspan="2" class="cl4">
-                    <p>{{ topic['topTitle'] }}</p>
-                </td>
-            </tr>
-            {% for subtopic in subtopics %}
-                {% if loop.index0 % 2 == 0 %}<tr>{% endif %}
-                
-                <td class="{% if subtopic.subtopID in visitedSubtop %}cl6{% else %}cl5{% endif %}">
-                    {% if subtopic.subtopID in visitedSubtop %}
-                        <font>{{ subtopic.subtopTitle }}</font>
-                    {% else %}
-                        <a href="{{ url_for('task_b', subtop=subtopic.subtopID, passOrd=1, lastPage='a') }}"
-                           style="text-decoration: underline;">
-                            {{ subtopic.subtopTitle }}
-                        </a>
-                    {% endif %}
-                </td>
-
-                {% if loop.index0 % 2 == 1 or loop.last %}</tr>{% endif %}
-            {% endfor %}
-        </table>
-    </div>
-
-    <!-- Add your timer JavaScript here -->
+  <!-- Timer -->
+  <div id="timer" class="timer">
+    <p><strong>TIME REMAINS:</strong></p>
     <script>
-    // JavaScript timer implementation would go here
+      var RemainingTime = Number({{ session.get('remainingTime', 0) }});
+      var BackColor = "white";
+      var ForeColor = "navy";
+      var CountActive = true;
+      var CountStepper = -1;
+      var LeadingZero = true;
+      var DisplayFormat = "%%M%% Minutes, %%S%% Seconds.";
+      var FinishMessage = "Time is UP!";
+      var RedirectPage = "{{ session.get('redirectPage', '') }}";
     </script>
+    <script src="{{ url_for('static', filename='js/countdown.js') }}"></script>
+  </div>
+
+  <!-- Table of Subtopics -->
+  <div id="topic" style="text-align:center;">
+    <table id="subtopic" width="100%" style="table-layout:fixed;">
+      <tr>
+        <td class="cl4" colspan="2">
+          <p>{{ topicResult[1] if topicResult else "Unknown Topic" }}</p>
+        </td>
+      </tr>
+      {% set i = 0 %}
+      {% for row in subtopics %}
+        {% if i % 2 == 0 %}
+          <tr>
+        {% endif %}
+
+        {% set subtop_id = row[0] %}
+        {% set subtop_title = row[2] %}
+
+        {% if subtop_id in visited_subtop %}
+          <td class="cl6"><font>{{ subtop_title }}</font></td>
+        {% else %}
+          <!-- Link to /task_b?subtop=XYZ&passOrd=1&lastPage=a -->
+          <td class="cl5">
+            <a href="{{ url_for('task_b', subtop=subtop_id, passOrd=1, lastPage='a') }}"
+               style="text-decoration:underline;">
+              {{ subtop_title }}
+            </a>
+          </td>
+        {% endif %}
+
+        {% if i % 2 == 1 %}
+          </tr>
+        {% endif %}
+        {% set i = i + 1 %}
+      {% endfor %}
+    </table>
+  </div>
 </body>
 </html>

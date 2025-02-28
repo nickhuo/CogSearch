@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Instruction for Letter Comparison One</title>
+</head>
+<body>
+  <div class="cl2">
+    <h2><b>Instructions:</b></h2>
+    <p style="line-height:130%">
+      You are almost done!
+    </p>
+    <p style="line-height:130%">
+      In the next task, you will be asked to determine whether two letter strings are exactly the same or different.
+      If these two letter strings are exactly the <b>same</b>, please select <b>“S”</b>.
+      If they are <b>different</b>, please select <b>“D”</b>.
+      Please do <b>as fast as you can</b>. Once you finish the task, please press “DONE” button.
+    </p>
+    <p>
+      Ready?
+    </p>
+  </div>
+
+  <div class="cl0" style="font-size:20pt">
+    <form method="post" action="{{ url_for('let_comp_one') }}">
+      <input type="image" name="submit" id="submit" src="{{ url_for('static', filename='images/nextpage_button.gif') }}" alt="Next">
+    </form>
+  </div>
+</body>
+</html>

@@ -1,43 +1,83 @@
+<!-- templates/prac_a.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Practice Task</title>
+  <meta charset="UTF-8">
+  <title>Practice A</title>
+  <!-- If you want to use the same CSS classes as in setting.php, 
+       copy them to a .css file or inline <style> block. -->
 </head>
 <body>
-    <!-- Timer -->
-    <div id="timer" name="timer" class="timer">
-        <!-- Include timer logic here -->
-        Remaining Time: {{ session['remainingTime'] }} seconds
-    </div>
 
-    <div id="topic" name="topic" style="text-align:center">
-        <table id="subtopic" width="100%" style="table-layout:fixed">
-            <tr>
-                <td class="cl4" colspan="2">
-                    <p>{{ topic['topTitle'] }}</p>
-                </td>
-            </tr>
-            {% for i, subtopic in enumerate(subtopics) %}
-                {% if i % 2 == 0 %}
-                    <tr>
-                {% endif %}
+  <!-- TIMER SECTION -->
+  <div id="timer" class="timer">
+    <p><strong>TIME REMAINS:</strong></p>
+    <script>
+      /*
+        We pull the needed variables from Flask session/context.
+        'RemainingTime' and 'RedirectPage' are set in your /prac_a route, e.g.:
+            session['remainingTime'] = 30
+            session['redirectPage'] = "/some_next_page"
+      */
+      var RemainingTime = Number({{ session.get('remainingTime', 0) }});
+      var BackColor = "white";
+      var ForeColor = "navy";
+      var CountActive = true;
+      var CountStepper = -1;
+      var LeadingZero = true;
+      var DisplayFormat = "%%M%% Minutes, %%S%% Seconds.";
+      var FinishMessage = "Time is UP!";
+      var RedirectPage = "{{ session.get('redirectPage', '') }}";
+    </script>
+    <!-- Load your countdown.js from static/js/countdown.js -->
+    <script src="{{ url_for('static', filename='js/countdown.js') }}"></script>
+  </div>
 
-                {% if subtopic['subtopID'] in visitedSubtop %}
-                    <td class="cl6"><font>{{ subtopic['subtopTitle'] }}</font></td>
-                {% else %}
-                    <td class="cl5">
-                        <a href="{{ url_for('prac_b', subtop=subtopic['subtopID'], passOrd=1, lastPage='a') }}" style="text-decoration:underline;">
-                            {{ subtopic['subtopTitle'] }}
-                        </a>
-                    </td>
-                {% endif %}
+  <!-- TOPIC + SUBTOPICS TABLE SECTION -->
+  <div id="topic" style="margin-top:20px;">
+    <table id="subtopic" width="100%" style="table-layout:fixed;">
+      <tr>
+        <td class="cl4" colspan="2">
+          <!-- topic_result[1] is likely topTitle if your columns are (topID, topTitle, ...) -->
+          <p>{{ topic_result[1] }}</p>
+        </td>
+      </tr>
+      {# 
+        'subtopics' is a list of rows from tb13_prac_subtopic. 
+        Typically row[0] = subtopID, row[2] = subtopTitle.
+        'visited_subtop' is a list of visited subtopic IDs.
+      #}
+      {% set i = 0 %}
+      {% for row in subtopics %}
+        {% if i % 2 == 0 %}
+          <tr>
+        {% endif %}
 
-                {% if i % 2 == 1 %}
-                    </tr>
-                {% endif %}
-            {% endfor %}
-        </table>
-    </div>
+        {% set subtop_id = row[0] %}
+        {% set subtop_title = row[2] %}
+
+        {% if subtop_id in visited_subtop %}
+          <!-- Already visited -->
+          <td class="cl6">
+            <font>{{ subtop_title }}</font>
+          </td>
+        {% else %}
+          <!-- Not visited yet => link to prac_b.php (convert later to a Flask route) -->
+          <td class="cl5">
+            <a href="{{ url_for('prac_b', subtop=subtop_id, passOrd=1, lastPage='a') }}"
+             style="text-decoration:underline;">
+               {{ subtop_title }}
+            </a>
+          </td>
+        {% endif %}
+
+        {% if i % 2 == 1 %}
+          </tr>
+        {% endif %}
+        {% set i = i + 1 %}
+      {% endfor %}
+    </table>
+  </div>
+
 </body>
 </html>

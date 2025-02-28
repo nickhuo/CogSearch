@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Submit Letter Comparison One</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+</head>
+<body>
+  <div>
+    <form id="form_lcOne" name="form_lcOne" action="{{ action_url }}" method="POST" onsubmit="return saveLetCompOne();">
+      <table>
+        <colgroup>
+          <col style="width:30%;"/>
+          <col style="width:40%;"/>
+          <col style="width:30%;"/>
+        </colgroup>
+        <tr>
+          <td style="text-align:right;">PRDBZTYFN</td>
+          <td style="text-align:center;">
+            <input type="radio" name="lc1" id="lc1_S" value="S" required/>S  
+            <input type="radio" name="lc1" id="lc1_D" value="D"/>D  
+          </td>
+          <td style="text-align:left;">PRDBZTYFN</td>
+        </tr>
+        <tr>
+          <td style="text-align:right;">NCWJDZ</td>
+          <td style="text-align:center;">
+            <input type="radio" name="lc2" id="lc2_S" value="S" required/>S  
+            <input type="radio" name="lc2" id="lc2_D" value="D"/>D  
+          </td>
+          <td style="text-align:left;">NCMJDZ</td>
+        </tr>
+        <tr>
+          <td style="text-align:right;">KHW</td>
+          <td style="text-align:center;">
+            <input type="radio" name="lc3" id="lc3_S" value="S" required/>S  
+            <input type="radio" name="lc3" id="lc3_D" value="D"/>D  
+          </td>
+          <td style="text-align:left;">KBW</td>
+        </tr>
+        <tr>
+          <td style="text-align:right;">ZRBGMF</td>
+          <td style="text-align:center;">
+            <input type="radio" name="lc4" id="lc4_S" value="S" required/>S  
+            <input type="radio" name="lc4" id="lc4_D" value="D"/>D  
+          </td>
+          <td style="text-align:left;">ZRBCMF</td>
+        </tr>
+        <tr>
+          <td style="text-align:right;">BTH</td>
+          <td style="text-align:center;">
+            <input type="radio" name="lc5" id="lc5_S" value="S" required/>S  
+            <input type="radio" name="lc5" id="lc5_D" value="D"/>D  
+          </td>
+          <td style="text-align:left;">BYH</td>
+        </tr>
+        <tr>
+          <td style="text-align:right;">XWKQRYCNZ</td>
+          <td style="text-align:center;">
+            <input type="radio" name="lc6" id="lc6_S" value="S" required/>S  
+            <input type="radio" name="lc6" id="lc6_D" value="D"/>D  
+          </td>
+          <td style="text-align:left;">XWKQRYCNZ</td>
+        </tr>
+        <tr>
+          <td style="text-align:right;">HNPDLK</td>
+          <td style="text-align:center;">
+            <input type="radio" name="lc7" id="lc7_S" value="S" required/>S  
+            <input type="radio" name="lc7" id="lc7_D" value="D"/>D  
+          </td>
+          <td style="text-align:left;">HNPDLK</td>
+        </tr>
+        <tr>
+          <td style="text-align:right;">WMQTRSGLZ</td>
+          <td style="text-align:center;">
+            <input type="radio" name="lc8" id="lc8_S" value="S" required/>S  
+            <input type="radio" name="lc8" id="lc8_D" value="D"/>D  
+          </td>
+          <td style="text-align:left;">WMQTRZGLZ</td>
+        </tr>
+        <tr>
+          <td style="text-align:right;">JPN</td>
+          <td style="text-align:center;">
+            <input type="radio" name="lc9" id="lc9_S" value="S" required/>S  
+            <input type="radio" name="lc9" id="lc9_D" value="D"/>D  
+          </td>
+          <td style="text-align:left;">JPN</td>
+        </tr>
+        <tr>
+          <td style="text-align:right;">QLXSVT</td>
+          <td style="text-align:center;">
+            <input type="radio" name="lc10" id="lc10_S" value="S" required/>S  
+            <input type="radio" name="lc10" id="lc10_D" value="D"/>D  
+          </td>
+          <td style="text-align:left;">QLNSVT</td>
+        </tr>
+      </table>
+      <br>
+      <input type="image" name="submit" id="submit" src="{{ url_for('static', filename='images/done_button.gif') }}" alt="Done">
+    </form>
+  </div>
+
+  <script type="text/javascript">
+    function saveLetCompOne(){
+      var input1 = getRadioVal(document.getElementById('form_lcOne'),'lc1');
+      var input2 = getRadioVal(document.getElementById('form_lcOne'),'lc2');
+      var input3 = getRadioVal(document.getElementById('form_lcOne'),'lc3');
+      var input4 = getRadioVal(document.getElementById('form_lcOne'),'lc4');
+      var input5 = getRadioVal(document.getElementById('form_lcOne'),'lc5');
+      var input6 = getRadioVal(document.getElementById('form_lcOne'),'lc6');
+      var input7 = getRadioVal(document.getElementById('form_lcOne'),'lc7');
+      var input8 = getRadioVal(document.getElementById('form_lcOne'),'lc8');
+      var input9 = getRadioVal(document.getElementById('form_lcOne'),'lc9');
+      var input10 = getRadioVal(document.getElementById('form_lcOne'),'lc10');
+       
+      if(input1 == ''){
+          return false;
+      } else {
+          return true;
+      }
+    }
+    
+    function getRadioVal(form, name) {
+      var val;
+      var radios = form.elements[name];
+      for (var i = 0; i < radios.length; i++) {
+          if (radios[i].checked) {
+              val = radios[i].value;
+              break;
+          }
+      }
+      return val;
+    }
+  </script>
+</body>
+</html>

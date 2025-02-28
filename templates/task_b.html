@@ -2,16 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>{{ pageTitle if pageTitle else "Practice B" }}</title>
+  <title>{{ passResult['passTitle'] if passResult else "Task B" }}</title>
 </head>
 <body>
-  <!-- Timer (like b_up) -->
+  <!-- b_up -->
   <div class="b_up">
+    <!-- Timer -->
     <div id="timer" class="timer">
-      <!-- 
-        We can reuse a timer snippet like we did in other pages, 
-        or inline it. For brevity, let's inline the minimal logic:
-      -->
       <p><strong>TIME REMAINS:</strong></p>
       <script>
         var RemainingTime = Number({{ session.get('remainingTime', 0) }});
@@ -28,9 +25,9 @@
     </div>
   </div>
 
+  <!-- b_down -->
   <div class="b_down">
     <div id="article" class="article">
-      <!-- Display the passage text -->
       <div id="artText" class="artText">
         {% if passResult %}
           <p>{{ passResult['passText'] | safe }}</p>
@@ -40,23 +37,30 @@
       </div>
     </div>
 
-    <div class="back_a">
+    <div id="back_a" class="back_a">
+      <!-- "Go to OTHER TOPIC" => /task_c1?fid=back -->
       <p>
-        <a href="{{ url_for('prac_c1', fid='back') }}" style="color:#FFFFFF;">
+        <a href="{{ url_for('task_c1', fid='back') }}" style="color:#FFFFFF;">
           Go to OTHER TOPIC
         </a>
       </p>
     </div>
 
-    <div class="nextArt">
-      {% if passOrder == 5 %}
-        <a href="{{ url_for('prac_c1', fid='back') }}" style="color:#FFFFFF;">
-          Go to OTHER TOPIC
-        </a>
+    <div id="nextArt" class="nextArt">
+      {% if passOrder == 6 %}
+        <!-- If passOrder==6, only show "Go to OTHER TOPIC" -->
+        <font>
+          <a href="{{ url_for('task_c1', fid='back') }}" style="color:#FFFFFF;">
+            Go to OTHER TOPIC
+          </a>
+        </font>
       {% else %}
-        <a href="{{ url_for('prac_c1', fid='same') }}" style="color:#FFFFFF;">
-          Read NEXT ARTICLE
-        </a>
+        <!-- Otherwise, "Read NEXT ARTICLE" => /task_c1?fid=same -->
+        <font>
+          <a href="{{ url_for('task_c1', fid='same') }}" style="color:#FFFFFF;">
+            Read NEXT ARTICLE
+          </a>
+        </font>
       {% endif %}
     </div>
   </div>
