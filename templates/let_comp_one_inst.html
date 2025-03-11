@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>Instruction for Letter Comparison One</title>
+  <style>
+    .cl2 { margin: 20px; padding: 20px; border: 1px solid #ccc; }
+    .cl0 { margin: 20px; }
+  </style>
 </head>
 <body>
   <div class="cl2">
@@ -22,8 +26,10 @@
   </div>
 
   <div class="cl0" style="font-size:20pt">
-    <form method="post" action="{{ url_for('let_comp_one') }}">
-      <input type="image" name="submit" id="submit" src="{{ url_for('static', filename='images/nextpage_button.gif') }}" alt="Next">
+    <form method="post" action="{{ url_for('let_comp_one_inst') }}">
+      <input type="image" name="submit" id="submit"
+             src="{{ url_for('static', filename='images/nextpage_button.gif') }}"
+             alt="Next">
     </form>
   </div>
 </body>

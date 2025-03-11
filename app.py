@@ -333,7 +333,8 @@ def prac_a():
         cursor = link.cursor()
 
         # If fid in [begin, next], start a new practice "taskTime"
-        if fid in ["begin", "next"]:
+        if fid == "begin":
+            print("oh yes it is a one")
             session['startUnixTime'] = int(time.time())
             session['startTimeStamp'] = get_time_stamp_cdt()
             session['remainingTime'] = 30000
@@ -358,13 +359,31 @@ def prac_a():
             session['visitedSub'] = ""
             visited_subtop = []
 
-        elif fid == "back":
+        elif fid in ["back", "next"]:
+            print("oh yes it is a two", subtop_param)
             session['lastPageSwitchUnixTime'] = int(time.time())
-            session['visitedSub'] = session.get('visitedSub', '') + subtop_param
-            visited_subtop = _split_subtopics(session['visitedSub'])
+            current = session.get('visitedSub', '')
+            if current:
+                session['visitedSub'] = current + ',' + subtop_param
+            else:
+                session['visitedSub'] = subtop_param
+            visited_subtop = visited_subtop.append(subtop_param)
+            print("ohhhh yeahhh baby dolll")
+            print(visited_subtop, session['visitedSub'])
 
+        # Load subtopics
+        subtop_query = "SELECT * FROM tb13_prac_subtopic WHERE topID=%s ORDER BY subtopID"
+        cursor.execute(subtop_query, ("1",))
+        all_subtops = []
+        subtopics = cursor.fetchall()
+        for row in subtopics:
+            all_subtops.append(row[0])
+
+        print(all_subtops)
         # If lastPage == c3, maybe update c3Ans
         if last_page == "c3" and request.method == 'POST':
+            print("yess yess ut's a c3")
+            print(visited_subtop, all_subtops)
             ans = request.form.get('ans', '')
             passid_to_save = request.form.get('savepassid', '')
             if ans:
@@ -374,6 +393,12 @@ def prac_a():
                     WHERE sid=%s AND uid=%s AND passID=%s
                 """
                 cursor.execute(update_ans, (ans, sid, uid, passid_to_save))
+            visited_subtop = split_subtopics(session.get('visitedSub', ''))
+            visited_subtop.sort()
+            if visited_subtop == all_subtops:
+                # action_url = url_for('prac_k2', lastPage='c3')
+                print("yesss it is ")
+                return redirect(url_for('prac_k2', lastPage='c3'))
 
         link.commit()
 
@@ -381,11 +406,6 @@ def prac_a():
         topic_query = "SELECT * FROM tb12_prac_topic WHERE topID=%s"
         cursor.execute(topic_query, ("1",))
         topic_result = cursor.fetchone()
-
-        # Load subtopics
-        subtop_query = "SELECT * FROM tb13_prac_subtopic WHERE topID=%s ORDER BY subtopID"
-        cursor.execute(subtop_query, ("1",))
-        subtopics = cursor.fetchall()
 
         # save_url
         pageTypeID = "prac_a"
@@ -396,11 +416,9 @@ def prac_a():
         session['redirectPage'] = url_for('prac_k2', lastPage='a')
 
         if not visited_subtop:
-            visited_subtop = _split_subtopics(session.get('visitedSub', ''))
+            print("Diffferent caseesese")
+            visited_subtop = split_subtopics(session.get('visitedSub', ''))
         
-
-        print(topic_result, subtopics, visited_subtop)
-        print("yessssssssssssssssssssssssssssssssssssssssssssssS")
         return render_template('prac_a.html',
                                topic_result=topic_result,
                                subtopics=subtopics,
@@ -414,11 +432,13 @@ def prac_a():
             cursor.close()
             link.close()
 
-def _split_subtopics(visited_sub_str):
-    result = []
-    for i in range(0, len(visited_sub_str), 4):
-        chunk = visited_sub_str[i:i+4]
-        result.append(chunk)
+def split_subtopics(visited_sub_str):
+    result =  visited_sub_str.split(",") if visited_sub_str else []
+    print("Insideeeee splitted")
+    print(result)
+    # for i in range(0, len(visited_sub_str), 4):
+    #     chunk = visited_sub_str[i:i+4]
+    #     result.append(chunk)
     return result
 
 
@@ -454,13 +474,16 @@ def prac_b():
         link = get_db_connection()
         cursor = link.cursor(dictionary=True)
 
+        print("yessssssssssssss")
+        print(topID, subtopID, conID, str(passOrderInt), passID, passOrd)
+
         # Load passage
         pass_qry = """
             SELECT * 
             FROM tb14_prac_passage
             WHERE topID=%s AND subtopID=%s AND conID=%s AND passOrder=%s
         """
-        cursor.execute(pass_qry, (topID, subtopID, conID, str(passOrderInt)))
+        cursor.execute(pass_qry, (topID, subtopID, conID, "0" + str(passOrderInt)))
         pass_result = cursor.fetchone()
 
         # save_url
@@ -568,6 +591,7 @@ def prac_c1():
         return "No user session found; please start from the beginning.", 400
 
     fid = request.args.get('fid', '')
+    print(fid)
     subtopID = session.get('subtopID', '')
     passID = session.get('passID', '')
     passTitle = session.get('passTitle', '')
@@ -600,12 +624,14 @@ def prac_c1():
 # ----------------------------------------------------
 @app.route('/prac_c2', methods=['GET', 'POST'])
 def prac_c2():
+    print("yessssss c2 is here bro")
     uid = session.get('uid')
     sid = session.get('sid', '')
     if not uid:
         return "No user session found; please start from the beginning.", 400
 
     fid = request.args.get('fid', '')
+    print(fid)
     subtopID = session.get('subtopID', '')
     passID = session.get('passID', '')
     passTitle = session.get('passTitle', '')
@@ -617,9 +643,11 @@ def prac_c2():
     save_url(uid, sid, topID, subtopID, conID, passID, pageTypeID, pageTitle, request.url)
 
     if request.method == "POST":
+        print("yeah baby")
         ans = request.form.get("ans", "").strip()
         qid = request.form.get("qid", "c2")
         if ans:
+            print("yess inside thissss")
             save_pass_answer(qid, ans, table="tb15_prac_passQop")
             return redirect(url_for('prac_c3', fid=fid))
         else:
@@ -639,6 +667,8 @@ def prac_c3():
         return "No user session found; please start from the beginning.", 400
 
     fid = request.args.get('fid', '')
+    print("it's a c3 fucker")
+    print(fid)
     subtopID = session.get('subtopID', '')
     passID = session.get('passID', '')
     passTitle = session.get('passTitle', '')
@@ -656,6 +686,9 @@ def prac_c3():
     else:
         action_url = url_for('prac_k2', lastPage='unknown')
 
+
+    print("On yesss c3333")
+    print(action_url)
     pageTypeID = "prac_c3"
     pageTitle = f"C3: {passTitle}"
     save_url(uid, sid, topID, subtopID, conID, passID, pageTypeID, pageTitle, request.url)
@@ -878,22 +911,27 @@ def task_a():
         cursor = link.cursor()
 
         # 1) If fid == begin or next => set up start time, insert into tb6_taskTime
-        if fid in ["begin", "next"]:
+        if fid == "begin":
             session['startUnixTime'] = int(time.time())
             # e.g. "Y-m-d H:i:s" in UTC-5
             session['startTimeStamp'] = get_time_stamp_cdt()
             # 60 seconds for debugging, or 900 for 15 minutes
-            session['remainingTime'] = 60
+            session['remainingTime'] = 30000
             session['lastPageSwitchUnixTime'] = int(time.time())
 
             insert_time = """
-                INSERT INTO tb6_taskTime (uid, sid, topID, timeStart, timeStartStamp)
-                VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO tb6_taskTime 
+                    (uid, sid, topID, timeStart, timeEnd, timeStartStamp, timeEndStamp)
+                VALUES 
+                    (%s, %s, %s, %s, %s, %s, %s)
             """
+            topID = "1"
             cursor.execute(insert_time, (
                 uid, sid, topID,
                 session['startUnixTime'],
-                session['startTimeStamp']
+                0,  # Provide 0 for timeEnd
+                session['startTimeStamp'],
+                ""  # Provide an empty string for timeEndStamp
             ))
 
             # Start a session visitedSub = ""
@@ -901,7 +939,7 @@ def task_a():
             visited_subtop = []
 
         # 2) If fid == back => conDone++ in tb1_user, record visited subtopic
-        elif fid == "back":
+        elif fid in ["back", "next"]:
             # lastPage must be c4 or something => we don't update remaining time
             session['lastPageSwitchUnixTime'] = int(time.time())
 
@@ -913,11 +951,28 @@ def task_a():
             cursor.execute(updateCon, (sid, uid))
 
             # add visited subtopic from ?subtop=XYZ
-            session['visitedSub'] = session.get('visitedSub', '') + subtop_param
-            visited_subtop = _split_subtopics(session['visitedSub'])
+            current = session.get('visitedSub', '')
+            if current:
+                session['visitedSub'] = current + ',' + subtop_param
+            else:
+                session['visitedSub'] = subtop_param
+            visited_subtop = visited_subtop.append(subtop_param)
+            # session['visitedSub'] = session.get('visitedSub', '') + subtop_param
+            # visited_subtop = visited_subtop.append(subtop_param)
 
         # 3) If lastPage == c3 => update c3Ans in tb5_passQop from POST
-        if lastPage == "c3" and request.method == 'POST':
+        subtop_q = "SELECT * FROM tb3_subtopic WHERE topID=%s ORDER BY subtopID"
+        cursor.execute(subtop_q, (topID,))
+        subtopics = cursor.fetchall()
+        all_subtops = []
+        for row in subtopics:
+            all_subtops.append(row[0])
+
+        print(all_subtops, lastPage)
+        print("Oh yeahhhhhh babyyyy dollllll")
+        
+        if lastPage == "c4" and request.method == 'POST':
+            print("yess its the final one and nothing to do else")
             ans_to_save = request.form.get('ans', '')
             passid_to_save = request.form.get('savepassid', '')
             if ans_to_save:
@@ -927,6 +982,12 @@ def task_a():
                     WHERE sid=%s AND uid=%s AND passID=%s
                 """
                 cursor.execute(updateAns, (ans_to_save, sid, uid, passid_to_save))
+            visited_subtop = split_subtopics(session.get('visitedSub', ''))
+            visited_subtop.sort()
+            if visited_subtop == all_subtops:
+                # action_url = url_for('prac_k2', lastPage='c3')
+                print("yesss it is c4c4c44c4c4")
+                return redirect(url_for('k2', lastPage='c4'))
 
         # 4) Load topic from tb2_topic
         topic_q = "SELECT * FROM tb2_topic WHERE topID=%s"
@@ -954,14 +1015,15 @@ def task_a():
         )
 
         # 7) Set redirect page for timer
-        session['redirectPage'] = "k2.php?lastPage=a"
+        session['redirectPage'] = url_for('k2', lastPage='a')
         # You can convert "k2.php?lastPage=a" to a Flask route if needed, e.g. url_for('k2', lastPage='a')
 
         link.commit()
 
         # If we haven't set visited_subtop yet, parse from session
         if not visited_subtop:
-            visited_subtop = _split_subtopics(session.get('visitedSub', ''))
+            print("different caseee")
+            visited_subtop = split_subtopics(session.get('visitedSub', ''))
 
         # 8) Render template (task_a.html) passing topicResult + subtopics + visited_subtop
         return render_template(
@@ -978,18 +1040,6 @@ def task_a():
         if link and link.is_connected():
             cursor.close()
             link.close()
-
-
-def _split_subtopics(visited_sub_str):
-    """
-    The original code uses str_split($_SESSION['visitedSub'],4).
-    We'll do a chunk of 4 loop in Python.
-    """
-    result = []
-    for i in range(0, len(visited_sub_str), 4):
-        chunk = visited_sub_str[i:i+4]
-        result.append(chunk)
-    return result
 
 @app.route('/task_b', methods=['GET', 'POST'])
 def task_b():
@@ -1033,12 +1083,18 @@ def task_b():
         cursor = link.cursor(dictionary=True)
 
         # 1) Fetch the relevant passage from tb4_passage
+        finPassOrdInt = ""
+        if len(str(passOrderInt)) == 1:
+            finPassOrdInt = "0" + str(passOrderInt)
+        else:
+            finPassOrdInt = str(passOrderInt)
+
         pass_qry = """
             SELECT * 
             FROM tb4_passage
             WHERE topID=%s AND subtopID=%s AND conID=%s AND passOrder=%s
         """
-        cursor.execute(pass_qry, (topID, subtopID, conID, str(passOrderInt)))
+        cursor.execute(pass_qry, (topID, subtopID, conID, finPassOrdInt))
         passResult = cursor.fetchone()
 
         # 2) save_url => pageTypeID="b"
@@ -1186,15 +1242,6 @@ def task_c3():
     conID = "1"
     nextPassOrder = session.get('nextPassOrder', 2)
 
-    if fid == "same":
-        action_url = url_for('task_b', subtop=subtopID, passOrd=nextPassOrder, lastPage='c3')
-    elif fid == "back":
-        action_url = url_for('task_a', fid='back', subtop=subtopID, lastPage='c3')
-    elif fid == "done":
-        action_url = url_for('k2', lastPage='c3')
-    else:
-        action_url = url_for('k2', lastPage='unknown')
-
     pageTypeID = "c3"
     pageTitle = f"C3: {passTitle}"
     save_url(uid, sid, topID, subtopID, conID, passID, pageTypeID, pageTitle, request.url)
@@ -1204,11 +1251,11 @@ def task_c3():
         qid = request.form.get("qid", "c3")
         if ans:
             save_pass_answer(qid, ans, table="tb5_passQop")
-            return redirect(action_url)
+            return redirect(url_for('task_c4', fid=fid))
         else:
             return "No answer provided.", 400
 
-    return render_template("task_c3.html", fid=fid, action_url=action_url, passID=passID)
+    return render_template("task_c3.html", fid=fid, passID=passID)
 
 
 @app.route('/task_c4', methods=['GET', 'POST'])
@@ -1223,7 +1270,7 @@ def task_c4():
     if fid == "same":
         action_url = url_for('task_b', subtop=session.get('subtopID', ''), passOrd=session.get('nextPassOrder', 1), lastPage='c4')
     elif fid == "back":
-        action_url = url_for('task_a', fid='back', subtop=session.get('subtopID', ''))
+        action_url = url_for('task_a', fid='back', subtop=session.get('subtopID', ''), lastPage='c4')
     elif fid == "done":
         action_url = url_for('k1', lastPage='c4')
     else:
@@ -1347,74 +1394,112 @@ def vocab():
     return render_template("vocab.html", action_url=action_url)
 
 
-@app.route('/let_comp_one', methods=['GET', 'POST'])
-def let_comp_one():
-    uid = session.get('uid')
-    sid = session.get('sid', '')
-    if not uid:
-        return "No user session found; please start from the beginning.", 400
+# @app.route('/let_comp_one', methods=['GET', 'POST'])
+# def let_comp_one():
+#     uid = session.get('uid')
+#     sid = session.get('sid', '')
+#     if not uid:
+#         return "No user session found; please start from the beginning.", 400
 
-    # The next step after saving answers will be the instructions page
-    next_action = url_for('let_comp_one_inst')
+#     # The next step after saving answers will be the instructions page
+#     next_action = url_for('let_comp_two_inst')
 
-    # Log the visit
-    topID = "1"  # adjust as needed
-    pageTypeID = "submit_lc1"
-    pageTitle = "Submit Letter Comparison One"
-    save_url(uid, sid, topID, "", "", "", pageTypeID, pageTitle, request.url)
+#     # Log the visit
+#     topID = "1"  # adjust as needed
+#     pageTypeID = "submit_lc1"
+#     pageTitle = "Submit Letter Comparison One"
+#     save_url(uid, sid, topID, "", "", "", pageTypeID, pageTitle, request.url)
 
-    if request.method == "POST":
-        # Process the letter comparison answers only if lc1 is provided.
-        lc1v = request.form.get("lc1", "").strip()
-        if lc1v != "":
-            lc2v = request.form.get("lc2", "").strip()
-            lc3v = request.form.get("lc3", "").strip()
-            lc4v = request.form.get("lc4", "").strip()
-            lc5v = request.form.get("lc5", "").strip()
-            lc6v = request.form.get("lc6", "").strip()
-            lc7v = request.form.get("lc7", "").strip()
-            lc8v = request.form.get("lc8", "").strip()
-            lc9v = request.form.get("lc9", "").strip()
-            lc10v = request.form.get("lc10", "").strip()
+#     if request.method == "POST":
+#         # Process the letter comparison answers only if lc1 is provided.
+#         lc1v = request.form.get("lc1", "").strip()
+#         if lc1v != "":
+#             lc2v = request.form.get("lc2", "").strip()
+#             lc3v = request.form.get("lc3", "").strip()
+#             lc4v = request.form.get("lc4", "").strip()
+#             lc5v = request.form.get("lc5", "").strip()
+#             lc6v = request.form.get("lc6", "").strip()
+#             lc7v = request.form.get("lc7", "").strip()
+#             lc8v = request.form.get("lc8", "").strip()
+#             lc9v = request.form.get("lc9", "").strip()
+#             lc10v = request.form.get("lc10", "").strip()
             
-            aryUserInput = [lc1v, lc2v, lc3v, lc4v, lc5v, lc6v, lc7v, lc8v, lc9v, lc10v]
-            aryRightAnswer = ["S", "D", "D", "D", "D", "S", "S", "D", "S", "D"]
+#             aryUserInput = [lc1v, lc2v, lc3v, lc4v, lc5v, lc6v, lc7v, lc8v, lc9v, lc10v]
+#             aryRightAnswer = ["S", "D", "D", "D", "D", "S", "S", "D", "S", "D"]
             
-            numCorrect = sum(1 for i in range(10) if aryUserInput[i] == aryRightAnswer[i])
-            # numWrong = 10 - numCorrect (not used, since wrong contributes 0)
-            lcOneScore = numCorrect  # Each correct counts 1 point
+#             numCorrect = sum(1 for i in range(10) if aryUserInput[i] == aryRightAnswer[i])
+#             # numWrong = 10 - numCorrect (not used, since wrong contributes 0)
+#             lcOneScore = numCorrect  # Each correct counts 1 point
             
-            try:
-                link = get_db_connection()
-                cursor = link.cursor()
-                update_query = """
-                    UPDATE tb11_profile
-                    SET lc1=%s, lc2=%s, lc3=%s, lc4=%s, lc5=%s,
-                        lc6=%s, lc7=%s, lc8=%s, lc9=%s, lc10=%s, lcOneScore=%s
-                    WHERE sid=%s AND uid=%s
-                """
-                cursor.execute(update_query, (
-                    lc1v, lc2v, lc3v, lc4v, lc5v,
-                    lc6v, lc7v, lc8v, lc9v, lc10v,
-                    lcOneScore, sid, uid
-                ))
-                link.commit()
-            except Exception as e:
-                print(f"Error updating letter comparison one: {e}")
-                return f"Database error: {e}", 500
-            finally:
-                if link and link.is_connected():
-                    cursor.close()
-                    link.close()
+#             try:
+#                 link = get_db_connection()
+#                 cursor = link.cursor()
+#                 update_query = """
+#                     UPDATE tb11_profile
+#                     SET lc1=%s, lc2=%s, lc3=%s, lc4=%s, lc5=%s,
+#                         lc6=%s, lc7=%s, lc8=%s, lc9=%s, lc10=%s, lcOneScore=%s
+#                     WHERE sid=%s AND uid=%s
+#                 """
+#                 cursor.execute(update_query, (
+#                     lc1v, lc2v, lc3v, lc4v, lc5v,
+#                     lc6v, lc7v, lc8v, lc9v, lc10v,
+#                     lcOneScore, sid, uid
+#                 ))
+#                 link.commit()
+#             except Exception as e:
+#                 print(f"Error updating letter comparison one: {e}")
+#                 return f"Database error: {e}", 500
+#             finally:
+#                 if link and link.is_connected():
+#                     cursor.close()
+#                     link.close()
 
-            # After saving answers, redirect to the next step
-            return redirect(next_action)
-        else:
-            return "No answers provided.", 400
+#             # After saving answers, redirect to the next step
+#             return redirect(next_action)
+#         else:
+#             return "No answers provided.", 400
 
-    # For GET requests, render the form for letter comparison one.
-    return render_template("let_comp_one.html", action_url=next_action)
+#     # For GET requests, render the form for letter comparison one.
+#     return render_template("let_comp_one.html", action_url=next_action)
 
+
+# @app.route('/let_comp_one_inst', methods=['GET', 'POST'])
+# def let_comp_one_inst():
+#     uid = session.get('uid')
+#     sid = session.get('sid', '')
+#     if not uid:
+#         return "No user session found; please start from the beginning.", 400
+
+#     # Assume topID is defined as "1" (adjust if needed)
+#     topID = "1"
+
+#     # Save URL (log the visit)
+#     pageTypeID = "inst_lci1"
+#     pageTitle = "Instruction for Letter Comparison One"
+#     save_url(uid, sid, topID, "", "", "", pageTypeID, pageTitle, request.url)
+
+#     # If POST and textarea_k2 is provided, insert answer into tb8_topicIdeas
+#     if request.method == "POST":
+#         ans_to_save = request.form.get("textarea_k2", "").strip()
+#         if ans_to_save:
+#             try:
+#                 link = get_db_connection()
+#                 cursor = link.cursor()
+#                 insert_query = """
+#                     INSERT INTO tb8_topicIdeas (uid, sid, topID, quesID, quesAns)
+#                     VALUES (%s, %s, %s, %s, %s)
+#                 """
+#                 cursor.execute(insert_query, (uid, sid, topID, 'k2', ans_to_save))
+#                 link.commit()
+#             except Exception as e:
+#                 print(f"Error inserting topic idea: {e}")
+#                 return f"Database error: {e}", 500
+#             finally:
+#                 cursor.close()
+#                 link.close()
+
+#     # Render the instruction template
+#     return render_template("let_comp_one_inst.html")
 
 @app.route('/let_comp_one_inst', methods=['GET', 'POST'])
 def let_comp_one_inst():
@@ -1423,36 +1508,105 @@ def let_comp_one_inst():
     if not uid:
         return "No user session found; please start from the beginning.", 400
 
-    # Assume topID is defined as "1" (adjust if needed)
+    # Use fixed topID (adjust as needed)
     topID = "1"
-
-    # Save URL (log the visit)
     pageTypeID = "inst_lci1"
     pageTitle = "Instruction for Letter Comparison One"
+    # Log this page visit
     save_url(uid, sid, topID, "", "", "", pageTypeID, pageTitle, request.url)
 
-    # If POST and textarea_k2 is provided, insert answer into tb8_topicIdeas
     if request.method == "POST":
         ans_to_save = request.form.get("textarea_k2", "").strip()
-        if ans_to_save:
-            try:
-                link = get_db_connection()
-                cursor = link.cursor()
-                insert_query = """
-                    INSERT INTO tb8_topicIdeas (uid, sid, topID, quesID, quesAns)
-                    VALUES (%s, %s, %s, %s, %s)
-                """
-                cursor.execute(insert_query, (uid, sid, topID, 'k2', ans_to_save))
-                link.commit()
-            except Exception as e:
-                print(f"Error inserting topic idea: {e}")
-                return f"Database error: {e}", 500
-            finally:
+        # if ans_to_save:
+        try:
+            link = get_db_connection()
+            cursor = link.cursor()
+            insert_query = """
+                INSERT INTO tb8_topicIdeas (uid, sid, topID, quesID, quesAns)
+                VALUES (%s, %s, %s, %s, %s)
+            """
+            cursor.execute(insert_query, (uid, sid, topID, "k2", ans_to_save))
+            link.commit()
+        except Exception as e:
+            print(f"Error inserting topic idea: {e}")
+            return f"Database error: {e}", 500
+        finally:
+            if link and link.is_connected():
+                cursor.close()
+                link.close()
+        # Redirect to Letter Comparison One page
+        return redirect(url_for('let_comp_one'))
+        # else:
+        #     return "No answer provided.", 400
+
+    return render_template("let_comp_one_inst.html")
+
+
+@app.route('/let_comp_one', methods=['GET', 'POST'])
+def let_comp_one():
+    uid = session.get('uid')
+    sid = session.get('sid', '')
+    if not uid:
+        return "No user session found; please start from the beginning.", 400
+
+    # Next action: letter comparison two instruction page.
+    next_action = url_for('let_comp_two_inst')
+    topID = "1"
+    pageTypeID = "start_lc1"
+    pageTitle = "Start Letter Comparison One"
+    save_url(uid, sid, topID, "", "", "", pageTypeID, pageTitle, request.url)
+
+    if request.method == "POST":
+        # Retrieve LC1 answers from the form (fields: lc1 to lc10)
+        lc1 = request.form.get("lc1", "").strip()
+        if lc1 == "":
+            return "No answer provided.", 400
+        lc2 = request.form.get("lc2", "").strip()
+        lc3 = request.form.get("lc3", "").strip()
+        lc4 = request.form.get("lc4", "").strip()
+        lc5 = request.form.get("lc5", "").strip()
+        lc6 = request.form.get("lc6", "").strip()
+        lc7 = request.form.get("lc7", "").strip()
+        lc8 = request.form.get("lc8", "").strip()
+        lc9 = request.form.get("lc9", "").strip()
+        lc10 = request.form.get("lc10", "").strip()
+
+        aryUserInput = [lc1, lc2, lc3, lc4, lc5, lc6, lc7, lc8, lc9, lc10]
+        aryRightAnswer = ["S", "D", "D", "D", "D", "S", "S", "D", "S", "D"]
+
+        numCorrect = sum(1 for i in range(10) if aryUserInput[i] == aryRightAnswer[i])
+        # Compute score (each correct = 1 point)
+        lcOneScore = numCorrect
+
+        try:
+            link = get_db_connection()
+            cursor = link.cursor()
+            update_query = """
+                UPDATE tb11_profile
+                SET lc1=%s, lc2=%s, lc3=%s, lc4=%s, lc5=%s,
+                    lc6=%s, lc7=%s, lc8=%s, lc9=%s, lc10=%s,
+                    lcOneScore=%s
+                WHERE sid=%s AND uid=%s
+            """
+            cursor.execute(update_query, (
+                lc1, lc2, lc3, lc4, lc5,
+                lc6, lc7, lc8, lc9, lc10,
+                lcOneScore, sid, uid
+            ))
+            link.commit()
+        except Exception as e:
+            print(f"Error updating LC1 answers: {e}")
+            return f"Database error: {e}", 500
+        finally:
+            if link and link.is_connected():
                 cursor.close()
                 link.close()
 
-    # Render the instruction template
-    return render_template("let_comp_one_inst.html")
+        return redirect(next_action)
+
+    return render_template("let_comp_one.html", action_url=next_action)
+
+
 
 @app.route('/let_comp_two_inst', methods=['GET', 'POST'])
 def let_comp_two_inst():
@@ -1643,7 +1797,7 @@ def k2():
     lastPage = request.args.get('lastPage', '')
 
     # If lastPage == "c3", process POST data: update c3Ans and update condition
-    if lastPage == "c3" and request.method == "POST":
+    if lastPage == "c4" and request.method == "POST":
         ans_to_save = request.form.get('ans', '').strip()
         passid_to_save = request.form.get('savepassid', '')
         if ans_to_save:

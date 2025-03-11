@@ -42,7 +42,7 @@
 
     <div class="back_a">
       <p>
-        <a href="{{ url_for('prac_c1', fid='back') }}" style="color:#FFFFFF;">
+        <a href="{{ url_for('prac_c1', fid='back') }}" style="color:#0a0000;">
           Go to OTHER TOPIC
         </a>
       </p>
@@ -50,11 +50,11 @@
 
     <div class="nextArt">
       {% if passOrder == 5 %}
-        <a href="{{ url_for('prac_c1', fid='back') }}" style="color:#FFFFFF;">
+        <a href="{{ url_for('prac_c1', fid='back') }}" style="color:#0a0000;">
           Go to OTHER TOPIC
         </a>
       {% else %}
-        <a href="{{ url_for('prac_c1', fid='same') }}" style="color:#FFFFFF;">
+        <a href="{{ url_for('prac_c1', fid='same') }}" style="color:#0a0000;">
           Read NEXT ARTICLE
         </a>
       {% endif %}

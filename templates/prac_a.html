@@ -64,7 +64,7 @@
         {% else %}
           <!-- Not visited yet => link to prac_b.php (convert later to a Flask route) -->
           <td class="cl5">
-            <a href="{{ url_for('prac_b', subtop=subtop_id, passOrd=1, lastPage='a') }}"
+            <a href="{{ url_for('prac_b', subtop=subtop_id, passOrd='01', lastPage='a') }}"
              style="text-decoration:underline;">
                {{ subtop_title }}
             </a>

@@ -40,7 +40,7 @@
     <div id="back_a" class="back_a">
       <!-- "Go to OTHER TOPIC" => /task_c1?fid=back -->
       <p>
-        <a href="{{ url_for('task_c1', fid='back') }}" style="color:#FFFFFF;">
+        <a href="{{ url_for('task_c1', fid='back') }}" style="color:#160101;">
           Go to OTHER TOPIC
         </a>
       </p>
@@ -50,14 +50,14 @@
       {% if passOrder == 6 %}
         <!-- If passOrder==6, only show "Go to OTHER TOPIC" -->
         <font>
-          <a href="{{ url_for('task_c1', fid='back') }}" style="color:#FFFFFF;">
+          <a href="{{ url_for('task_c1', fid='back') }}" style="color:#160101;">
             Go to OTHER TOPIC
           </a>
         </font>
       {% else %}
         <!-- Otherwise, "Read NEXT ARTICLE" => /task_c1?fid=same -->
         <font>
-          <a href="{{ url_for('task_c1', fid='same') }}" style="color:#FFFFFF;">
+          <a href="{{ url_for('task_c1', fid='same') }}" style="color:#160101;">
             Read NEXT ARTICLE
           </a>
         </font>

@@ -4,10 +4,14 @@
   <meta charset="UTF-8">
   <title>Submit Letter Comparison One</title>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+  <style>
+    table { width: 100%; }
+    td { padding: 8px; }
+  </style>
 </head>
 <body>
   <div>
-    <form id="form_lcOne" name="form_lcOne" action="{{ action_url }}" method="POST" onsubmit="return saveLetCompOne();">
+    <form id="form_lcOne" name="form_lcOne" action="{{ url_for('let_comp_one') }}" method="POST" onsubmit="return saveLetCompOne();">
       <table>
         <colgroup>
           <col style="width:30%;"/>
@@ -96,7 +100,9 @@
         </tr>
       </table>
       <br>
-      <input type="image" name="submit" id="submit" src="{{ url_for('static', filename='images/done_button.gif') }}" alt="Done">
+      <input type="image" name="submit" id="submit" 
+             src="{{ url_for('static', filename='images/done_button.gif') }}" 
+             alt="Done">
     </form>
   </div>
 
@@ -113,7 +119,7 @@
       var input9 = getRadioVal(document.getElementById('form_lcOne'),'lc9');
       var input10 = getRadioVal(document.getElementById('form_lcOne'),'lc10');
        
-      if(input1 == ''){
+      if(input1==''){
           return false;
       } else {
           return true;

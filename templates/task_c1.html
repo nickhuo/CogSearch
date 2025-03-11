@@ -18,7 +18,7 @@
                 <div id="passQ">
                     <p><b>1. How easy was this article to read?</b></p>
                     <br><br>
-                    <form id="form_c1" action="{{ action }}" method="POST" onsubmit="return saveAns()">
+                    <form id="form_c1" action="{{ url_for('task_c1', fid=fid) }}" method="POST" onsubmit="return saveAns()">
                         <table>
                             <tr>
                                 <td colspan="2" style="text-align: center;">
