@@ -19,7 +19,11 @@
             session['remainingTime'] = 30
             session['redirectPage'] = "/some_next_page"
       */
-      var RemainingTime = Number({{ session.get('remainingTime', 0) }});
+      var RemainingTime = {{ session.get('remainingTime', 0) | int }};
+      RemainingTime = Number(RemainingTime)
+      console.log({{session.get('remainingTime')}})
+      console.log("yooooo")
+      console.log(RemainingTime)
       var BackColor = "white";
       var ForeColor = "navy";
       var CountActive = true;
@@ -56,18 +60,21 @@
         {% set subtop_id = row[0] %}
         {% set subtop_title = row[2] %}
 
+
         {% if subtop_id in visited_subtop %}
           <!-- Already visited -->
           <td class="cl6">
-            <font>{{ subtop_title }}</font>
+            <div style="width: 100%; border: 1px solid #ccc; padding: 10px; background-color: #f5f5f5; font-size: 16pt; color: #0B3861; border-radius: 4px;">
+              {{ subtop_title }}
+            </div>
           </td>
         {% else %}
-          <!-- Not visited yet => link to prac_b.php (convert later to a Flask route) -->
+          <!-- Not visited yet => display as a clickable text box -->
           <td class="cl5">
-            <a href="{{ url_for('prac_b', subtop=subtop_id, passOrd='01', lastPage='a') }}"
-             style="text-decoration:underline;">
-               {{ subtop_title }}
-            </a>
+            <div style="width: 100%; border: 1px solid #007BFF; padding: 10px; background-color: #e9f5ff; font-size: 16pt; color: #0B3861; border-radius: 4px; cursor: pointer;"
+                onclick="window.location.href='{{ url_for('prac_b', subtop=subtop_id, passOrd='01', lastPage='a') }}';">
+              {{ subtop_title }}
+            </div>
           </td>
         {% endif %}
 

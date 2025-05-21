@@ -46,21 +46,20 @@
       </p>
     </div>
 
-    <div id="nextArt" class="nextArt">
-      {% if passOrder == 6 %}
-        <!-- If passOrder==6, only show "Go to OTHER TOPIC" -->
-        <font>
-          <a href="{{ url_for('task_c1', fid='back') }}" style="color:#160101;">
-            Go to OTHER TOPIC
-          </a>
-        </font>
+    <div class="nextArt" style="
+      border: 1px solid #ccc;
+      padding: 10px;
+      display: flex;
+      justify-content: {% if passOrder == 11 %} flex-start {% else %} flex-end {% endif %};
+    ">
+      {% if passOrder == 11 %}
+        <a href="{{ url_for('task_c1', fid='back') }}" style="color:#0a0000;">
+          Go to OTHER TOPIC
+        </a>
       {% else %}
-        <!-- Otherwise, "Read NEXT ARTICLE" => /task_c1?fid=same -->
-        <font>
-          <a href="{{ url_for('task_c1', fid='same') }}" style="color:#160101;">
-            Read NEXT ARTICLE
-          </a>
-        </font>
+        <a href="{{ url_for('task_c1', fid='same') }}" style="color:#0a0000;">
+          Read NEXT ARTICLE
+        </a>
       {% endif %}
     </div>
   </div>

@@ -9,7 +9,8 @@ def get_db_connection():
         host='localhost',
         user='root',
         password='root',
-        database='cogsearch_textsearch3'
+        database='cogsearch_textsearch3',
+        auth_plugin='mysql_native_password'
     )
     # return mysql.connector.connect(
     #     host='localhost',

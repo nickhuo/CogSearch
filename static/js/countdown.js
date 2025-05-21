@@ -84,7 +84,7 @@ if (typeof(LeadingZero)=="undefined")
   LeadingZero = true;
 
 if (typeof(RemainingTime)!="number")
-  RemainingTime = 30000;
+  RemainingTime = 3000;
 //20150314 Add Redirect Page
 if(typeof(RedirectPage)=="undefined")
    RedirectPage="task_c1.php";
@@ -107,4 +107,6 @@ gsecs = Math.floor(ddiff.valueOf()/1000);
 */
 ddiff=RemainingTime;
 gsecs=Math.floor(RemainingTime);
+console.log("hello")
+console.log(gsecs)
 CountBack(gsecs);

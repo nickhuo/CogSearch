@@ -48,7 +48,12 @@
       </p>
     </div>
 
-    <div class="nextArt">
+    <div class="nextArt" style="
+      border: 1px solid #ccc;
+      padding: 10px;
+      display: flex;
+      justify-content: {% if passOrder == 5 %} flex-start {% else %} flex-end {% endif %};
+    ">
       {% if passOrder == 5 %}
         <a href="{{ url_for('prac_c1', fid='back') }}" style="color:#0a0000;">
           Go to OTHER TOPIC
@@ -59,6 +64,7 @@
         </a>
       {% endif %}
     </div>
+
   </div>
 </body>
 </html>
