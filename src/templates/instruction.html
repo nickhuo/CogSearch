@@ -123,7 +123,7 @@
   <!-- The final form that was <form method='post' action='task_a.php?fid=begin'> -->
   <!-- Convert it to /task_a?fid=begin in Flask -->
   <div>
-    <form method="POST" action="{{ url_for('task_a', fid='begin') }}">
+    <form method="POST" action="{{ url_for('core.task_a', fid='begin') }}">
       <input type="hidden" name="begin_task" value="yes" />
       <input type="image" name="submit" id="submit"
              src="{{ url_for('static', filename='images/next_button.gif') }}" alt="Start">

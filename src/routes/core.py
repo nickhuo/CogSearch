@@ -1,0 +1,1120 @@
+from __future__ import annotations
+
+import time
+from flask import (
+    Blueprint,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
+
+from src.db import get_db_connection, get_time_stamp_cdt, save_url
+from src.services.utils import list_order, format_pass_id, save_pass_answer
+
+
+core_bp = Blueprint("core", __name__)
+
+
+def safe_int_param(value, default=0):
+    """Safely convert parameter to integer, handling empty strings and None values"""
+    if value is None or value == '':
+        return default
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return default
+
+
+@core_bp.route("/")
+def index():
+    return render_template("index.html")
+
+
+@core_bp.route("/warning")
+def warning():
+    return render_template("warning.html")
+
+
+@core_bp.route("/consent", methods=["GET"])
+def consent():
+    if "sid" in session:
+        session.clear()
+    return render_template("consent.html")
+
+
+@core_bp.route("/demographic", methods=["POST"])
+def demographic():
+    # If a uid already exists, clear it
+    if "uid" in session and session["uid"]:
+        session["uid"] = ""
+
+    sid = request.form.get("mturkid", "").strip()
+    session["sid"] = sid
+
+    link = None
+    try:
+        link = get_db_connection()
+        cursor = link.cursor()
+
+        timeStamp = get_time_stamp_cdt()
+
+        cursor.execute(
+            """
+            INSERT INTO tb1_user 
+                (sid, topIDorder, subtopIDorder, conIDorder, taskDone, conDone, signedConsent, signedDate)
+            VALUES
+                (%s, '', '', '', 0, 0, 'TRUE', %s)
+            """,
+            (sid, timeStamp),
+        )
+
+        cursor.execute("SELECT MAX(uid) FROM tb1_user WHERE sid=%s", (sid,))
+        row = cursor.fetchone()
+        if row and row[0]:
+            session["uid"] = row[0]
+
+        bmv = request.form.get("demog_bm", "").strip()
+        if bmv:
+            bdv = request.form.get("demog_bd", "").strip()
+            byv = request.form.get("demog_by", "").strip()
+            bsv = f"{bmv}/{bdv}/{byv}"
+            agev = request.form.get("demog_age", "").strip()
+            genv = request.form.get("demog_gen", "").strip()
+            eduv = request.form.get("demog_edu", "").strip()
+            natengv = request.form.get("demog_eng", "").strip()
+            firlanv = request.form.get("demog_firlan", "").strip()
+            ageengv = request.form.get("demog_ageeng", "").strip()
+            hislatv = request.form.get("demog_hislat", "").strip()
+            racev = request.form.get("demog_race", "").strip()
+
+            cursor.execute(
+                """
+                INSERT INTO tb11_profile
+                    (uid, sid, dobMonth, dobDay, dobYear, dobSum, age, gender, edu, natEng, firLan, ageEng, hisLat, race)
+                VALUES
+                    (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """,
+                (
+                    session["uid"],
+                    sid,
+                    bmv,
+                    bdv,
+                    byv,
+                    bsv,
+                    agev,
+                    genv,
+                    eduv,
+                    natengv,
+                    firlanv,
+                    ageengv,
+                    hislatv,
+                    racev,
+                ),
+            )
+
+        pageTypeID = "start_demog"
+        pageTitle = "Start Demographic Information"
+        save_url(session["uid"], sid, "", "", "", "", pageTypeID, pageTitle, request.url)
+
+        link.commit()
+
+    except Exception as e:
+        print(f"DB Error in /demographic: {e}")
+        return f"Database error: {e}", 500
+    finally:
+        if link and link.is_connected():
+            cursor.close()
+            link.close()
+
+    return render_template("demographic.html")
+
+
+@core_bp.route("/timer")
+def timer_page():
+    remaining_time = session.get("remainingTime", 0)
+    redirect_page = session.get("redirectPage", "")
+    return render_template("timer.html", remaining_time=remaining_time, redirect_page=redirect_page)
+
+
+@core_bp.route("/set_timer")
+def set_timer():
+    session["remainingTime"] = 300
+    session["redirectPage"] = "/done"
+    return redirect(url_for("core.timer_page"))
+
+
+@core_bp.route("/task_setting")
+def task_setting():
+    topID = request.args.get("topID", "unknown")
+    return render_template("task_setting.html", topID=topID)
+
+
+@core_bp.route("/settings")
+def settings():
+    uid = session.get("uid")
+    if not uid:
+        return redirect(url_for("core.index"))
+
+    link = get_db_connection()
+    try:
+        cursor = link.cursor(dictionary=True)
+        cursor.execute("SELECT topIDorder, taskDone FROM tb1_user WHERE uid = %s", (uid,))
+        user_data = cursor.fetchone()
+    finally:
+        if link and link.is_connected():
+            cursor.close()
+            link.close()
+
+    if not user_data:
+        return "User data not found", 404
+
+    topIDorder, taskDone = user_data.get("topIDorder"), user_data.get("taskDone")
+    task_array = list_order(topIDorder, 1) if topIDorder else []
+    current_topID = task_array[taskDone] if (isinstance(taskDone, int) and 0 <= taskDone < len(task_array)) else ""
+
+    return render_template(
+        "settings.html",
+        current_topID=current_topID,
+        user_id=uid,
+        session_id=session.get("sid"),
+    )
+
+
+@core_bp.route("/save_url", methods=["POST"])
+def handle_save_url():
+    uid = session.get("uid")
+    sid = request.form.get("sid", "")
+    topID = request.form.get("topID", "")
+    subtopID = request.form.get("subtopID", "")
+    conID = request.form.get("conID", "")
+    passID = request.form.get("passID", "")
+    pageTypeID = request.form.get("pageTypeID", "")
+    url_str = request.form.get("url", "")
+    pageTitle = request.form.get("pageTitle", "")
+
+    save_url(
+        uid,
+        sid,
+        topID,
+        subtopID,
+        conID,
+        passID,
+        pageTypeID,
+        pageTitle,
+        url_str,
+    )
+
+    return jsonify({"status": "ok"}), 200
+
+
+# --- Task (non-practice) routes kept under core for now ---
+
+@core_bp.route("/instruction", methods=["GET", "POST"])
+def instruction():
+    uid = session.get("uid")
+    sid = session.get("sid", "")
+    if not uid:
+        return "No user session found; please start from the beginning.", 400
+
+    link = None
+    topID = "1"
+    try:
+        link = get_db_connection()
+        cursor = link.cursor()
+
+        if request.method == "POST":
+            ans_to_save = request.form.get("textarea_k2", "").strip()
+            if ans_to_save:
+                cursor.execute(
+                    """
+                    INSERT INTO tb18_prac_topicIdeas 
+                        (uid, sid, topID, quesID, quesAns)
+                    VALUES 
+                        (%s, %s, %s, 'prac_k2', %s)
+                    """,
+                    (uid, sid, topID, ans_to_save),
+                )
+
+        strDomain = "01#"
+        remain = uid % 6
+        if remain == 1:
+            strCon = "1#2#3#1#2#3#1#2#3#1#2#3#"
+        elif remain == 2:
+            strCon = "2#3#1#2#3#1#2#3#1#2#3#1#"
+        elif remain == 3:
+            strCon = "3#1#2#3#1#2#3#1#2#3#1#2#"
+        elif remain == 4:
+            strCon = "1#3#2#1#3#2#1#3#2#1#3#2#"
+        elif remain == 5:
+            strCon = "2#1#3#2#1#3#2#1#3#2#1#3#"
+        else:
+            strCon = "3#2#1#3#2#1#3#2#1#3#2#1#"
+
+        cursor.execute(
+            """
+            UPDATE tb1_user
+            SET topIDorder=%s, conIDorder=%s
+            WHERE sid=%s AND uid=%s
+            """,
+            (strDomain, strCon, sid, uid),
+        )
+
+        pageTypeID = "instruction"
+        pageTitle = "Instruction"
+        save_url(uid=uid, sid=sid, topID=topID, subtopID="", conID="", passID="", pageTypeID=pageTypeID, pageTitle=pageTitle, url=request.url)
+        link.commit()
+
+    except Exception as e:
+        print(f"Error in /instruction route: {e}")
+        return f"Database error: {e}", 500
+    finally:
+        if link and link.is_connected():
+            cursor.close()
+            link.close()
+
+    return render_template("instruction.html")
+
+
+# --- Non-practice task routes migrated from app.py ---
+
+@core_bp.route('/task_a', methods=['GET', 'POST'])
+def task_a():
+    uid = session.get('uid')
+    sid = session.get('sid', '')
+    if not uid:
+        return "No user session found; please start from the beginning.", 400
+
+    topID = "1"
+    fid = request.args.get('fid', '')
+    lastPage = request.args.get('lastPage', '')
+    subtop_param = request.args.get('subtop', '')
+
+    link = None
+    visited_subtop = []
+    try:
+        link = get_db_connection()
+        cursor = link.cursor()
+
+        if fid == "begin":
+            session['startUnixTime'] = int(time.time())
+            session['startTimeStamp'] = get_time_stamp_cdt()
+            session['remainingTime'] = 300
+            session['lastPageSwitchUnixTime'] = int(time.time())
+
+            # Insert start time row into tb6_taskTime
+            cursor.execute(
+                """
+                INSERT INTO tb6_taskTime (uid, sid, topID, timeStart, timeEnd, timeStartStamp, timeEndStamp)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """,
+                (
+                    uid,
+                    sid,
+                    topID,
+                    session['startUnixTime'],
+                    int(time.time()),
+                    session['startTimeStamp'],
+                    get_time_stamp_cdt(),
+                ),
+            )
+            session['visitedSub'] = ''
+            visited_subtop = []
+
+        elif fid in ["back", "next"]:
+            session['lastPageSwitchUnixTime'] = int(time.time())
+            current = session.get('visitedSub', '')
+            if current:
+                session['visitedSub'] = current + ',' + subtop_param
+            else:
+                session['visitedSub'] = subtop_param
+            # Append to the local tracker without reassigning (append returns None)
+            visited_subtop.append(subtop_param)
+
+        # Load subtopics
+        cursor.execute("SELECT * FROM tb3_subtopic WHERE topID=%s ORDER BY subtopID", (topID,))
+        all_subtops = []
+        subtopics = cursor.fetchall()
+        for row in subtopics:
+            all_subtops.append(row[0])
+
+        # If lastPage == c3 and POST, update c3Ans and maybe redirect
+        if lastPage == "c3" and request.method == 'POST':
+            ans = request.form.get('ans', '')
+            passid_to_save = request.form.get('savepassid', '')
+            if ans:
+                cursor.execute(
+                    """
+                    UPDATE tb5_passQop SET c3Ans=%s WHERE sid=%s AND uid=%s AND passID=%s
+                    """,
+                    (ans, sid, uid, passid_to_save),
+                )
+            visited_subtop = session.get('visitedSub', '')
+            visited_subtop = visited_subtop.split(',') if visited_subtop else []
+            visited_subtop.sort()
+            if visited_subtop == all_subtops:
+                return redirect(url_for('core.k1', lastPage='c3'))
+
+        link.commit()
+
+        # Load topic
+        cursor.execute("SELECT * FROM tb2_topic WHERE topID=%s", (topID,))
+        topic_result = cursor.fetchone()
+
+        # save_url
+        pageTypeID = "a"
+        pageTitle = f"a Task: {topic_result[1]}" if topic_result else "a Task"
+        save_url(uid, sid, topID, "", "", "", pageTypeID, pageTitle, request.url)
+
+        # define redirect if timer runs out
+        session['redirectPage'] = url_for('core.task_b', lastPage='a')
+
+        if not visited_subtop:
+            visited_subtop = session.get('visitedSub', '')
+            visited_subtop = visited_subtop.split(',') if visited_subtop else []
+
+        return render_template('task_a.html', topic_result=topic_result, subtopics=subtopics, visited_subtop=visited_subtop, session=session)
+
+    except Exception as e:
+        print(f"Error in /task_a route: {e}")
+        return f"Database error: {e}", 500
+    finally:
+        if link and link.is_connected():
+            cursor.close()
+            link.close()
+
+
+@core_bp.route('/task_b', methods=['GET', 'POST'])
+def task_b():
+    uid = session.get('uid')
+    sid = session.get('sid', '')
+    if not uid:
+        return "No user session found; please start from the beginning.", 400
+
+    subtopID = safe_int_param(request.args.get('subtop'), 0)
+    conID = safe_int_param(session.get('conID'), 1)
+    passOrd = safe_int_param(request.args.get('passOrd'), 1)
+    lastPage = request.args.get('lastPage', '')
+
+    try:
+        passOrderInt = int(passOrd)
+    except ValueError:
+        passOrderInt = 1
+
+    passID = format_pass_id(subtopID, conID, passOrd)
+    _next_pass_order = passOrderInt + 1
+
+    session.update({'subtopID': subtopID, 'conID': conID, 'passOrder': passOrd, 'passID': passID, 'next_passOrder': passOrd + 1})
+
+    link = None
+    passResult = None
+    try:
+        link = get_db_connection()
+        cursor = link.cursor(dictionary=True)
+
+        cursor.execute(
+            """
+            SELECT * FROM tb4_passage 
+            WHERE topID=%s AND subtopID=%s AND conID=%s AND passOrder=%s
+            """,
+            (
+                session.get('topID', 1),
+                subtopID,
+                conID,
+                f"{passOrd:02d}",
+            ),
+        )
+        passResult = cursor.fetchone()
+
+        if passOrd == 1:
+            cursor.execute(
+                """
+                UPDATE tb6_taskTime 
+                SET timeStart=%s, timeStartStamp=%s
+                WHERE uid=%s AND sid=%s AND topID=%s
+                ORDER BY timeStart DESC LIMIT 1
+                """,
+                (
+                    int(time.time()),
+                    get_time_stamp_cdt(),
+                    uid,
+                    sid,
+                    session.get('topID', 1),
+                ),
+            )
+            link.commit()
+
+        pageTypeID = "b"
+        pageTitle = passResult['passTitle'] if passResult else "No Title"
+        save_url(uid=uid, sid=sid, topID="1", subtopID=subtopID, conID=conID, passID=passID, pageTypeID=pageTypeID, pageTitle=pageTitle, url=request.url)
+
+        now = int(time.time())
+        if lastPage == "a":
+            used_time = now - session.get('lastPageSwitchUnixTime', now)
+            session['remainingTime'] = session.get('remainingTime', 0) - used_time
+            session['lastPageSwitchUnixTime'] = now
+            session['redirectPage'] = url_for('core.task_c1', fid='done')
+        elif lastPage == "c3":
+            session['lastPageSwitchUnixTime'] = now
+            session['redirectPage'] = url_for('core.task_c1', fid='done')
+            if request.method == 'POST':
+                ans_to_save = request.form.get('ans', '')
+                passid_to_save = request.form.get('savepassid', '')
+                if ans_to_save:
+                    cursor.execute(
+                        """
+                        UPDATE tb5_passQop SET c3Ans=%s WHERE sid=%s AND uid=%s AND passID=%s
+                        """,
+                        (ans_to_save, sid, uid, passid_to_save),
+                    )
+
+        link.commit()
+
+    except Exception as e:
+        print(f"Error in /task_b route: {e}")
+        return f"Database error: {e}", 500
+    finally:
+        if link and link.is_connected():
+            cursor.close()
+            link.close()
+
+    return render_template('task_b.html', passResult=passResult, passOrder=passOrderInt)
+
+
+@core_bp.route('/task_c1', methods=['GET', 'POST'])
+def task_c1():
+    uid = session.get('uid')
+    sid = session.get('sid', '')
+    if not uid:
+        return "No user session found; please start from the beginning.", 400
+
+    fid = request.args.get('fid', '')
+    subtopID = session.get('subtopID', '')
+    passID = session.get('passID', '')
+    passTitle = session.get('passTitle', '')
+    topID = "1"
+    conID = "1"
+    pageTypeID = "c1"
+    pageTitle = f"C1: {passTitle}"
+    save_url(uid, sid, topID, subtopID, conID, passID, pageTypeID, pageTitle, request.url)
+
+    now = int(time.time())
+    last_switch = session.get('lastPageSwitchUnixTime', now)
+    session['remainingTime'] = session.get('remainingTime', 0) - (now - last_switch)
+    session['lastPageSwitchUnixTime'] = now
+
+    if request.method == "POST":
+        ans = request.form.get("ans", "").strip()
+        qid = request.form.get("qid", "c1")
+        if ans:
+            save_pass_answer(qid, ans, table="tb5_passQop")
+            return redirect(url_for('core.task_c2', fid=fid))
+        else:
+            return "No answer provided.", 400
+
+    return render_template("task_c1.html", fid=fid)
+
+
+@core_bp.route('/task_c2', methods=['GET', 'POST'])
+def task_c2():
+    uid = session.get('uid')
+    sid = session.get('sid', '')
+    if not uid:
+        return "No user session found; please start from the beginning.", 400
+
+    fid = request.args.get('fid', '')
+    subtopID = session.get('subtopID', '')
+    passID = session.get('passID', '')
+    passTitle = session.get('passTitle', '')
+    # passOrder kept in session for other routes; not needed locally here
+    topID = "1"
+    conID = "1"
+    pageTypeID = "c2"
+    pageTitle = f"C2: {passTitle}"
+    save_url(uid, sid, topID, subtopID, conID, passID, pageTypeID, pageTitle, request.url)
+
+    if request.method == "POST":
+        ans = request.form.get("ans", "").strip()
+        qid = request.form.get("qid", "c2")
+        if ans:
+            save_pass_answer(qid, ans, table="tb5_passQop")
+            return redirect(url_for('core.task_c3', fid=fid))
+        else:
+            return "No answer provided.", 400
+
+    return render_template("task_c2.html", fid=fid)
+
+
+@core_bp.route('/task_c3', methods=['GET', 'POST'])
+def task_c3():
+    uid = session.get('uid')
+    sid = session.get('sid', '')
+    if not uid:
+        return "No user session found; please start from the beginning.", 400
+
+    fid = request.args.get('fid', '')
+    subtopID = session.get('subtopID', '')
+    passID = session.get('passID', '')
+    passTitle = session.get('passTitle', '')
+    topID = "1"
+    conID = "1"
+    # nextPassOrder not used in this scope; keep session value usage elsewhere
+    # and avoid an unused local variable warning
+    _next_pass_order = session.get('nextPassOrder', 2)
+
+    pageTypeID = "c3"
+    pageTitle = f"C3: {passTitle}"
+    save_url(uid, sid, topID, subtopID, conID, passID, pageTypeID, pageTitle, request.url)
+
+    if request.method == "POST":
+        ans = request.form.get("ans", "").strip()
+        qid = request.form.get("qid", "c3")
+        if ans:
+            save_pass_answer(qid, ans, table="tb5_passQop")
+            return redirect(url_for('core.task_c4', fid=fid))
+        else:
+            return "No answer provided.", 400
+
+    return render_template("task_c3.html", fid=fid, passID=passID)
+
+
+@core_bp.route('/task_c4', methods=['GET', 'POST'])
+def task_c4():
+    uid = session.get('uid')
+    sid = session.get('sid', '')
+    if not uid:
+        return "No user session found; please start from the beginning.", 400
+
+    fid = request.args.get('fid', '')
+    if fid == "same":
+        action_url = url_for('core.task_b', subtop=session.get('subtopID', ''), passOrd=session.get('nextPassOrder', 1), lastPage='c4')
+    elif fid == "back":
+        action_url = url_for('core.task_a', fid='back', subtop=session.get('subtopID', ''), lastPage='c4')
+    elif fid == "done":
+        action_url = url_for('core.k2', lastPage='c4')
+    else:
+        action_url = url_for('core.k2', lastPage='unknown')
+
+    _subtopID = session.get('subtopID', '')
+    _passID = session.get('passID', '')
+    pageTypeID = "c4"
+    passTitle = session.get('passTitle', '')
+    pageTitle = f"C4: {passTitle}"
+    save_url(uid, sid, "", "", "", "", pageTypeID, pageTitle, request.url)
+
+    if request.method == "POST":
+        ans = request.form.get("ans", "").strip()
+        qid = request.form.get("qid", "c4")
+        if ans:
+            save_pass_answer(qid, ans, table="tb5_passQop")
+            try:
+                link = get_db_connection()
+                cursor = link.cursor()
+                # original code updates completion time here if needed
+                link.commit()
+            except Exception as e:
+                print(f"DB error in task_c4 POST: {e}")
+                return f"Database error: {e}", 500
+            finally:
+                if link and link.is_connected():
+                    cursor.close()
+                    link.close()
+            return redirect(action_url)
+        else:
+            return "No answer provided.", 400
+
+    return render_template("task_c4.html", fid=fid, action_url=action_url)
+
+
+@core_bp.route('/let_comp_one_inst', methods=['GET', 'POST'])
+def let_comp_one_inst():
+    uid = session.get('uid')
+    sid = session.get('sid', '')
+    if not uid:
+        return "No user session found; please start from the beginning.", 400
+
+    topID = "1"
+    pageTypeID = "inst_lci1"
+    pageTitle = "Instruction for Letter Comparison One"
+    save_url(uid, sid, topID, "", "", "", pageTypeID, pageTitle, request.url)
+
+    if request.method == "POST":
+        ans_to_save = request.form.get("textarea_k2", "").strip()
+        try:
+            link = get_db_connection()
+            cursor = link.cursor()
+            cursor.execute(
+                """
+                INSERT INTO tb8_topicIdeas (uid, sid, topID, quesID, quesAns)
+                VALUES (%s, %s, %s, %s, %s)
+                """,
+                (uid, sid, topID, "k2", ans_to_save),
+            )
+            link.commit()
+        except Exception as e:
+            print(f"Error inserting topic idea: {e}")
+            return f"Database error: {e}", 500
+        finally:
+            if link and link.is_connected():
+                cursor.close()
+                link.close()
+
+    return render_template("let_comp_one_inst.html")
+
+
+@core_bp.route('/let_comp_one', methods=['GET', 'POST'])
+def let_comp_one():
+    uid = session.get('uid')
+    sid = session.get('sid', '')
+    if not uid:
+        return "No user session found; please start from the beginning.", 400
+
+    next_action = url_for('core.let_comp_two_inst')
+    topID = "1"
+    pageTypeID = "start_lc1"
+    pageTitle = "Start Letter Comparison One"
+    save_url(uid, sid, topID, "", "", "", pageTypeID, pageTitle, request.url)
+
+    return render_template("let_comp_one.html", action_url=next_action)
+
+
+@core_bp.route('/let_comp_two_inst', methods=['GET', 'POST'])
+def let_comp_two_inst():
+    uid = session.get('uid')
+    sid = session.get('sid', '')
+    if not uid:
+        return "No user session found; please start from the beginning.", 400
+
+    topID = "1"
+    pageTypeID = "inst_lc2"
+    pageTitle = "Instruction for Letter Comparison Two"
+    save_url(uid, sid, topID, "", "", "", pageTypeID, pageTitle, request.url)
+
+    if request.method == "POST" and request.form.get("lc1", "").strip() != "":
+        lc_vals = [request.form.get(f"lc{i}", "").strip() for i in range(1, 11)]
+        aryRightAnswer = ["S", "D", "D", "D", "D", "S", "S", "D", "S", "D"]
+        numCorrect = sum(1 for i in range(10) if lc_vals[i] == aryRightAnswer[i])
+        lcOneScore = numCorrect
+        try:
+            link = get_db_connection()
+            cursor = link.cursor()
+            cursor.execute(
+                """
+                UPDATE tb11_profile
+                SET lc1=%s, lc2=%s, lc3=%s, lc4=%s, lc5=%s, lc6=%s, lc7=%s, lc8=%s, lc9=%s, lc10=%s, lcOneScore=%s
+                WHERE sid=%s AND uid=%s
+                """,
+                (*lc_vals, lcOneScore, sid, uid),
+            )
+            link.commit()
+        except Exception as e:
+            print(f"Error updating letter comparison answers: {e}")
+            return f"Database error: {e}", 500
+        finally:
+            if link and link.is_connected():
+                cursor.close()
+                link.close()
+
+    return render_template("let_comp_two_inst.html")
+
+
+@core_bp.route('/let_comp_two', methods=['GET', 'POST'])
+def let_comp_two():
+    uid = session.get('uid')
+    sid = session.get('sid', '')
+    if not uid:
+        return "No user session found; please start from the beginning.", 400
+
+    topID = "1"
+    # Log start of LC2
+    pageTypeID = "start_lc2"
+    pageTitle = "Start Letter Comparison Two"
+    save_url(uid, sid, topID, "", "", "", pageTypeID, pageTitle, request.url)
+
+    if request.method == "POST" and request.form.get("lc11", "").strip() != "":
+        vals = [request.form.get(f"lc{i}", "").strip() for i in range(11, 21)]
+        right = ["D", "S", "S", "S", "D", "S", "D", "S", "D", "D"]
+        lcTwoScore = sum(1 for i in range(10) if vals[i] == right[i])
+        try:
+            link = get_db_connection()
+            cursor = link.cursor()
+            cursor.execute(
+                """
+                UPDATE tb11_profile
+                SET lc11=%s, lc12=%s, lc13=%s, lc14=%s, lc15=%s,
+                    lc16=%s, lc17=%s, lc18=%s, lc19=%s, lc20=%s, lcTwoScore=%s
+                WHERE sid=%s AND uid=%s
+                """,
+                (*vals, lcTwoScore, sid, uid),
+            )
+            link.commit()
+        except Exception as e:
+            print(f"Error updating LC2 answers: {e}")
+            return f"Database error: {e}", 500
+        finally:
+            if link and link.is_connected():
+                cursor.close()
+                link.close()
+
+        return redirect(url_for('core.vocab'))
+
+    return render_template("let_comp_two.html", action_url=url_for('core.let_comp_two'))
+
+
+@core_bp.route('/k2', methods=['GET', 'POST'])
+def k2():
+    uid = session.get('uid')
+    sid = session.get('sid', '')
+    if not uid:
+        return "No user session found; please start from the beginning.", 400
+
+    topID = "1"
+    try:
+        link = get_db_connection()
+        cursor = link.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM tb2_topic WHERE topID = %s", (topID,))
+        topic_row = cursor.fetchone()
+        topicTitle = topic_row['topTitle'] if topic_row else "Unknown Topic"
+        subtop_list = []
+        cursor.execute("SELECT * FROM tb3_subtopic WHERE topID = %s ORDER BY subtopID", (topID,))
+        subtop_rows = cursor.fetchall()
+        for row in subtop_rows:
+            subtop_list.append(row['subtopTitle'])
+    except Exception as e:
+        print(f"Error retrieving topic/subtopics: {e}")
+        return f"Database error: {e}", 500
+    finally:
+        if link and link.is_connected():
+            cursor.close()
+            link.close()
+
+    subtopString = ", ".join(subtop_list)
+    trimSubtop = subtopString.lstrip(", ").strip()
+    lastPage = request.args.get('lastPage', '')
+
+    if lastPage == "c4" and request.method == "POST":
+        ans_to_save = request.form.get('ans', '').strip()
+        passid_to_save = request.form.get('savepassid', '')
+        if ans_to_save:
+            try:
+                link = get_db_connection()
+                cursor = link.cursor()
+                cursor.execute(
+                    """
+                    UPDATE tb5_passQop 
+                    SET c3Ans = %s 
+                    WHERE sid = %s AND uid = %s AND passID = %s
+                    """,
+                    (ans_to_save, sid, uid, passid_to_save),
+                )
+                cursor.execute("UPDATE tb1_user SET conDone = conDone + 1 WHERE sid = %s AND uid = %s", (sid, uid))
+                link.commit()
+            except Exception as e:
+                print(f"Error updating c3Ans in /k2: {e}")
+                return f"Database error: {e}", 500
+            finally:
+                if link and link.is_connected():
+                    cursor.close()
+                    link.close()
+
+    pageTypeID = "k2"
+    pageTitle_full = f"K2: {topicTitle}"
+    save_url(uid, sid, topID, "", "", "", pageTypeID, pageTitle_full, request.url)
+    session['redirectPage'] = url_for('core.let_comp_one_inst')
+    action_url = url_for('core.let_comp_one_inst')
+    return render_template("k2.html", topicTitle=topicTitle, trimSubtop=trimSubtop, action_url=action_url)
+
+
+@core_bp.route('/vocab', methods=['GET'])
+def vocab():
+    uid = session.get('uid')
+    sid = session.get('sid', '')
+    if not uid:
+        return redirect(url_for('core.index'))
+    # Log entering vocab
+    save_url(uid, sid, "1", "", "", "", "vocab", "Vocabulary", request.url)
+    return render_template('vocab.html', action_url=url_for('core.done'))
+
+
+@core_bp.route('/questions', methods=['GET', 'POST'])
+def questions():
+    uid = session.get('uid')
+    sid = session.get('sid', '')
+    passID = session.get('passID', '101101')
+    if not uid:
+        return redirect(url_for('core.index'))
+
+    topID = "1"
+    pageTypeID = "DONE"
+    pageTitle = "DONE"
+    save_url(uid, sid, topID, "", "", "", pageTypeID, pageTitle, request.url)
+
+    if request.method == "POST" and request.form.get("voc1", "").strip() != "":
+        voc = [request.form.get(f"voc{i}", "").strip() for i in range(1, 16)]
+        right = ["1", "2", "2", "2", "3", "2", "4", "1", "4", "5", "3", "4", "1", "3", "5"]
+        numCorrect = 0
+        numWrong = 0
+        numNotSure = 0
+        for i in range(15):
+            if voc[i] == right[i]:
+                numCorrect += 1
+            else:
+                if voc[i] == "6":
+                    numNotSure += 1
+                else:
+                    numWrong += 1
+        vocScore = (1 * numCorrect) - (0.2 * numWrong)
+        try:
+            link = get_db_connection()
+            cursor = link.cursor()
+            cursor.execute(
+                """
+                UPDATE tb11_profile
+                SET voc1=%s, voc2=%s, voc3=%s, voc4=%s, voc5=%s,
+                    voc6=%s, voc7=%s, voc8=%s, voc9=%s, voc10=%s,
+                    voc11=%s, voc12=%s, voc13=%s, voc14=%s, voc15=%s,
+                    vocScore=%s
+                WHERE sid=%s AND uid=%s
+                """,
+                (*voc, vocScore, sid, uid),
+            )
+            link.commit()
+        except Exception as e:
+            print(f"Error updating vocabulary answers: {e}")
+            return f"Database error: {e}", 500
+        finally:
+            if link and link.is_connected():
+                cursor.close()
+                link.close()
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM tb21_questions WHERE passID = %s", (passID,))
+        questions = cursor.fetchall()
+        cursor.execute(
+            """
+            SELECT questionID, choice 
+            FROM tb22_multiQop 
+            WHERE uid = %s AND sid = %s AND passID = %s
+            """,
+            (uid, sid, passID),
+        )
+        existing_answers = {row['questionID']: row['choice'] for row in cursor.fetchall()}
+        return render_template('questions.html', questions=questions, existing_answers=existing_answers, pass_title=session.get('passTitle', ''))
+    except Exception as e:
+        print(f"Database error: {str(e)}")
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
+@core_bp.route('/done', methods=['GET', 'POST'])
+def done():
+    uid = session.get('uid')
+    sid = session.get('sid', '')
+    passID = session.get('passID', '')
+    if not uid:
+        return redirect(url_for('core.index'))
+
+    bonusWordsCnt = 0
+    topID = "1"
+
+    if request.method == 'POST' and passID:
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute(
+                """
+                SELECT * FROM tb21_questions 
+                WHERE passID = %s 
+                ORDER BY questionID
+                """,
+                (passID,),
+            )
+            questions = cursor.fetchall()
+            for q in questions:
+                user_choice = request.form.get(f"q_{q['questionID']}", '').lower()
+                if user_choice:
+                    is_correct = 1 if user_choice == q['correctAns'].lower() else 0
+                    cursor.execute(
+                        """
+                        INSERT INTO tb22_multiQop (
+                            uid, sid, questionID, topID, subtopID,
+                            conID, passID, passOrder, choice, isCorrect
+                        ) VALUES (
+                            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                        )
+                        ON DUPLICATE KEY UPDATE
+                            choice = VALUES(choice),
+                            isCorrect = VALUES(isCorrect)
+                        """,
+                        (
+                            uid,
+                            sid,
+                            q['questionID'],
+                            session['topID'],
+                            session['subtopID'],
+                            session['conID'],
+                            passID,
+                            session['passOrder'],
+                            user_choice,
+                            is_correct,
+                        ),
+                    )
+            conn.commit()
+        except Exception as e:
+            print(f"Database error processing answers: {str(e)}")
+            conn.rollback()
+        finally:
+            if conn and conn.is_connected():
+                cursor.close()
+                conn.close()
+
+    # Update time intervals in output1_url, update RTs, bonuses, etc. Kept same as original for brevity.
+    try:
+        link = get_db_connection()
+        cursor = link.cursor(dictionary=True)
+        cursor.execute(
+            """
+            SELECT * FROM output1_url
+            WHERE topID=%s AND sid=%s AND uid=%s
+            ORDER BY op1ID DESC
+            """,
+            (topID, sid, uid),
+        )
+        op_results = cursor.fetchall()
+        nextUnixTime = 0
+        for row in op_results:
+            rowID = row.get('op1ID', 0)
+            if rowID > 0:
+                thisUnixTime = row.get('unixTime', 0)
+                timeInterval = abs(nextUnixTime - thisUnixTime) if nextUnixTime else 0
+                if row.get('pageTypeID') != "DONE":
+                    cursor.execute("UPDATE output1_url SET time_interval=%s WHERE op1ID=%s", (timeInterval, rowID))
+                nextUnixTime = thisUnixTime
+        link.commit()
+    except Exception as e:
+        print(f"Error updating time intervals: {e}")
+    finally:
+        if link and link.is_connected():
+            cursor.close()
+            link.close()
+
+    # passage RT for b
+    try:
+        link = get_db_connection()
+        cursor = link.cursor()
+        cursor.execute("SELECT * FROM output1_url WHERE sid=%s AND uid=%s AND pageTypeID='b'", (sid, uid))
+        for row in cursor.fetchall():
+            qryPassID = row[6]
+            qryPassRT = row[9]
+            cursor.execute("UPDATE tb5_passQop SET passRT=%s WHERE sid=%s AND uid=%s AND passID=%s", (qryPassRT, sid, uid, qryPassID))
+        link.commit()
+    except Exception as e:
+        print(f"Error updating passage reading time for b: {e}")
+    finally:
+        if link and link.is_connected():
+            cursor.close()
+            link.close()
+
+    # practice b RTs
+    try:
+        link = get_db_connection()
+        cursor = link.cursor()
+        cursor.execute("SELECT * FROM output1_url WHERE sid=%s AND uid=%s AND pageTypeID='prac_b'", (sid, uid))
+        for row in cursor.fetchall():
+            qryPassID = row[6]
+            qryPassRT = row[9]
+            cursor.execute("UPDATE tb15_prac_passQop SET passRT=%s WHERE sid=%s AND uid=%s AND passID=%s", (qryPassRT, sid, uid, qryPassID))
+        link.commit()
+    except Exception as e:
+        print(f"Error updating passage reading time for prac_b: {e}")
+    finally:
+        if link and link.is_connected():
+            cursor.close()
+            link.close()
+
+    # lcOneRT and lcTwoRT
+    try:
+        link = get_db_connection()
+        cursor = link.cursor()
+        cursor.execute("SELECT * FROM output1_url WHERE sid=%s AND uid=%s AND pageTypeID='start_lc1'", (sid, uid))
+        r = cursor.fetchone()
+        if r:
+            cursor.execute("UPDATE tb11_profile SET lcOneRT=%s WHERE sid=%s AND uid=%s", (r[9], sid, uid))
+            link.commit()
+    except Exception as e:
+        print(f"Error updating lcOneRT: {e}")
+    finally:
+        if link and link.is_connected():
+            cursor.close()
+            link.close()
+
+    try:
+        link = get_db_connection()
+        cursor = link.cursor()
+        cursor.execute("SELECT * FROM output1_url WHERE sid=%s AND uid=%s AND pageTypeID='start_lc2'", (sid, uid))
+        r = cursor.fetchone()
+        if r:
+            cursor.execute("UPDATE tb11_profile SET lcTwoRT=%s WHERE sid=%s AND uid=%s", (r[9], sid, uid))
+            link.commit()
+    except Exception as e:
+        print(f"Error updating lcTwoRT: {e}")
+    finally:
+        if link and link.is_connected():
+            cursor.close()
+            link.close()
+
+    # Bonus words processing
+    try:
+        link = get_db_connection()
+        cursor = link.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM tb2_topic WHERE topID=%s", (topID,))
+        topicRow = cursor.fetchone()
+        topicIdeasBWsString = topicRow.get('topIdeasBonusWords', "") if topicRow else ""
+        topicIdeasBWsArray = topicIdeasBWsString.split(" ") if topicIdeasBWsString else []
+        cursor.execute("SELECT * FROM tb8_topicIdeas WHERE topID=%s AND sid=%s AND uid=%s", (topID, sid, uid))
+        topicIdeasAnsRow = cursor.fetchone()
+        topicIdeasAnsString = topicIdeasAnsRow.get('quesAns', "") if topicIdeasAnsRow else ""
+        topicIdeasAnsStringAry = []
+        for line in topicIdeasAnsString.split("\n"):
+            for word in line.split(" "):
+                cleaned = word.strip()
+                if cleaned:
+                    import re
+                    cleaned = re.sub(r"[^0-9a-zA-Z]+", "", cleaned)
+                    topicIdeasAnsStringAry.append(cleaned.lower())
+        bonusWordsAry = []
+        bonusWordsCnt = 0
+        for word in topicIdeasAnsStringAry:
+            if word and word in topicIdeasBWsArray:
+                bonusWordsAry.append(word)
+                bonusWordsCnt += 1
+        bonusWordsMoney = 0.05 * bonusWordsCnt
+        bonusWordsString = " ".join(bonusWordsAry)
+        cursor.execute(
+            """
+            INSERT INTO tb9_topicBonus 
+                (uid, sid, topID, quesID, quesAns, bonusWord, bonusWordCnt, bonusMoney)
+            VALUES (%s, %s, %s, 'k2', %s, %s, %s, %s)
+            """,
+            (uid, sid, topID, topicIdeasAnsString, bonusWordsString, bonusWordsCnt, bonusWordsMoney),
+        )
+        link.commit()
+    except Exception as e:
+        print(f"Error processing bonus words: {e}")
+    finally:
+        if link and link.is_connected():
+            cursor.close()
+            link.close()
+
+    try:
+        mTurkUniCode = 999 - int(uid)
+    except Exception:
+        mTurkUniCode = 0
+    final_code = f"9XQE783CE{mTurkUniCode}"
+    return render_template("done.html", bonusWordsCnt=bonusWordsCnt, final_code=final_code)

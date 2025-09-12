@@ -8,7 +8,7 @@
 <body>
 <div class="container">
     <h2>Comprehension Questions: {{ pass_title }}</h2>
-    <form method="POST" action="{{ url_for('done') }}">
+    <form method="POST" action="{{ url_for('core.done') }}">
         {% for q in questions %}
         <div class="card mb-4">
             <div class="card-header">Question {{ loop.index }}</div>

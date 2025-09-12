@@ -1,36 +1,28 @@
-<!-- templates/prac_instruction.html -->
+<!-- templates/practice/prac_instruction.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Prac Instruction</title>
   <style>
-    input[type="range"] {
-      width: 100vw; /* Or use 100% if you want it to fill the container */
-    }
+    input[type="range"] { width: 100vw; }
   </style>
 </head>
 <body>
   <div class='cl2'>
     <h2><b>Instructions</b></h2>
-    
-    
     <p style='line-height:130%'>
     In this study, your task is to learn about some topics in medical science related to Donation and Medical Transplants. There are three main topics, and your goal is to learn as much as you can about them. You will have 15 minutes to learn about Donation and Medical Transplants before I ask you to answer some questions. <b>It is very important for you to pay attention to the articles and do your best to learn about the topics. </b>You will receive bonus money based on your performance.
     </p>
-    
     <p style='line-height:130%'>
     During the learning phase, you will select one topic at a time and read a collection of articles about it. You can read each article at your own pace. After you read each article, you have a choice. You can either continue reading about this topic by pressing the “Read Next article” button OR you can switch to a new topic. You only have 15 minutes to learn about Donations and Medical Transplants, so do your best to <b>concentrate and stay with a topic only as long as you feel you are still learning something</b>. If the articles in the topic are <b>either too hard or not helping you to learn anything new, you might want to decide to switch to a new topic</b>.  This is your choice. 
     </p>
-    
     <p style='line-height:130%'>
     Note that there are more articles than you can completely read within 15 minutes so you should make your decisions about <b>whether to continue or stop reading carefully </b>so that you can learn as much information as possible about Donation and Medical Transplant. 
     </p>
-    
     <p style='line-height:130%'>
     After reading each article within a topic, you will be asked to rate how easy the text was, how much new information you thought was in the article, AND how much you learned.  You will be asked to make these ratings on a scale from 0 to 100 by moving the circle: 
     </p>
-    <!-- <center> -->
     <div>
     <table>
     <tr>
@@ -40,7 +32,7 @@
     </tr>
     <tr>
       <td text-align='center'>
-        <form id='form_c1' name='form_c1'> 		
+        <form id='form_c1' name='form_c1'>
            <tabl style="width: 100%;">
              <tr>
                <td colspan='2' text-align='center'><input type='range' name='ans_range' id='ans_range' min='0' max='100'/></td>
@@ -52,8 +44,8 @@
              <tr>
                <td text-align='left'  style='font-size:16pt; color:#0B3861;'>Very </br>Difficult</td>
                <td text-align='right'  style='font-size:16pt; color:#0B3861;'>Very</br> Easy</td>
-             </tr> 				
-           </table> 		
+             </tr>
+           </table>
         </form>
       </td>
     </tr>
@@ -64,7 +56,7 @@
     </tr>
     <tr>
       <td text-align='center'>
-        <form id='form_c2' name='form_c2'> 		
+        <form id='form_c2' name='form_c2'>
            <table style="width: 100%;">
              <tr>
                <td colspan='2' text-align='center'><input type='range' name='ans_range' id='ans_range' min='0' max='100'/></td>
@@ -76,8 +68,8 @@
              <tr>
                <td text-align='left' style='font-size:16pt; color:#0B3861;'>No New </br>Information</td>
                <td text-align='right' style='font-size:16pt; color:#0B3861;'>Completely</br> New Information</td>
-             </tr> 				
-           </table> 		
+             </tr>
+           </table>
         </form>
       </td>
     </tr>
@@ -88,7 +80,7 @@
     </tr>
     <tr>
       <td text-align='center'>
-        <form id='form_c3' name='form_c3'> 		
+        <form id='form_c3' name='form_c3'>
            <table style="width: 100%;">
              <tr>
                <td colspan='2' text-align='center'><input type='range' name='ans_range' id='ans_range' min='0' max='100'/></td>
@@ -100,40 +92,24 @@
              <tr>
                <td text-align='left' style='font-size:16pt; color:#0B3861;'>Didn't Learn </br>Anything at All</td>
                <td text-align='right' style='font-size:16pt; color:#0B3861;'>Learned a Lot</td>
-             </tr> 				
-           </table> 		
+             </tr>
+           </table>
         </form>
       </td>
     </tr>
     </table>
     </div>
-    <!-- </center> -->
-    
-    <p style='line-height:130%'>
-    Again, after reading each article, you can decide to keep reading about this topic by moving to the next article, or to go back to the main page to choose another topic. Once you decide to leave a topic, you will not be able to return.
-    </p>
-    <p style='line-height:130%'>
-    The goal is to learn as much about Donations and Medical Transplants as possible instead of memorizing the passages word for word. You will need to do your best to <b>optimize your learning outcome</b>.
-    </p>
-    <p style='line-height:130%'>
-    You will be asked to what you have learned at the end of the task. Your performance will be awarded based on the number of facts you learned. Please try your best to learn as much information about “Donation and Medical Transplantation” in 15 minutes. 
-    </p>
-    <p style='line-height:130%'>
-    First, you will do a practice round, in which your task is to learn about animals in 5 minutes. Please learn as many facts about animals as you can.</p>
+
+    <p style='line-height:130%'>Again, after reading each article, you can decide to keep reading about this topic by moving to the next article, or to go back to the main page to choose another topic. Once you decide to leave a topic, you will not be able to return.</p>
+    <p style='line-height:130%'>The goal is to learn as much about Donations and Medical Transplants as possible instead of memorizing the passages word for word. You will need to do your best to <b>optimize your learning outcome</b>.</p>
+    <p style='line-height:130%'>You will be asked to what you have learned at the end of the task. Your performance will be awarded based on the number of facts you learned. Please try your best to learn as much information about “Donation and Medical Transplantation” in 15 minutes.</p>
+    <p style='line-height:130%'>First, you will do a practice round, in which your task is to learn about animals in 5 minutes. Please learn as many facts about animals as you can.</p>
     </div>
 
   <div>
-    <!-- The final form that was originally:
-         <form method='post' action='prac_a.php?fid=begin'> -->
-    <!-- In Flask, we replicate that with url_for('prac_a', fid='begin'). 
-         We keep method='post' since that's what's in your code. -->
-    <form method="POST" action="{{ url_for('prac_a', fid='begin') }}">
+    <form method="POST" action="{{ url_for('practice.prac_a', fid='begin') }}">
       <input type="hidden" name="begin_task" value="yes" />
-      <input type="image" 
-             name="submit" 
-             id="submit" 
-             src="{{ url_for('static', filename='images/start_button.gif') }}" 
-             alt="Start">
+      <input type="image" name="submit" id="submit" src="{{ url_for('static', filename='images/start_button.gif') }}" alt="Start">
     </form>
   </div>
 </body>

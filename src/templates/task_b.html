@@ -2,16 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>{{ pageTitle if pageTitle else "Practice B" }}</title>
+  <title>{{ passResult['passTitle'] if passResult else "Task B" }}</title>
 </head>
 <body>
-  <!-- Timer (like b_up) -->
+  <!-- b_up -->
   <div class="b_up">
+    <!-- Timer -->
     <div id="timer" class="timer">
-      <!-- 
-        We can reuse a timer snippet like we did in other pages, 
-        or inline it. For brevity, let's inline the minimal logic:
-      -->
       <p><strong>TIME REMAINS:</strong></p>
       <script>
         var RemainingTime = Number({{ session.get('remainingTime', 0) }});
@@ -28,9 +25,9 @@
     </div>
   </div>
 
+  <!-- b_down -->
   <div class="b_down">
     <div id="article" class="article">
-      <!-- Display the passage text -->
       <div id="artText" class="artText">
         {% if passResult %}
           <p>{{ passResult['passText'] | safe }}</p>
@@ -40,9 +37,10 @@
       </div>
     </div>
 
-    <div class="back_a">
+    <div id="back_a" class="back_a">
+      <!-- "Go to OTHER TOPIC" => /task_c1?fid=back -->
       <p>
-        <a href="{{ url_for('prac_c1', fid='back') }}" style="color:#0a0000;">
+        <a href="{{ url_for('core.task_c1', fid='back') }}" style="color:#160101;">
           Go to OTHER TOPIC
         </a>
       </p>
@@ -52,19 +50,18 @@
       border: 1px solid #ccc;
       padding: 10px;
       display: flex;
-      justify-content: {% if passOrder == 5 %} flex-start {% else %} flex-end {% endif %};
+      justify-content: {% if passOrder == 11 %} flex-start {% else %} flex-end {% endif %};
     ">
-      {% if passOrder == 5 %}
-        <a href="{{ url_for('prac_c1', fid='back') }}" style="color:#0a0000;">
+      {% if passOrder == 11 %}
+        <a href="{{ url_for('core.task_c1', fid='back') }}" style="color:#0a0000;">
           Go to OTHER TOPIC
         </a>
       {% else %}
-        <a href="{{ url_for('prac_c1', fid='same') }}" style="color:#0a0000;">
+        <a href="{{ url_for('core.task_c1', fid='same') }}" style="color:#0a0000;">
           Read NEXT ARTICLE
         </a>
       {% endif %}
     </div>
-
   </div>
 </body>
 </html>

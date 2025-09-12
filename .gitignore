@@ -138,6 +138,7 @@ instance/app.db
 
 # Configuration files with sensitive data
 config.py
+instance/config.py
 .env
 .env.local
 .env.production
@@ -178,8 +179,11 @@ logs/
 # Flask session files
 flask_session/
 
-# MySQL dump files
-*.sql
+# SQL scripts
+!schema.sql
+!cogsearch.sql
+seed-*.sql
+dump-*.sql
 *.dump
 
 # Backup files
@@ -215,3 +219,5 @@ uploads/
 
 # Cache directories
 .cache/
+
+AGENTS.md

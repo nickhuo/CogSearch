@@ -19,16 +19,10 @@
         as you can about {{ subtopString }}.
       </p>
 
-      <!-- The form now posts to /instruction instead of instruction.php -->
-      <form id="form_k2" name="form_k2"
-            action="{{ url_for('instruction') }}"
-            method="POST"
-            onsubmit="return saveAns();">
-        <textarea id="textarea_k2" name="textarea_k2"
-                  rows="10" cols="60" required></textarea>
+      <form id="form_k2" name="form_k2" action="{{ url_for('core.instruction') }}" method="POST" onsubmit="return saveAns();">
+        <textarea id="textarea_k2" name="textarea_k2" rows="10" cols="60" required></textarea>
         <br><br>
-        <input type="image" name="submit" id="submit"
-               src="{{ url_for('static', filename='images/next_button.gif') }}" alt="Next" />
+        <input type="image" name="submit" id="submit" src="{{ url_for('static', filename='images/next_button.gif') }}" alt="Next" />
       </form>
     </div>
   </div>
@@ -36,14 +30,9 @@
   <script>
     function saveAns() {
       var input = document.getElementById('textarea_k2');
-      if (input.value === '') {
-        return false;
-      } else {
-        // If you want an AJAX post:
-        // jQuery.post('/saveTopicAnswer', { ans: input.value, qid: "prac_k2" });
-        return true;
-      }
+      return input.value !== '';
     }
   </script>
 </body>
 </html>
+
