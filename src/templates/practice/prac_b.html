@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>{{ pageTitle if pageTitle else "Practice B" }}</title>
+  <base target="_top">
   <script src="{{ url_for('static', filename='js/countdown.js') }}"></script>
 </head>
 <body>
@@ -36,16 +37,18 @@
 
     <div class="back_a">
       <p>
-        <a href="{{ url_for('core.task_c1', fid='back') }}" style="color:#0a0000;">Go to OTHER TOPIC</a>
+        <a href="{{ url_for('practice.prac_c1', fid='back') }}" target="_top" style="color:#0a0000;">Go to OTHER TOPIC</a>
       </p>
     </div>
 
     <div class="nextArt" style="border: 1px solid #ccc; padding: 10px; display: flex; justify-content: {% if passOrder == 5 %} flex-start {% else %} flex-end {% endif %};">
-      {% if passOrder == 5 %}
-        <a href="{{ url_for('core.task_c1', fid='back') }}" style="color:#0a0000;">Go to OTHER TOPIC</a>
-      {% else %}
-        <a href="{{ url_for('core.task_c1', fid='same') }}" style="color:#0a0000;">Read NEXT ARTICLE</a>
-      {% endif %}
+      <div style="display:flex; gap: 24px;">
+        <a href="{{ url_for('practice.prac_c1', fid='back') }}" target="_top" style="color:#0a0000;">Go to OTHER TOPIC</a>
+        {% if passOrder != 5 %}
+          <a href="{{ url_for('practice.prac_c1', fid='same') }}" target="_top" style="color:#0a0000;">Read NEXT ARTICLE</a>
+        {% endif %}
+        <a href="{{ url_for('practice.prac_c1', fid='done') }}" target="_top" style="color:#0a0000;">Finish Practice</a>
+      </div>
     </div>
   </div>
 </body>

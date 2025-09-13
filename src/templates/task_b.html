@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>{{ passResult['passTitle'] if passResult else "Task B" }}</title>
+  <base target="_top">
 </head>
 <body>
   <!-- b_up -->
@@ -40,7 +41,7 @@
     <div id="back_a" class="back_a">
       <!-- "Go to OTHER TOPIC" => /task_c1?fid=back -->
       <p>
-        <a href="{{ url_for('core.task_c1', fid='back') }}" style="color:#160101;">
+        <a href="{{ url_for('core.task_c1', fid='back') }}" target="_top" style="color:#160101;">
           Go to OTHER TOPIC
         </a>
       </p>
@@ -50,17 +51,13 @@
       border: 1px solid #ccc;
       padding: 10px;
       display: flex;
-      justify-content: {% if passOrder == 11 %} flex-start {% else %} flex-end {% endif %};
+      justify-content: flex-end;
     ">
-      {% if passOrder == 11 %}
-        <a href="{{ url_for('core.task_c1', fid='back') }}" style="color:#0a0000;">
-          Go to OTHER TOPIC
-        </a>
-      {% else %}
-        <a href="{{ url_for('core.task_c1', fid='same') }}" style="color:#0a0000;">
-          Read NEXT ARTICLE
-        </a>
-      {% endif %}
+      <div style="display:flex; gap: 24px;">
+        <a href="{{ url_for('core.task_c1', fid='back') }}" target="_top" style="color:#0a0000;">Go to OTHER TOPIC</a>
+        <a href="{{ url_for('core.task_c1', fid='same') }}" target="_top" style="color:#0a0000;">Read NEXT ARTICLE</a>
+        <a href="{{ url_for('core.task_c1', fid='done') }}" target="_top" style="color:#0a0000;">Finish Reading</a>
+      </div>
     </div>
   </div>
 </body>

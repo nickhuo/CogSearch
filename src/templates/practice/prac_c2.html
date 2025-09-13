@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Practice C2</title>
+  <base target="_top">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 </head>
 <body>
@@ -20,7 +21,7 @@
           </b>
           <br><br>
 
-          <form id="form_c2" name="form_c2" action="{{ url_for('core.task_c2', fid=fid) }}" method="POST" onsubmit="return saveAns();">
+          <form id="form_c2" name="form_c2" action="{{ url_for('practice.prac_c2', fid=fid) }}" method="POST" onsubmit="return saveAns();">
             <input type="hidden" name="qid" value="c2">
             <table style="width:100%;">
               <tr>

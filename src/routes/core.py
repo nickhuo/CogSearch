@@ -301,7 +301,7 @@ def task_a():
         if fid == "begin":
             session['startUnixTime'] = int(time.time())
             session['startTimeStamp'] = get_time_stamp_cdt()
-            session['remainingTime'] = 300
+            session['remainingTime'] = 1200  
             session['lastPageSwitchUnixTime'] = int(time.time())
 
             # Insert start time row into tb6_taskTime
@@ -406,7 +406,7 @@ def task_b():
     passID = format_pass_id(subtopID, conID, passOrd)
     _next_pass_order = passOrderInt + 1
 
-    session.update({'subtopID': subtopID, 'conID': conID, 'passOrder': passOrd, 'passID': passID, 'next_passOrder': passOrd + 1})
+    session.update({'subtopID': subtopID, 'conID': conID, 'passOrder': passOrd, 'passID': passID, 'next_passOrder': passOrd + 1, 'nextPassOrder': passOrderInt + 1})
 
     link = None
     passResult = None
@@ -416,17 +416,19 @@ def task_b():
 
         cursor.execute(
             """
-            SELECT * FROM tb4_passage 
-            WHERE topID=%s AND subtopID=%s AND conID=%s AND passOrder=%s
+            SELECT * FROM tb4_passage
+            WHERE topID=%s AND subtopID=%s AND conID=%s AND CAST(passOrder AS UNSIGNED)=%s
             """,
             (
-                session.get('topID', 1),
-                subtopID,
-                conID,
-                f"{passOrd:02d}",
+                str(session.get('topID', 1)),
+                str(subtopID),
+                str(conID),
+                int(passOrderInt),
             ),
         )
         passResult = cursor.fetchone()
+        if passResult and 'passTitle' in passResult:
+            session['passTitle'] = passResult['passTitle']
 
         if passOrd == 1:
             cursor.execute(
@@ -758,7 +760,7 @@ def let_comp_two():
                 cursor.close()
                 link.close()
 
-        return redirect(url_for('core.vocab'))
+        return redirect(url_for('core.questions'))
 
     return render_template("let_comp_two.html", action_url=url_for('core.let_comp_two'))
 
@@ -892,7 +894,19 @@ def questions():
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM tb21_questions WHERE passID = %s", (passID,))
+        # Be tolerant to passID scheme differences by querying structured keys
+        q_top = str(session.get('topID', '1'))
+        q_sub = str(session.get('subtopID', ''))
+        q_con = str(session.get('conID', '1'))
+        q_ord = int(session.get('passOrder', 1))
+        cursor.execute(
+            """
+            SELECT * FROM tb21_questions
+            WHERE topID=%s AND subtopID=%s AND conID=%s AND CAST(passOrder AS UNSIGNED)=%s
+            ORDER BY questionID
+            """,
+            (q_top, q_sub, q_con, q_ord),
+        )
         questions = cursor.fetchall()
         cursor.execute(
             """
@@ -927,13 +941,17 @@ def done():
         try:
             conn = get_db_connection()
             cursor = conn.cursor(dictionary=True)
+            q_top = str(session.get('topID', '1'))
+            q_sub = str(session.get('subtopID', ''))
+            q_con = str(session.get('conID', '1'))
+            q_ord = int(session.get('passOrder', 1))
             cursor.execute(
                 """
-                SELECT * FROM tb21_questions 
-                WHERE passID = %s 
+                SELECT * FROM tb21_questions
+                WHERE topID=%s AND subtopID=%s AND conID=%s AND CAST(passOrder AS UNSIGNED)=%s
                 ORDER BY questionID
                 """,
-                (passID,),
+                (q_top, q_sub, q_con, q_ord),
             )
             questions = cursor.fetchall()
             for q in questions:
@@ -1004,15 +1022,18 @@ def done():
             cursor.close()
             link.close()
 
-    # passage RT for b
+    # passage RT for formal reading pages (pageTypeID='b')
     try:
         link = get_db_connection()
-        cursor = link.cursor()
-        cursor.execute("SELECT * FROM output1_url WHERE sid=%s AND uid=%s AND pageTypeID='b'", (sid, uid))
+        cursor = link.cursor(dictionary=True)
+        cursor.execute("SELECT passID, time_interval FROM output1_url WHERE sid=%s AND uid=%s AND pageTypeID='b'", (sid, uid))
         for row in cursor.fetchall():
-            qryPassID = row[6]
-            qryPassRT = row[9]
-            cursor.execute("UPDATE tb5_passQop SET passRT=%s WHERE sid=%s AND uid=%s AND passID=%s", (qryPassRT, sid, uid, qryPassID))
+            qryPassID = row['passID']
+            qryPassRT = row['time_interval']
+            cursor.execute(
+                "UPDATE tb5_passQop SET passRT=%s WHERE sid=%s AND uid=%s AND passID=%s",
+                (qryPassRT, sid, uid, qryPassID),
+            )
         link.commit()
     except Exception as e:
         print(f"Error updating passage reading time for b: {e}")
@@ -1021,15 +1042,18 @@ def done():
             cursor.close()
             link.close()
 
-    # practice b RTs
+    # passage RT for practice reading pages (pageTypeID='prac_b')
     try:
         link = get_db_connection()
-        cursor = link.cursor()
-        cursor.execute("SELECT * FROM output1_url WHERE sid=%s AND uid=%s AND pageTypeID='prac_b'", (sid, uid))
+        cursor = link.cursor(dictionary=True)
+        cursor.execute("SELECT passID, time_interval FROM output1_url WHERE sid=%s AND uid=%s AND pageTypeID='prac_b'", (sid, uid))
         for row in cursor.fetchall():
-            qryPassID = row[6]
-            qryPassRT = row[9]
-            cursor.execute("UPDATE tb15_prac_passQop SET passRT=%s WHERE sid=%s AND uid=%s AND passID=%s", (qryPassRT, sid, uid, qryPassID))
+            qryPassID = row['passID']
+            qryPassRT = row['time_interval']
+            cursor.execute(
+                "UPDATE tb15_prac_passQop SET passRT=%s WHERE sid=%s AND uid=%s AND passID=%s",
+                (qryPassRT, sid, uid, qryPassID),
+            )
         link.commit()
     except Exception as e:
         print(f"Error updating passage reading time for prac_b: {e}")
@@ -1038,14 +1062,14 @@ def done():
             cursor.close()
             link.close()
 
-    # lcOneRT and lcTwoRT
+    # lcOneRT and lcTwoRT (use time_interval of start markers)
     try:
         link = get_db_connection()
-        cursor = link.cursor()
-        cursor.execute("SELECT * FROM output1_url WHERE sid=%s AND uid=%s AND pageTypeID='start_lc1'", (sid, uid))
+        cursor = link.cursor(dictionary=True)
+        cursor.execute("SELECT time_interval FROM output1_url WHERE sid=%s AND uid=%s AND pageTypeID='start_lc1' ORDER BY op1ID DESC LIMIT 1", (sid, uid))
         r = cursor.fetchone()
-        if r:
-            cursor.execute("UPDATE tb11_profile SET lcOneRT=%s WHERE sid=%s AND uid=%s", (r[9], sid, uid))
+        if r and r.get('time_interval') is not None:
+            cursor.execute("UPDATE tb11_profile SET lcOneRT=%s WHERE sid=%s AND uid=%s", (r['time_interval'], sid, uid))
             link.commit()
     except Exception as e:
         print(f"Error updating lcOneRT: {e}")
@@ -1056,11 +1080,11 @@ def done():
 
     try:
         link = get_db_connection()
-        cursor = link.cursor()
-        cursor.execute("SELECT * FROM output1_url WHERE sid=%s AND uid=%s AND pageTypeID='start_lc2'", (sid, uid))
+        cursor = link.cursor(dictionary=True)
+        cursor.execute("SELECT time_interval FROM output1_url WHERE sid=%s AND uid=%s AND pageTypeID='start_lc2' ORDER BY op1ID DESC LIMIT 1", (sid, uid))
         r = cursor.fetchone()
-        if r:
-            cursor.execute("UPDATE tb11_profile SET lcTwoRT=%s WHERE sid=%s AND uid=%s", (r[9], sid, uid))
+        if r and r.get('time_interval') is not None:
+            cursor.execute("UPDATE tb11_profile SET lcTwoRT=%s WHERE sid=%s AND uid=%s", (r['time_interval'], sid, uid))
             link.commit()
     except Exception as e:
         print(f"Error updating lcTwoRT: {e}")

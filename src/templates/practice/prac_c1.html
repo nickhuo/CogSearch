@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Task C1</title>
+  <base target="_top">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 </head>
 <body>
@@ -20,7 +21,7 @@
           <p><b>1. How easy was this article to read?</b></p>
           <br><br>
 
-          <form id="form_c1" name="form_c1" action="{{ url_for('core.task_c1', fid=fid) }}" method="POST" onsubmit="return saveAns();">
+          <form id="form_c1" name="form_c1" action="{{ url_for('practice.prac_c1', fid=fid) }}" method="POST" onsubmit="return saveAns();">
             <table style="width:100%;">
               <tr>
                 <td colspan="2" style="text-align:center;">

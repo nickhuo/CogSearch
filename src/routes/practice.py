@@ -237,16 +237,18 @@ def prac_b():
         cursor.execute(
             """
             SELECT * FROM tb14_prac_passage
-            WHERE topID=%s AND subtopID=%s AND conID=%s AND passOrder=%s
+            WHERE topID=%s AND subtopID=%s AND conID=%s AND CAST(passOrder AS UNSIGNED)=%s
             """,
             (
                 "1",
-                f"{subtopID}",
-                f"{conID}",
-                f"{passOrderInt:02d}",
+                str(subtopID),
+                str(conID),
+                int(passOrderInt),
             ),
         )
         passResult = cursor.fetchone()
+        if passResult and 'passTitle' in passResult:
+            session['passTitle'] = passResult['passTitle']
 
         # when first article, set practical task start time
         if passOrderInt == 1:
@@ -277,10 +279,10 @@ def prac_b():
             used_time = now - session.get("lastPageSwitchUnixTime", now)
             session["remainingTime"] = session.get("remainingTime", 0) - used_time
             session["lastPageSwitchUnixTime"] = now
-            session["redirectPage"] = url_for("practice.prac_c3", fid="done")
+            session["redirectPage"] = url_for("practice.prac_c1", fid="done")
         elif lastPage == "c3":
             session["lastPageSwitchUnixTime"] = now
-            session["redirectPage"] = url_for("practice.prac_c3", fid="done")
+            session["redirectPage"] = url_for("practice.prac_c1", fid="done")
 
         link.commit()
 
@@ -339,6 +341,65 @@ def prac_c3():
 
     return render_template("practice/prac_c3.html", fid=fid, action_url=action_url, passID=passID)
 
+
+@practice_bp.route("/prac_c1", methods=["GET", "POST"])
+def prac_c1():
+    uid = session.get("uid")
+    sid = session.get("sid", "")
+    if not uid:
+        return "No user session found; please start from the beginning.", 400
+
+    fid = request.args.get("fid", "")
+    subtopID = session.get("subtopID", "")
+    passID = session.get("passID", "")
+    passTitle = session.get("passTitle", "")
+    topID = "1"
+    conID = "1"
+
+    pageTypeID = "prac_c1"
+    pageTitle = f"C1 Prac: {passTitle}"
+    save_url(uid, sid, topID, subtopID, conID, passID, pageTypeID, pageTitle, request.url)
+
+    if request.method == "POST":
+        ans = request.form.get("ans", "").strip()
+        qid = request.form.get("qid", "c1")
+        if ans:
+            save_pass_answer(qid, ans, table="tb15_prac_passQop")
+            return redirect(url_for("practice.prac_c2", fid=fid))
+        else:
+            return "No answer provided.", 400
+
+    return render_template("practice/prac_c1.html", fid=fid)
+
+
+@practice_bp.route("/prac_c2", methods=["GET", "POST"])
+def prac_c2():
+    uid = session.get("uid")
+    sid = session.get("sid", "")
+    if not uid:
+        return "No user session found; please start from the beginning.", 400
+
+    fid = request.args.get("fid", "")
+    subtopID = session.get("subtopID", "")
+    passID = session.get("passID", "")
+    passTitle = session.get("passTitle", "")
+    topID = "1"
+    conID = "1"
+
+    pageTypeID = "prac_c2"
+    pageTitle = f"C2 Prac: {passTitle}"
+    save_url(uid, sid, topID, subtopID, conID, passID, pageTypeID, pageTitle, request.url)
+
+    if request.method == "POST":
+        ans = request.form.get("ans", "").strip()
+        qid = request.form.get("qid", "c2")
+        if ans:
+            save_pass_answer(qid, ans, table="tb15_prac_passQop")
+            return redirect(url_for("practice.prac_c3", fid=fid))
+        else:
+            return "No answer provided.", 400
+
+    return render_template("practice/prac_c2.html", fid=fid)
 
 @practice_bp.route("/prac_k2", methods=["GET", "POST"])
 def prac_k2():
