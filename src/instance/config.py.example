@@ -1,0 +1,8 @@
+SECRET_KEY = "change-me"
+
+# MySQL settings
+MYSQL_HOST = "localhost"
+MYSQL_USER = "root"
+MYSQL_PASSWORD = "root"
+MYSQL_DB = "cogsearch_textsearch3"
+

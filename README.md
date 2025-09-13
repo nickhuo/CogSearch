@@ -5,15 +5,47 @@ Overview
 - Practice routes live under `src/routes/practice.py`; core routes under `src/routes/core.py`.
 
 Quick Start
+
+### 1. Environment Setup
 - Python 3.10+
 - Create venv: `python3 -m venv .venv && source .venv/bin/activate`
 - Install deps: `pip install -r requirements.txt`
-- Configure: copy `src/instance/config.py.example` to `src/instance/config.py` and adjust values; or set env vars `SECRET_KEY`, `MYSQL_HOST`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DB`.
-- Init DB (example):
-  - `mysql -u root -p -e "CREATE DATABASE cogsearch_textsearch3;"`
-  - `mysql -u root -p cogsearch_textsearch3 < schema.sql`
-  - `mysql -u root -p cogsearch_textsearch3 < seed_data.sql`  # load mock data
-- Run dev server: `flask --app app run --debug`
+
+### 2. Database Configuration
+**Method 1: Using config file (Recommended)**
+```bash
+# Copy the example config file
+cp src/instance/config.py.example src/instance/config.py
+
+# Edit config.py with your database settings
+nano src/instance/config.py
+```
+
+**Method 2: Using environment variables**
+```bash
+export SECRET_KEY="your-secret-key"
+export MYSQL_HOST="localhost"
+export MYSQL_USER="root"
+export MYSQL_PASSWORD="your-password"
+export MYSQL_DB="cogsearch_textsearch3"
+```
+
+### 3. Database Initialization
+```bash
+# Create database
+mysql -u root -p -e "CREATE DATABASE cogsearch_textsearch3;"
+
+# Import schema
+mysql -u root -p cogsearch_textsearch3 < schema.sql
+
+# Load sample data (optional)
+mysql -u root -p cogsearch_textsearch3 < seed_data.sql
+```
+
+### 4. Run Development Server
+```bash
+flask --app app run --debug
+```
 
 Project Structure
 - `src/`: app package (`__init__.py`, Blueprints, services, db helpers)
