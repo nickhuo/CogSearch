@@ -38,25 +38,20 @@
       </div>
     </div>
 
-    <div id="back_a" class="back_a">
-      <!-- "Go to OTHER TOPIC" => /task_c1?fid=back -->
-      <p>
-        <a href="{{ url_for('core.task_c1', fid='back') }}" target="_top" style="color:#160101;">
-          Go to OTHER TOPIC
-        </a>
-      </p>
-    </div>
-
     <div class="nextArt" style="
       border: 1px solid #ccc;
       padding: 10px;
       display: flex;
-      justify-content: flex-end;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
     ">
+      <a href="{{ url_for('core.task_c1', fid='back') }}" target="_top" style="color:#0a0000;">Go to other topic</a>
       <div style="display:flex; gap: 24px;">
-        <a href="{{ url_for('core.task_c1', fid='back') }}" target="_top" style="color:#0a0000;">Go to OTHER TOPIC</a>
-        <a href="{{ url_for('core.task_c1', fid='same') }}" target="_top" style="color:#0a0000;">Read NEXT ARTICLE</a>
-        <a href="{{ url_for('core.task_c1', fid='done') }}" target="_top" style="color:#0a0000;">Finish Reading</a>
+        <a href="{{ url_for('core.task_c1', fid='done') }}" target="_top" style="color:#0a0000;">Finish reading</a>
+        {% if passOrder != 5 %}
+        <a href="{{ url_for('core.task_c1', fid='same') }}" target="_top" style="color:#0a0000;">Continue to next article</a>
+        {% endif %}
       </div>
     </div>
   </div>

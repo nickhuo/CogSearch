@@ -40,7 +40,7 @@
 - templates/warning.html
   - 目的：提醒勿刷新、勿前进后退。
 - templates/consent.html
-  - 目的：研究同意书与 MTurk Worker ID 采集。
+  - 目的：研究同意书与 Participant ID 采集。
   - 提交：`core.demographic`（POST）。
   - 校验：必须勾选“同意”。
 

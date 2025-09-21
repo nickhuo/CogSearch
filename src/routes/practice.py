@@ -101,7 +101,7 @@ def prac_a():
         if fid == "begin":
             session["startUnixTime"] = int(time.time())
             session["startTimeStamp"] = get_time_stamp_cdt()
-            session["remainingTime"] = 300
+            session["remainingTime"] = 240
             session["lastPageSwitchUnixTime"] = int(time.time())
 
             cursor.execute(

@@ -39,8 +39,22 @@
           method="POST"
           onsubmit="return saveConsent();">
 
-      <b>mTurk Worker ID: 
-        <input type="text" name="mturkid" style="width:300px;" required />
+      {% if error %}
+      <p style="color:#b30000; margin:0 0 1em 0; font-weight:bold;">{{ error }}</p>
+      {% endif %}
+      <b>Participant ID:
+        <input
+          type="text"
+          name="participant_id"
+          id="participant_id"
+          style="width:300px;"
+          inputmode="numeric"
+          pattern="[0-9]+"
+          title="Participant ID must be numeric"
+          value="{{ participant_id|default('', true) }}"
+          oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+          required
+        />
       </b>
       (required)
       <br><br>

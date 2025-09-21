@@ -51,7 +51,21 @@ def demographic():
     if "uid" in session and session["uid"]:
         session["uid"] = ""
 
-    sid = request.form.get("mturkid", "").strip()
+    participant_id = request.form.get("participant_id", "").strip()
+
+    if not participant_id:
+        error_message = "Participant ID is required."
+        return render_template(
+            "consent.html", error=error_message, participant_id=participant_id
+        )
+
+    if not participant_id.isdigit():
+        error_message = "Participant ID must contain digits only."
+        return render_template(
+            "consent.html", error=error_message, participant_id=participant_id
+        )
+
+    sid = participant_id
     session["sid"] = sid
 
     link = None
