@@ -10,6 +10,38 @@ from src.services.utils import format_pass_id, save_pass_answer, split_subtopics
 practice_bp = Blueprint("practice", __name__)
 
 
+PRACTICE_REQUIRED_STAGES = {"c1", "c2", "c3"}
+
+
+def _practice_pending_redirect():
+    """Return the URL that leads the user back to the outstanding practice question."""
+    stage = session.get("practice_pending_stage")
+    if stage not in PRACTICE_REQUIRED_STAGES:
+        return None
+
+    fid = session.get("practice_pending_fid")
+    subtop = session.get("subtopID")
+    pass_order = session.get("passOrder")
+    params = {}
+    if subtop is not None:
+        params["subtop"] = subtop
+    if pass_order is not None:
+        params["passOrd"] = pass_order
+
+    if stage == "c1" and not fid:
+        last_page = session.get("practice_last_page")
+        if last_page:
+            params["lastPage"] = last_page
+        return url_for("practice.prac_b", **params)
+    if stage == "c1":
+        return url_for("practice.prac_c1", fid=fid)
+    if stage == "c2":
+        return url_for("practice.prac_c2", fid=fid or "same")
+    if stage == "c3":
+        return url_for("practice.prac_c3", fid=fid or "same")
+    return None
+
+
 @practice_bp.route("/prac_instruction", methods=["POST"])
 def prac_instruction():
     """Inserts demographic answers (if provided) then shows instructions."""
@@ -88,6 +120,13 @@ def prac_a():
     if not uid:
         return "No user session found; please start from the beginning.", 400
 
+    is_c3_submission = request.method == "POST" and request.form.get("qid") == "c3"
+
+    if not is_c3_submission:
+        pending_redirect = _practice_pending_redirect()
+        if pending_redirect:
+            return redirect(pending_redirect)
+
     fid = request.args.get("fid", "")
     subtop_param = request.args.get("subtop", "")
     last_page = request.args.get("lastPage", "")
@@ -103,6 +142,10 @@ def prac_a():
             session["startTimeStamp"] = get_time_stamp_cdt()
             session["remainingTime"] = 240
             session["lastPageSwitchUnixTime"] = int(time.time())
+            session.pop("practice_pending_stage", None)
+            session.pop("practice_pending_passID", None)
+            session.pop("practice_pending_fid", None)
+            session.pop("practice_last_page", None)
 
             cursor.execute(
                 """
@@ -155,6 +198,12 @@ def prac_a():
                 )
             visited_subtop = split_subtopics(session.get("visitedSub", ""))
             visited_subtop.sort()
+
+            session.pop("practice_pending_stage", None)
+            session.pop("practice_pending_passID", None)
+            session.pop("practice_pending_fid", None)
+            session.pop("practice_last_page", None)
+
             if visited_subtop == all_subtops:
                 return redirect(url_for("practice.prac_k2", lastPage="c3"))
 
@@ -214,6 +263,24 @@ def prac_b():
     conID = 1
     passID = format_pass_id(subtopID, conID, passOrderInt)
     next_pass_order = passOrderInt + 1
+
+    is_c3_submission = request.method == "POST" and request.form.get("qid") == "c3"
+
+    pending_stage = session.get("practice_pending_stage")
+    pending_pass = session.get("practice_pending_passID")
+    if not is_c3_submission and pending_stage in PRACTICE_REQUIRED_STAGES:
+        if pending_stage != "c1" or pending_pass != passID:
+            redirect_url = _practice_pending_redirect()
+            if redirect_url:
+                return redirect(redirect_url)
+
+    if not is_c3_submission:
+        session["practice_pending_passID"] = passID
+        session["practice_pending_stage"] = "c1"
+        session["practice_pending_fid"] = None
+        session["practice_last_page"] = lastPage
+    else:
+        session["practice_last_page"] = lastPage
 
     # persist to session
     session.update(
@@ -283,6 +350,22 @@ def prac_b():
         elif lastPage == "c3":
             session["lastPageSwitchUnixTime"] = now
             session["redirectPage"] = url_for("practice.prac_c1", fid="done")
+            if request.method == 'POST':
+                session.pop("practice_pending_stage", None)
+                session.pop("practice_pending_passID", None)
+                session.pop("practice_pending_fid", None)
+                session.pop("practice_last_page", None)
+                ans_to_save = request.form.get('ans', '')
+                passid_to_save = request.form.get('savepassid', '')
+                if ans_to_save:
+                    cursor.execute(
+                        """
+                        UPDATE tb15_prac_passQop
+                        SET c3Ans=%s
+                        WHERE sid=%s AND uid=%s AND passID=%s
+                        """,
+                        (ans_to_save, sid, uid, passid_to_save),
+                    )
 
         link.commit()
 
@@ -317,6 +400,23 @@ def prac_c3():
     conID = "1"
     nextPassOrder = session.get("nextPassOrder", 2)
 
+    pending_stage = session.get("practice_pending_stage")
+    pending_pass = session.get("practice_pending_passID")
+    if pending_stage in PRACTICE_REQUIRED_STAGES:
+        if pending_pass != passID or pending_stage != "c3":
+            redirect_url = _practice_pending_redirect()
+            if redirect_url:
+                return redirect(redirect_url)
+    else:
+        redirect_url = _practice_pending_redirect()
+        if redirect_url:
+            return redirect(redirect_url)
+
+    if not fid:
+        fid = session.get("practice_pending_fid", "same")
+    else:
+        session["practice_pending_fid"] = fid
+
     if fid == "same":
         action_url = url_for("practice.prac_b", subtop=subtopID, passOrd=nextPassOrder, lastPage="c3")
     elif fid == "back":
@@ -335,6 +435,10 @@ def prac_c3():
         qid = request.form.get("qid", "c3")
         if ans:
             save_pass_answer(qid, ans, table="tb15_prac_passQop")
+            session.pop("practice_pending_stage", None)
+            session.pop("practice_pending_passID", None)
+            session.pop("practice_pending_fid", None)
+            session.pop("practice_last_page", None)
             return redirect(action_url)
         else:
             return "No answer provided.", 400
@@ -356,6 +460,24 @@ def prac_c1():
     topID = "1"
     conID = "1"
 
+    pending_stage = session.get("practice_pending_stage")
+    pending_pass = session.get("practice_pending_passID")
+    if pending_stage in PRACTICE_REQUIRED_STAGES:
+        if pending_pass != passID or pending_stage != "c1":
+            redirect_url = _practice_pending_redirect()
+            if redirect_url:
+                return redirect(redirect_url)
+    else:
+        session["practice_pending_passID"] = passID
+        session["practice_pending_stage"] = "c1"
+
+    if fid:
+        session["practice_pending_fid"] = fid
+    else:
+        stored_fid = session.get("practice_pending_fid")
+        if stored_fid:
+            fid = stored_fid
+
     pageTypeID = "prac_c1"
     pageTitle = f"C1 Prac: {passTitle}"
     save_url(uid, sid, topID, subtopID, conID, passID, pageTypeID, pageTitle, request.url)
@@ -365,6 +487,7 @@ def prac_c1():
         qid = request.form.get("qid", "c1")
         if ans:
             save_pass_answer(qid, ans, table="tb15_prac_passQop")
+            session["practice_pending_stage"] = "c2"
             return redirect(url_for("practice.prac_c2", fid=fid))
         else:
             return "No answer provided.", 400
@@ -386,6 +509,21 @@ def prac_c2():
     topID = "1"
     conID = "1"
 
+    pending_stage = session.get("practice_pending_stage")
+    pending_pass = session.get("practice_pending_passID")
+    if pending_stage in PRACTICE_REQUIRED_STAGES:
+        if pending_pass != passID or pending_stage != "c2":
+            redirect_url = _practice_pending_redirect()
+            if redirect_url:
+                return redirect(redirect_url)
+    else:
+        redirect_url = _practice_pending_redirect()
+        if redirect_url:
+            return redirect(redirect_url)
+
+    if not fid:
+        fid = session.get("practice_pending_fid", "same")
+
     pageTypeID = "prac_c2"
     pageTitle = f"C2 Prac: {passTitle}"
     save_url(uid, sid, topID, subtopID, conID, passID, pageTypeID, pageTitle, request.url)
@@ -395,6 +533,7 @@ def prac_c2():
         qid = request.form.get("qid", "c2")
         if ans:
             save_pass_answer(qid, ans, table="tb15_prac_passQop")
+            session["practice_pending_stage"] = "c3"
             return redirect(url_for("practice.prac_c3", fid=fid))
         else:
             return "No answer provided.", 400
@@ -407,6 +546,13 @@ def prac_k2():
     sid = session.get("sid", "")
     if not uid:
         return "No user session found; please start from the beginning.", 400
+
+    is_c3_submission = request.method == "POST" and request.form.get("qid") == "c3"
+
+    if not is_c3_submission:
+        pending_redirect = _practice_pending_redirect()
+        if pending_redirect:
+            return redirect(pending_redirect)
 
     topID = "1"
     lastPage = request.args.get("lastPage", "")
@@ -431,6 +577,10 @@ def prac_k2():
                     """,
                     (ans_to_save, sid, uid, passid_to_save),
                 )
+                session.pop("practice_pending_stage", None)
+                session.pop("practice_pending_passID", None)
+                session.pop("practice_pending_fid", None)
+                session.pop("practice_last_page", None)
 
         cursor.execute("SELECT * FROM tb12_prac_topic WHERE topID=%s", (topID,))
         topic_row = cursor.fetchone()

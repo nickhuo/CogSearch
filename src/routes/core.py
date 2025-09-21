@@ -28,6 +28,44 @@ def safe_int_param(value, default=0):
         return default
 
 
+FORMAL_REQUIRED_STAGES = {"c1", "c2", "c3", "c4"}
+
+
+def _formal_pending_redirect():
+    """Return the URL that routes the participant back to outstanding formal questions."""
+    stage = session.get("formal_pending_stage")
+    if stage not in FORMAL_REQUIRED_STAGES:
+        return None
+
+    fid = session.get("formal_pending_fid")
+    subtop = session.get("subtopID")
+    pass_order = session.get("passOrder")
+    params = {}
+    if subtop is not None:
+        params["subtop"] = subtop
+    if pass_order is not None:
+        params["passOrd"] = pass_order
+
+    if stage == "c1" and not fid:
+        last_page = session.get("formal_last_page")
+        if last_page:
+            params["lastPage"] = last_page
+        return url_for("core.task_b", **params)
+    if stage == "c1":
+        return url_for("core.task_c1", fid=fid)
+    if stage == "c2":
+        return url_for("core.task_c2", fid=fid or "same")
+    if stage == "c3":
+        return url_for("core.task_c3", fid=fid or "same")
+    if stage == "c4":
+        return url_for("core.task_c4", fid=fid or "same")
+    return None
+
+
+def _is_formal_rating_submission() -> bool:
+    return request.method == "POST" and request.form.get("qid") in {"c3", "c4"}
+
+
 @core_bp.route("/")
 def index():
     return render_template("index.html")
@@ -301,6 +339,13 @@ def task_a():
     if not uid:
         return "No user session found; please start from the beginning.", 400
 
+    is_rating_submission = _is_formal_rating_submission()
+
+    if not is_rating_submission:
+        pending_redirect = _formal_pending_redirect()
+        if pending_redirect:
+            return redirect(pending_redirect)
+
     topID = "1"
     fid = request.args.get('fid', '')
     lastPage = request.args.get('lastPage', '')
@@ -317,6 +362,10 @@ def task_a():
             session['startTimeStamp'] = get_time_stamp_cdt()
             session['remainingTime'] = 1200  
             session['lastPageSwitchUnixTime'] = int(time.time())
+            session.pop('formal_pending_stage', None)
+            session.pop('formal_pending_passID', None)
+            session.pop('formal_pending_fid', None)
+            session.pop('formal_last_page', None)
 
             # Insert start time row into tb6_taskTime
             cursor.execute(
@@ -365,6 +414,10 @@ def task_a():
                     """,
                     (ans, sid, uid, passid_to_save),
                 )
+                session.pop('formal_pending_stage', None)
+                session.pop('formal_pending_passID', None)
+                session.pop('formal_pending_fid', None)
+                session.pop('formal_last_page', None)
             visited_subtop = session.get('visitedSub', '')
             visited_subtop = visited_subtop.split(',') if visited_subtop else []
             visited_subtop.sort()
@@ -419,6 +472,21 @@ def task_b():
 
     passID = format_pass_id(subtopID, conID, passOrd)
     _next_pass_order = passOrderInt + 1
+
+    is_rating_submission = _is_formal_rating_submission()
+
+    pending_stage = session.get('formal_pending_stage')
+    pending_pass = session.get('formal_pending_passID')
+    if not is_rating_submission and pending_stage in FORMAL_REQUIRED_STAGES:
+        if pending_stage != 'c1' or pending_pass != passID:
+            redirect_url = _formal_pending_redirect()
+            if redirect_url:
+                return redirect(redirect_url)
+
+    session['formal_pending_passID'] = passID
+    session['formal_pending_stage'] = 'c1'
+    session['formal_pending_fid'] = None
+    session['formal_last_page'] = lastPage
 
     session.update({'subtopID': subtopID, 'conID': conID, 'passOrder': passOrd, 'passID': passID, 'next_passOrder': passOrd + 1, 'nextPassOrder': passOrderInt + 1})
 
@@ -476,6 +544,10 @@ def task_b():
             session['lastPageSwitchUnixTime'] = now
             session['redirectPage'] = url_for('core.task_c1', fid='done')
             if request.method == 'POST':
+                session.pop('formal_pending_stage', None)
+                session.pop('formal_pending_passID', None)
+                session.pop('formal_pending_fid', None)
+                session.pop('formal_last_page', None)
                 ans_to_save = request.form.get('ans', '')
                 passid_to_save = request.form.get('savepassid', '')
                 if ans_to_save:
@@ -485,6 +557,11 @@ def task_b():
                         """,
                         (ans_to_save, sid, uid, passid_to_save),
                     )
+        elif lastPage == "c4" and request.method == 'POST':
+            session.pop('formal_pending_stage', None)
+            session.pop('formal_pending_passID', None)
+            session.pop('formal_pending_fid', None)
+            session.pop('formal_last_page', None)
 
         link.commit()
 
@@ -514,6 +591,25 @@ def task_c1():
     conID = "1"
     pageTypeID = "c1"
     pageTitle = f"C1: {passTitle}"
+
+    pending_stage = session.get('formal_pending_stage')
+    pending_pass = session.get('formal_pending_passID')
+    if pending_stage in FORMAL_REQUIRED_STAGES:
+        if pending_pass != passID or pending_stage != 'c1':
+            redirect_url = _formal_pending_redirect()
+            if redirect_url:
+                return redirect(redirect_url)
+    else:
+        session['formal_pending_passID'] = passID
+        session['formal_pending_stage'] = 'c1'
+
+    if fid:
+        session['formal_pending_fid'] = fid
+    else:
+        stored_fid = session.get('formal_pending_fid')
+        if stored_fid:
+            fid = stored_fid
+
     save_url(uid, sid, topID, subtopID, conID, passID, pageTypeID, pageTitle, request.url)
 
     now = int(time.time())
@@ -526,6 +622,7 @@ def task_c1():
         qid = request.form.get("qid", "c1")
         if ans:
             save_pass_answer(qid, ans, table="tb5_passQop")
+            session['formal_pending_stage'] = 'c2'
             return redirect(url_for('core.task_c2', fid=fid))
         else:
             return "No answer provided.", 400
@@ -549,6 +646,22 @@ def task_c2():
     conID = "1"
     pageTypeID = "c2"
     pageTitle = f"C2: {passTitle}"
+
+    pending_stage = session.get('formal_pending_stage')
+    pending_pass = session.get('formal_pending_passID')
+    if pending_stage in FORMAL_REQUIRED_STAGES:
+        if pending_pass != passID or pending_stage != 'c2':
+            redirect_url = _formal_pending_redirect()
+            if redirect_url:
+                return redirect(redirect_url)
+    else:
+        redirect_url = _formal_pending_redirect()
+        if redirect_url:
+            return redirect(redirect_url)
+
+    if not fid:
+        fid = session.get('formal_pending_fid', 'same')
+
     save_url(uid, sid, topID, subtopID, conID, passID, pageTypeID, pageTitle, request.url)
 
     if request.method == "POST":
@@ -556,6 +669,7 @@ def task_c2():
         qid = request.form.get("qid", "c2")
         if ans:
             save_pass_answer(qid, ans, table="tb5_passQop")
+            session['formal_pending_stage'] = 'c3'
             return redirect(url_for('core.task_c3', fid=fid))
         else:
             return "No answer provided.", 400
@@ -582,6 +696,22 @@ def task_c3():
 
     pageTypeID = "c3"
     pageTitle = f"C3: {passTitle}"
+
+    pending_stage = session.get('formal_pending_stage')
+    pending_pass = session.get('formal_pending_passID')
+    if pending_stage in FORMAL_REQUIRED_STAGES:
+        if pending_pass != passID or pending_stage != 'c3':
+            redirect_url = _formal_pending_redirect()
+            if redirect_url:
+                return redirect(redirect_url)
+    else:
+        redirect_url = _formal_pending_redirect()
+        if redirect_url:
+            return redirect(redirect_url)
+
+    if not fid:
+        fid = session.get('formal_pending_fid', 'same')
+
     save_url(uid, sid, topID, subtopID, conID, passID, pageTypeID, pageTitle, request.url)
 
     if request.method == "POST":
@@ -589,6 +719,7 @@ def task_c3():
         qid = request.form.get("qid", "c3")
         if ans:
             save_pass_answer(qid, ans, table="tb5_passQop")
+            session['formal_pending_stage'] = 'c4'
             return redirect(url_for('core.task_c4', fid=fid))
         else:
             return "No answer provided.", 400
@@ -604,6 +735,23 @@ def task_c4():
         return "No user session found; please start from the beginning.", 400
 
     fid = request.args.get('fid', '')
+    passID = session.get('passID', '')
+
+    pending_stage = session.get('formal_pending_stage')
+    pending_pass = session.get('formal_pending_passID')
+    if pending_stage in FORMAL_REQUIRED_STAGES:
+        if pending_pass != passID or pending_stage != 'c4':
+            redirect_url = _formal_pending_redirect()
+            if redirect_url:
+                return redirect(redirect_url)
+    else:
+        redirect_url = _formal_pending_redirect()
+        if redirect_url:
+            return redirect(redirect_url)
+
+    if not fid:
+        fid = session.get('formal_pending_fid', 'same')
+
     if fid == "same":
         action_url = url_for('core.task_b', subtop=session.get('subtopID', ''), passOrd=session.get('nextPassOrder', 1), lastPage='c4')
     elif fid == "back":
@@ -637,6 +785,10 @@ def task_c4():
                 if link and link.is_connected():
                     cursor.close()
                     link.close()
+            session.pop('formal_pending_stage', None)
+            session.pop('formal_pending_passID', None)
+            session.pop('formal_pending_fid', None)
+            session.pop('formal_last_page', None)
             return redirect(action_url)
         else:
             return "No answer provided.", 400
@@ -786,6 +938,13 @@ def k2():
     if not uid:
         return "No user session found; please start from the beginning.", 400
 
+    is_rating_submission = _is_formal_rating_submission()
+
+    if not is_rating_submission:
+        pending_redirect = _formal_pending_redirect()
+        if pending_redirect:
+            return redirect(pending_redirect)
+
     topID = "1"
     try:
         link = get_db_connection()
@@ -834,6 +993,10 @@ def k2():
                 if link and link.is_connected():
                     cursor.close()
                     link.close()
+            session.pop('formal_pending_stage', None)
+            session.pop('formal_pending_passID', None)
+            session.pop('formal_pending_fid', None)
+            session.pop('formal_last_page', None)
 
     pageTypeID = "k2"
     pageTitle_full = f"K2: {topicTitle}"
