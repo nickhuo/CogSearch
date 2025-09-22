@@ -4,23 +4,35 @@
   <meta charset="UTF-8">
   <title>{{ pageTitle if pageTitle else "Practice B" }}</title>
   <base target="_top">
-  <script src="{{ url_for('static', filename='js/countdown.js') }}"></script>
 </head>
 <body>
   <div class="b_up">
-    <div id="timer" class="timer">
+    <div id="timer" class="timer" data-remaining-time="{{ session.get('remainingTime', 0) }}" data-redirect="{{ session.get('redirectPage', '') }}">
       <p><strong>TIME REMAINS:</strong></p>
       <script>
-        var RemainingTime = Number({{ session.get('remainingTime', 0) }});
-        var BackColor = "white";
-        var ForeColor = "navy";
-        var CountActive = true;
-        var CountStepper = -1;
-        var LeadingZero = true;
-        var DisplayFormat = "%%M%% Minutes, %%S%% Seconds.";
-        var FinishMessage = "Time is UP!";
-        var RedirectPage = "{{ session.get('redirectPage', '') }}";
+        (function(){
+          var timerEl = document.getElementById('timer');
+          var RemainingTime = Number(timerEl?.dataset?.remainingTime || 0);
+          var BackColor = "white";
+          var ForeColor = "navy";
+          var CountActive = true;
+          var CountStepper = -1;
+          var LeadingZero = true;
+          var DisplayFormat = "%%M%% Minutes, %%S%% Seconds.";
+          var FinishMessage = "Time is UP!";
+          var RedirectPage = timerEl?.dataset?.redirect || "";
+          window.RemainingTime = RemainingTime;
+          window.BackColor = BackColor;
+          window.ForeColor = ForeColor;
+          window.CountActive = CountActive;
+          window.CountStepper = CountStepper;
+          window.LeadingZero = LeadingZero;
+          window.DisplayFormat = DisplayFormat;
+          window.FinishMessage = FinishMessage;
+          window.RedirectPage = RedirectPage;
+        })();
       </script>
+      <script src="{{ url_for('static', filename='js/countdown.js') }}"></script>
     </div>
   </div>
 

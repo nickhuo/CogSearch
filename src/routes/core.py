@@ -389,12 +389,11 @@ def task_a():
         elif fid in ["back", "next"]:
             session['lastPageSwitchUnixTime'] = int(time.time())
             current = session.get('visitedSub', '')
-            if current:
-                session['visitedSub'] = current + ',' + subtop_param
-            else:
-                session['visitedSub'] = subtop_param
-            # Append to the local tracker without reassigning (append returns None)
-            visited_subtop.append(subtop_param)
+            current_list = [x for x in current.split(',') if x]
+            if subtop_param and subtop_param not in current_list:
+                current_list.append(subtop_param)
+            session['visitedSub'] = ','.join(current_list)
+            visited_subtop = current_list
 
         # Load subtopics
         cursor.execute("SELECT * FROM tb3_subtopic WHERE topID=%s ORDER BY subtopID", (topID,))
@@ -414,15 +413,21 @@ def task_a():
                     """,
                     (ans, sid, uid, passid_to_save),
                 )
+                # Clear pending formal state after saving c3 answer
                 session.pop('formal_pending_stage', None)
                 session.pop('formal_pending_passID', None)
                 session.pop('formal_pending_fid', None)
                 session.pop('formal_last_page', None)
-            visited_subtop = session.get('visitedSub', '')
-            visited_subtop = visited_subtop.split(',') if visited_subtop else []
-            visited_subtop.sort()
-            if visited_subtop == all_subtops:
-                return redirect(url_for('core.k1', lastPage='c3'))
+
+            # Compare visited subtopics with all subtopics (as integers)
+            visited_sub = session.get('visitedSub', '')
+            visited_list = [x for x in visited_sub.split(',') if x]
+            try:
+                visited_subtop_int = sorted([int(x) for x in visited_list if x.isdigit()])
+            except Exception:
+                visited_subtop_int = []
+            if visited_subtop_int == all_subtops:
+                return redirect(url_for('core.k2', lastPage='c3'))
 
         link.commit()
 
@@ -439,8 +444,17 @@ def task_a():
         session['redirectPage'] = url_for('core.task_b', lastPage='a')
 
         if not visited_subtop:
-            visited_subtop = session.get('visitedSub', '')
-            visited_subtop = visited_subtop.split(',') if visited_subtop else []
+            visited_sub = session.get('visitedSub', '')
+            # keep as strings for template membership checks
+            visited_subtop = [x for x in visited_sub.split(',') if x]
+
+        # Auto-advance when all subtopics have been visited
+        try:
+            visited_ints = sorted([int(x) for x in visited_subtop if str(x).isdigit()])
+            if visited_ints == all_subtops:
+                return redirect(url_for('core.k2', lastPage='auto'))
+        except Exception:
+            pass
 
         return render_template('task_a.html', topic_result=topic_result, subtopics=subtopics, visited_subtop=visited_subtop, session=session)
 

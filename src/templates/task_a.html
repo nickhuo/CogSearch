@@ -39,7 +39,7 @@
         {% set subtop_id = row[0] %}
         {% set subtop_title = row[2] %}
 
-        {% if subtop_id in visited_subtop %}
+        {% if (subtop_id|string) in visited_subtop %}
           <!-- Already visited -->
           <td class="cl6">
             <div style="width: 100%; border: 1px solid #ccc; padding: 10px; background-color: #f5f5f5; font-size: 16pt; color: #0B3861; border-radius: 4px;">
@@ -49,10 +49,9 @@
         {% else %}
           <!-- Not visited yet => display as a clickable text box -->
           <td class="cl5">
-            <div style="width: 100%; border: 1px solid #007BFF; padding: 10px; background-color: #e9f5ff; font-size: 16pt; color: #0B3861; border-radius: 4px; cursor: pointer;"
-                onclick="window.top.location.href='{{ url_for('core.task_b', subtop=subtop_id, passOrd='01', lastPage='a') }}';">
+            <a href="{{ url_for('core.task_b', subtop=subtop_id, passOrd='01', lastPage='a') }}" style="display:block; width: 100%; border: 1px solid #007BFF; padding: 10px; background-color: #e9f5ff; font-size: 16pt; color: #0B3861; border-radius: 4px; text-decoration: none;">
               {{ subtop_title }}
-            </div>
+            </a>
           </td>
         {% endif %}
 
