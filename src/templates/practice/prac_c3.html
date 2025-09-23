@@ -19,7 +19,7 @@
           <p><b>3. How much did you learn from this particular article?</b></p>
           <br><br>
 
-          <form id="form_c3" name="form_c3" action="{{ action_url }}" method="POST" onsubmit="return saveAns();">
+          <form id="form_c3" name="form_c3" action="{{ url_for('practice.prac_c3', fid=fid) }}" method="POST" onsubmit="return saveAns();">
             <table style="width:100%;">
               <tr>
                 <td colspan="2" style="text-align:center;"><input type="text" name="ans" id="ans" readonly="readonly" class="readonly" /></td>

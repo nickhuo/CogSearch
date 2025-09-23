@@ -10,8 +10,8 @@ def create_app() -> Flask:
     template_folder = os.path.join(os.path.dirname(__file__), 'templates')
     static_folder = os.path.join(os.path.dirname(__file__), 'static')
     instance_folder = os.path.join(os.path.dirname(__file__), 'instance')
-    
-    app = Flask(__name__, 
+
+    app = Flask(__name__,
                 template_folder=template_folder,
                 static_folder=static_folder,
                 instance_path=instance_folder)
@@ -22,7 +22,7 @@ def create_app() -> Flask:
         MYSQL_HOST=os.environ.get("MYSQL_HOST", "localhost"),
         MYSQL_USER=os.environ.get("MYSQL_USER", "root"),
         # Default to 'root' instead of empty to avoid "using password: NO"
-        MYSQL_PASSWORD=os.environ.get("MYSQL_PASSWORD", "root"),
+        MYSQL_PASSWORD=os.environ.get("MYSQL_PASSWORD", ""),
         MYSQL_DB=os.environ.get("MYSQL_DB", "cogsearch_textsearch3"),
     )
 
@@ -41,4 +41,3 @@ def create_app() -> Flask:
 
 # For `flask --app src run`
 app = create_app()
-

@@ -316,6 +316,8 @@ def instruction():
 
         pageTypeID = "instruction"
         pageTitle = "Instruction"
+        session["topID"] = topID
+        session.pop("practice_topID", None)
         save_url(uid=uid, sid=sid, topID=topID, subtopID="", conID="", passID="", pageTypeID=pageTypeID, pageTitle=pageTitle, url=request.url)
         link.commit()
 
@@ -350,6 +352,7 @@ def task_a():
     fid = request.args.get('fid', '')
     lastPage = request.args.get('lastPage', '')
     subtop_param = request.args.get('subtop', '')
+    session['topID'] = topID
 
     link = None
     visited_subtop = []
@@ -386,7 +389,7 @@ def task_a():
             session['visitedSub'] = ''
             visited_subtop = []
 
-        elif fid in ["back", "next"]:
+        elif fid in ["back", "next", "complete"]:
             session['lastPageSwitchUnixTime'] = int(time.time())
             current = session.get('visitedSub', '')
             current_list = [x for x in current.split(',') if x]
@@ -397,10 +400,13 @@ def task_a():
 
         # Load subtopics
         cursor.execute("SELECT * FROM tb3_subtopic WHERE topID=%s ORDER BY subtopID", (topID,))
-        all_subtops = []
         subtopics = cursor.fetchall()
-        for row in subtopics:
-            all_subtops.append(row[0])
+        all_subtops = [str(row[0]) for row in subtopics]
+        all_subtops_sorted = sorted(
+            all_subtops,
+            key=lambda value: int(value) if str(value).isdigit() else value,
+        )
+        session['formal_all_subtops'] = all_subtops_sorted
 
         # If lastPage == c3 and POST, update c3Ans and maybe redirect
         if lastPage == "c3" and request.method == 'POST':
@@ -419,15 +425,14 @@ def task_a():
                 session.pop('formal_pending_fid', None)
                 session.pop('formal_last_page', None)
 
-            # Compare visited subtopics with all subtopics (as integers)
+            # Compare visited subtopics with the full set (typed as strings)
             visited_sub = session.get('visitedSub', '')
-            visited_list = [x for x in visited_sub.split(',') if x]
-            try:
-                visited_subtop_int = sorted([int(x) for x in visited_list if x.isdigit()])
-            except Exception:
-                visited_subtop_int = []
-            if visited_subtop_int == all_subtops:
-                return redirect(url_for('core.k2', lastPage='c3'))
+            visited_list = sorted(
+                (x for x in visited_sub.split(',') if x),
+                key=lambda value: int(value) if value.isdigit() else value,
+            )
+            # retain visited list in session
+            session['visitedSub'] = ','.join(visited_list)
 
         link.commit()
 
@@ -445,18 +450,24 @@ def task_a():
 
         if not visited_subtop:
             visited_sub = session.get('visitedSub', '')
-            # keep as strings for template membership checks
             visited_subtop = [x for x in visited_sub.split(',') if x]
 
-        # Auto-advance when all subtopics have been visited
-        try:
-            visited_ints = sorted([int(x) for x in visited_subtop if str(x).isdigit()])
-            if visited_ints == all_subtops:
-                return redirect(url_for('core.k2', lastPage='auto'))
-        except Exception:
-            pass
+        visited_sorted = sorted(
+            (str(x) for x in visited_subtop if str(x)),
+            key=lambda value: int(value) if value.isdigit() else value,
+        )
+        all_completed = visited_sorted == all_subtops_sorted and bool(all_subtops_sorted)
 
-        return render_template('task_a.html', topic_result=topic_result, subtopics=subtopics, visited_subtop=visited_subtop, session=session)
+        return render_template(
+            'task_a.html',
+            topic_result=topic_result,
+            topicResult=topic_result,
+            subtopics=subtopics,
+            visited_subtop=visited_subtop,
+            session=session,
+            all_completed=all_completed,
+            next_section_url=url_for('core.k2', lastPage='complete'),
+        )
 
     except Exception as e:
         print(f"Error in /task_a route: {e}")
@@ -489,20 +500,38 @@ def task_b():
 
     is_rating_submission = _is_formal_rating_submission()
 
+    redirect_to_next_section = None
+
     pending_stage = session.get('formal_pending_stage')
     pending_pass = session.get('formal_pending_passID')
-    if not is_rating_submission and pending_stage in FORMAL_REQUIRED_STAGES:
-        if pending_stage != 'c1' or pending_pass != passID:
-            redirect_url = _formal_pending_redirect()
-            if redirect_url:
-                return redirect(redirect_url)
+    if not is_rating_submission:
+        if pending_stage in FORMAL_REQUIRED_STAGES and pending_pass and pending_pass != passID:
+            session.pop('formal_pending_stage', None)
+            session.pop('formal_pending_passID', None)
+            session.pop('formal_pending_fid', None)
+            session.pop('formal_last_page', None)
+            pending_stage = None
+            pending_pass = None
+        if pending_stage in FORMAL_REQUIRED_STAGES:
+            if pending_stage != 'c1' or pending_pass != passID:
+                redirect_url = _formal_pending_redirect()
+                if redirect_url:
+                    return redirect(redirect_url)
 
     session['formal_pending_passID'] = passID
     session['formal_pending_stage'] = 'c1'
     session['formal_pending_fid'] = None
     session['formal_last_page'] = lastPage
 
-    session.update({'subtopID': subtopID, 'conID': conID, 'passOrder': passOrd, 'passID': passID, 'next_passOrder': passOrd + 1, 'nextPassOrder': passOrderInt + 1})
+    session.update({
+        'subtopID': subtopID,
+        'conID': conID,
+        'passOrder': passOrd,
+        'passID': passID,
+        'next_passOrder': passOrd + 1,
+        'nextPassOrder': passOrderInt + 1,
+        'topID': session.get('topID', '1'),
+    })
 
     link = None
     passResult = None
@@ -546,7 +575,17 @@ def task_b():
 
         pageTypeID = "b"
         pageTitle = passResult['passTitle'] if passResult else "No Title"
-        save_url(uid=uid, sid=sid, topID="1", subtopID=subtopID, conID=conID, passID=passID, pageTypeID=pageTypeID, pageTitle=pageTitle, url=request.url)
+        save_url(
+            uid=uid,
+            sid=sid,
+            topID=session.get('topID', '1'),
+            subtopID=subtopID,
+            conID=conID,
+            passID=passID,
+            pageTypeID=pageTypeID,
+            pageTitle=pageTitle,
+            url=request.url,
+        )
 
         now = int(time.time())
         if lastPage == "a":
@@ -577,6 +616,26 @@ def task_b():
             session.pop('formal_pending_fid', None)
             session.pop('formal_last_page', None)
 
+            current_subtop = str(subtopID)
+            visited = [x for x in session.get('visitedSub', '').split(',') if x]
+            if current_subtop and current_subtop not in visited:
+                visited.append(current_subtop)
+            session['visitedSub'] = ','.join(visited)
+
+            visited_sorted = sorted(
+                (str(x) for x in visited if str(x)),
+                key=lambda value: int(value) if value.isdigit() else value,
+            )
+            formal_all = session.get('formal_all_subtops') or []
+            if formal_all and visited_sorted == formal_all:
+                redirect_to_next_section = url_for(
+                    'core.task_a',
+                    fid='complete',
+                    subtop=current_subtop,
+                    lastPage='c4',
+                    completed='1',
+                )
+
         link.commit()
 
     except Exception as e:
@@ -586,6 +645,9 @@ def task_b():
         if link and link.is_connected():
             cursor.close()
             link.close()
+
+    if redirect_to_next_section:
+        return redirect(redirect_to_next_section)
 
     return render_template('task_b.html', passResult=passResult, passOrder=passOrderInt)
 
@@ -790,7 +852,21 @@ def task_c4():
             try:
                 link = get_db_connection()
                 cursor = link.cursor()
-                # original code updates completion time here if needed
+                cursor.execute(
+                    """
+                    UPDATE tb6_taskTime
+                    SET timeEnd=%s, timeEndStamp=%s
+                    WHERE uid=%s AND sid=%s AND topID=%s
+                    ORDER BY timeStart DESC LIMIT 1
+                    """,
+                    (
+                        int(time.time()),
+                        get_time_stamp_cdt(),
+                        uid,
+                        sid,
+                        str(session.get('topID', 1)),
+                    ),
+                )
                 link.commit()
             except Exception as e:
                 print(f"DB error in task_c4 POST: {e}")
@@ -982,6 +1058,34 @@ def k2():
     subtopString = ", ".join(subtop_list)
     trimSubtop = subtopString.lstrip(", ").strip()
     lastPage = request.args.get('lastPage', '')
+
+    if lastPage == 'complete':
+        link = None
+        cursor = None
+        try:
+            link = get_db_connection()
+            cursor = link.cursor()
+            cursor.execute(
+                "UPDATE tb1_user SET conDone = conDone + 1 WHERE sid = %s AND uid = %s",
+                (sid, uid),
+            )
+            link.commit()
+        except Exception as e:
+            if link:
+                link.rollback()
+            print(f"Error updating conDone in /k2 complete redirect: {e}")
+            return f"Database error: {e}", 500
+        finally:
+            if cursor:
+                cursor.close()
+            if link and link.is_connected():
+                link.close()
+        session.pop('formal_pending_stage', None)
+        session.pop('formal_pending_passID', None)
+        session.pop('formal_pending_fid', None)
+        session.pop('formal_last_page', None)
+        session['redirectPage'] = url_for('core.let_comp_one_inst')
+        return redirect(url_for('core.let_comp_one_inst'))
 
     if lastPage == "c4" and request.method == "POST":
         ans_to_save = request.form.get('ans', '').strip()

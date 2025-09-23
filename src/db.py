@@ -8,7 +8,7 @@ def get_db_connection():
     return mysql.connector.connect(
         host=current_app.config.get("MYSQL_HOST", "localhost"),
         user=current_app.config.get("MYSQL_USER", "root"),
-        password=current_app.config.get("MYSQL_PASSWORD", "root"),
+        password=current_app.config.get("MYSQL_PASSWORD", ""),
         database=current_app.config.get("MYSQL_DB", "cogsearch_textsearch3"),
         auth_plugin="mysql_native_password",
     )
@@ -60,4 +60,3 @@ def save_url(uid, sid, topID, subtopID, conID, passID, pageTypeID, pageTitle, ur
         if link and link.is_connected():
             cursor.close()
             link.close()
-

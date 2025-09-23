@@ -58,10 +58,11 @@
         {% endif %}
 
         {% set subtop_id = row[0] %}
+        {% set subtop_id_str = subtop_id|string %}
         {% set subtop_title = row[2] %}
 
 
-        {% if subtop_id in visited_subtop %}
+        {% if subtop_id_str in visited_subtop %}
           <!-- Already visited -->
           <td class="cl6">
             <div style="width: 100%; border: 1px solid #ccc; padding: 10px; background-color: #f5f5f5; font-size: 16pt; color: #0B3861; border-radius: 4px;">
@@ -85,6 +86,22 @@
       {% endfor %}
     </table>
   </div>
+
+  {% if all_completed %}
+  <div style="margin-top: 24px; text-align: center;">
+    <button type="button" style="
+      padding: 10px 24px;
+      font-size: 16px;
+      background-color: #0B3861;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    " onclick="window.top.location.href='{{ next_section_url }}';">
+      Go to next section
+    </button>
+  </div>
+  {% endif %}
 
 </body>
 </html>

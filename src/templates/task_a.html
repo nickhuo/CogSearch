@@ -62,5 +62,21 @@
       {% endfor %}
     </table>
   </div>
+
+  {% if all_completed %}
+  <div style="margin-top: 24px; text-align: center;">
+    <button type="button" style="
+      padding: 10px 24px;
+      font-size: 16px;
+      background-color: #0B3861;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    " onclick="window.top.location.href='{{ next_section_url }}';">
+      Go to next section
+    </button>
+  </div>
+  {% endif %}
 </body>
 </html>

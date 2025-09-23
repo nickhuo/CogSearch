@@ -57,3 +57,13 @@ Project Structure
 Notes
 - DB helpers live in `cogsearch/db.py` and read Flask config via `current_app.config`.
 - Avoid committing local DBs and secrets; `.gitignore` is configured accordingly.
+
+Maintenance
+- Standardize `passID` columns to six-digit format:
+  ```bash
+  # ensure MYSQL_* env vars are set
+  python scripts/standardize_passage_ids.py --alter-columns
+  ```
+  The script queries `INFORMATION_SCHEMA` for any `passID`/`passage_id` fields,
+  left-pads existing values with zeros, and (optionally) converts column types
+  to `CHAR(6)` so future inserts are enforced.

@@ -15,6 +15,9 @@ def save_pass_answer(qid: str, ans_to_save: str, table: str = "tb5_passQop") -> 
     uid = session.get("uid")
     sid = session.get("sid", "")
     passID = session.get("passID", "")
+    top_id = session.get("topID", 1)
+    if table == "tb15_prac_passQop":
+        top_id = session.get("practice_topID", top_id)
 
     link = None
     try:
@@ -32,7 +35,7 @@ def save_pass_answer(qid: str, ans_to_save: str, table: str = "tb5_passQop") -> 
                 (
                     uid,
                     sid,
-                    session.get("topID", 1),
+                    top_id,
                     session.get("subtopID", 0),
                     session.get("conID", 1),
                     passID,
