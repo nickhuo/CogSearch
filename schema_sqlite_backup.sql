@@ -342,4 +342,22 @@ CREATE TABLE IF NOT EXISTS tb22_multiQop (
     isCorrect INTEGER NOT NULL
 );
 
+-- tb27_letter_item
+CREATE TABLE IF NOT EXISTS tb27_letter_item (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    uid INTEGER NOT NULL,
+    sid TEXT NOT NULL,
+    round_number INTEGER NOT NULL,
+    item_index INTEGER NOT NULL,
+    left_str TEXT NOT NULL,
+    right_str TEXT NOT NULL,
+    correct_answer TEXT NOT NULL,
+    response TEXT NOT NULL,
+    is_correct INTEGER NOT NULL,
+    reaction_time_ms INTEGER NOT NULL,
+    inter_question_interval_ms INTEGER NOT NULL,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
 PRAGMA foreign_keys = ON;

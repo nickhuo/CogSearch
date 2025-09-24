@@ -15,6 +15,34 @@ from src.db import get_db_connection, get_time_stamp_cdt, save_url
 from src.services.utils import list_order, format_pass_id, save_pass_answer
 
 
+LETTER_COMPARISON_ROUNDS = {
+    1: [
+        {"left": "PRDBZTYFN", "right": "PRDBZTYFN", "answer": "S"},
+        {"left": "NCWJDZ", "right": "NCMJDZ", "answer": "D"},
+        {"left": "KHW", "right": "KBW", "answer": "D"},
+        {"left": "ZRBGMF", "right": "ZRBCMF", "answer": "D"},
+        {"left": "BTH", "right": "BYH", "answer": "D"},
+        {"left": "XWKQRYCNZ", "right": "XWKQRYCNZ", "answer": "S"},
+        {"left": "HNPDLK", "right": "HNPDLK", "answer": "S"},
+        {"left": "WMQTRSGLZ", "right": "WMQTRZGLZ", "answer": "D"},
+        {"left": "JPN", "right": "JPN", "answer": "S"},
+        {"left": "QLXSVT", "right": "QLNSVT", "answer": "D"},
+    ],
+    2: [
+        {"left": "YXHKZVFPB", "right": "YXHKZVFPD", "answer": "D"},
+        {"left": "RJZ", "right": "RJZ", "answer": "S"},
+        {"left": "CLNPZD", "right": "CLNPZD", "answer": "S"},
+        {"left": "DCBPFHXYJ", "right": "DCBPFHXYJ", "answer": "S"},
+        {"left": "MWR", "right": "ZWR", "answer": "D"},
+        {"left": "LPKXZW", "right": "LPKXZW", "answer": "S"},
+        {"left": "TZL", "right": "TZQ", "answer": "D"},
+        {"left": "CSDBFPHXZ", "right": "CSDBFPHXZ", "answer": "S"},
+        {"left": "QHZXPC", "right": "QHZWPC", "answer": "D"},
+        {"left": "JNWXHPFBD", "right": "JNWXHPFMD", "answer": "D"},
+    ],
+}
+
+
 core_bp = Blueprint("core", __name__)
 
 
@@ -946,20 +974,126 @@ def let_comp_one_inst():
     return render_template("let_comp_one_inst.html")
 
 
+def _letter_round_session_key(round_number: int, name: str) -> str:
+    return f"lc_r{round_number}_{name}"
+
+
+def _letter_round_items(round_number: int):
+    return LETTER_COMPARISON_ROUNDS.get(round_number, [])
+
+
+def _letter_round_column(round_number: int, item_index: int) -> str:
+    base_offset = 0 if round_number == 1 else 10
+    return f"lc{base_offset + item_index}"
+
+
+def _letter_round_pass_id(round_number: int, item_index: int) -> str:
+    return f"LC{round_number}{item_index:02d}"
+
+
+def _save_letter_item_response(
+    uid: int,
+    sid: str,
+    round_number: int,
+    item_index: int,
+    item: dict,
+    response: str,
+    is_correct: int,
+    rt_ms: int,
+    inter_ms: int,
+):
+    """Persist per-item letter comparison response and reaction times."""
+    link = None
+    cursor = None
+    try:
+        link = get_db_connection()
+        cursor = link.cursor()
+
+        cursor.execute(
+            """
+            INSERT INTO tb27_letter_item
+                (uid, sid, round_number, item_index, left_str, right_str, correct_answer,
+                 response, is_correct, reaction_time_ms, inter_question_interval_ms)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                response = VALUES(response),
+                is_correct = VALUES(is_correct),
+                reaction_time_ms = VALUES(reaction_time_ms),
+                inter_question_interval_ms = VALUES(inter_question_interval_ms),
+                updated_at = CURRENT_TIMESTAMP
+            """,
+            (
+                uid,
+                sid,
+                round_number,
+                item_index,
+                item["left"],
+                item["right"],
+                item["answer"],
+                response,
+                is_correct,
+                rt_ms,
+                inter_ms,
+            ),
+        )
+
+        column_name = _letter_round_column(round_number, item_index)
+        cursor.execute(
+            f"UPDATE tb11_profile SET {column_name}=%s WHERE sid=%s AND uid=%s",
+            (response, sid, uid),
+        )
+
+        link.commit()
+    except Exception as e:
+        print(f"Error saving letter comparison response: {e}")
+        if link:
+            link.rollback()
+    finally:
+        if cursor:
+            cursor.close()
+        if link and link.is_connected():
+            link.close()
+
+
+def _finalize_letter_round(uid: int, sid: str, round_number: int) -> None:
+    """Aggregate per-round accuracy and RT totals into tb11_profile."""
+    link = None
+    cursor = None
+    try:
+        link = get_db_connection()
+        cursor = link.cursor(dictionary=True)
+        cursor.execute(
+            """
+            SELECT
+                COALESCE(SUM(is_correct), 0) AS correct_count,
+                COALESCE(SUM(reaction_time_ms), 0) AS total_rt
+            FROM tb27_letter_item
+            WHERE uid=%s AND sid=%s AND round_number=%s
+            """,
+            (uid, sid, round_number),
+        )
+        row = cursor.fetchone() or {"correct_count": 0, "total_rt": 0}
+        score_col = "lcOneScore" if round_number == 1 else "lcTwoScore"
+        rt_col = "lcOneRT" if round_number == 1 else "lcTwoRT"
+        cursor.execute(
+            f"UPDATE tb11_profile SET {score_col}=%s, {rt_col}=%s WHERE sid=%s AND uid=%s",
+            (row["correct_count"], row["total_rt"], sid, uid),
+        )
+        link.commit()
+    except Exception as e:
+        print(f"Error finalizing letter comparison round {round_number}: {e}")
+        if link:
+            link.rollback()
+    finally:
+        if cursor:
+            cursor.close()
+        if link and link.is_connected():
+            link.close()
+
+
 @core_bp.route('/let_comp_one', methods=['GET', 'POST'])
 def let_comp_one():
-    uid = session.get('uid')
-    sid = session.get('sid', '')
-    if not uid:
-        return "No user session found; please start from the beginning.", 400
-
-    next_action = url_for('core.let_comp_two_inst')
-    topID = "1"
-    pageTypeID = "start_lc1"
-    pageTitle = "Start Letter Comparison One"
-    save_url(uid, sid, topID, "", "", "", pageTypeID, pageTitle, request.url)
-
-    return render_template("let_comp_one.html", action_url=next_action)
+    return _handle_letter_round(round_number=1, completion_endpoint='core.let_comp_two_inst')
 
 
 @core_bp.route('/let_comp_two_inst', methods=['GET', 'POST'])
@@ -974,75 +1108,102 @@ def let_comp_two_inst():
     pageTitle = "Instruction for Letter Comparison Two"
     save_url(uid, sid, topID, "", "", "", pageTypeID, pageTitle, request.url)
 
-    if request.method == "POST" and request.form.get("lc1", "").strip() != "":
-        lc_vals = [request.form.get(f"lc{i}", "").strip() for i in range(1, 11)]
-        aryRightAnswer = ["S", "D", "D", "D", "D", "S", "S", "D", "S", "D"]
-        numCorrect = sum(1 for i in range(10) if lc_vals[i] == aryRightAnswer[i])
-        lcOneScore = numCorrect
-        try:
-            link = get_db_connection()
-            cursor = link.cursor()
-            cursor.execute(
-                """
-                UPDATE tb11_profile
-                SET lc1=%s, lc2=%s, lc3=%s, lc4=%s, lc5=%s, lc6=%s, lc7=%s, lc8=%s, lc9=%s, lc10=%s, lcOneScore=%s
-                WHERE sid=%s AND uid=%s
-                """,
-                (*lc_vals, lcOneScore, sid, uid),
-            )
-            link.commit()
-        except Exception as e:
-            print(f"Error updating letter comparison answers: {e}")
-            return f"Database error: {e}", 500
-        finally:
-            if link and link.is_connected():
-                cursor.close()
-                link.close()
-
     return render_template("let_comp_two_inst.html")
 
 
 @core_bp.route('/let_comp_two', methods=['GET', 'POST'])
 def let_comp_two():
+    return _handle_letter_round(round_number=2, completion_endpoint='core.vocab')
+
+
+def _handle_letter_round(round_number: int, completion_endpoint: str):
     uid = session.get('uid')
     sid = session.get('sid', '')
     if not uid:
         return "No user session found; please start from the beginning.", 400
 
-    topID = "1"
-    # Log start of LC2
-    pageTypeID = "start_lc2"
-    pageTitle = "Start Letter Comparison Two"
-    save_url(uid, sid, topID, "", "", "", pageTypeID, pageTitle, request.url)
+    items = _letter_round_items(round_number)
+    total_items = len(items)
+    if total_items == 0:
+        print(f"No letter comparison items configured for round {round_number}")
+        return redirect(url_for(completion_endpoint))
 
-    if request.method == "POST" and request.form.get("lc11", "").strip() != "":
-        vals = [request.form.get(f"lc{i}", "").strip() for i in range(11, 21)]
-        right = ["D", "S", "S", "S", "D", "S", "D", "S", "D", "D"]
-        lcTwoScore = sum(1 for i in range(10) if vals[i] == right[i])
-        try:
-            link = get_db_connection()
-            cursor = link.cursor()
-            cursor.execute(
-                """
-                UPDATE tb11_profile
-                SET lc11=%s, lc12=%s, lc13=%s, lc14=%s, lc15=%s,
-                    lc16=%s, lc17=%s, lc18=%s, lc19=%s, lc20=%s, lcTwoScore=%s
-                WHERE sid=%s AND uid=%s
-                """,
-                (*vals, lcTwoScore, sid, uid),
-            )
-            link.commit()
-        except Exception as e:
-            print(f"Error updating LC2 answers: {e}")
-            return f"Database error: {e}", 500
-        finally:
-            if link and link.is_connected():
-                cursor.close()
-                link.close()
+    if request.method == 'POST':
+        item_index = safe_int_param(request.form.get('item_index'), 1)
+        if item_index < 1 or item_index > total_items:
+            return redirect(url_for(completion_endpoint))
 
-        return redirect(url_for('core.vocab'))
+        session_key_start = _letter_round_session_key(round_number, 'current_start')
+        start_time = session.pop(session_key_start, None)
+        if start_time is None:
+            start_time = time.time()
 
-    return render_template("let_comp_two.html", action_url=url_for('core.let_comp_two'))
+        rt_ms = int((time.time() - start_time) * 1000)
+        inter_key = _letter_round_session_key(round_number, 'current_inter_ms')
+        inter_ms = session.pop(inter_key, 0)
+
+        choice = request.form.get('choice', '').strip().upper()
+        if choice not in {'S', 'D'}:
+            return "Invalid response.", 400
+
+        item = items[item_index - 1]
+        is_correct = 1 if choice == item['answer'] else 0
+
+        _save_letter_item_response(uid, sid, round_number, item_index, item, choice, is_correct, rt_ms, inter_ms)
+
+        session[_letter_round_session_key(round_number, 'last_finish')] = time.time()
+
+        next_index = item_index + 1
+        if next_index <= total_items:
+            return redirect(url_for(request.endpoint, item=next_index))
+
+        _finalize_letter_round(uid, sid, round_number)
+        session.pop(_letter_round_session_key(round_number, 'last_finish'), None)
+        return redirect(url_for(completion_endpoint))
+
+    item_index = safe_int_param(request.args.get('item'), 1)
+    if item_index < 1 or item_index > total_items:
+        return redirect(url_for(completion_endpoint))
+
+    now = time.time()
+    last_finish_key = _letter_round_session_key(round_number, 'last_finish')
+    last_finish = session.get(last_finish_key)
+    inter_ms = 0 if last_finish is None else int((now - last_finish) * 1000)
+    session[_letter_round_session_key(round_number, 'current_inter_ms')] = inter_ms
+    session[_letter_round_session_key(round_number, 'current_start')] = now
+
+    item = items[item_index - 1]
+    top_id = session.get('topID', '1')
+    pass_id = _letter_round_pass_id(round_number, item_index)
+    if item_index == 1:
+        page_type = 'start_lc1' if round_number == 1 else 'start_lc2'
+    else:
+        page_type = f'lc{round_number}_item'
+    page_title = f"Letter Comparison {round_number} - Item {item_index}"
+    save_url(
+        uid,
+        sid,
+        top_id,
+        '',
+        '',
+        pass_id,
+        page_type,
+        page_title,
+        request.url,
+    )
+
+    action_url = url_for(request.endpoint)
+    is_last = item_index == total_items
+    return render_template(
+        'letter_comp_item.html',
+        round_number=round_number,
+        item_index=item_index,
+        total_items=total_items,
+        left_string=item['left'],
+        right_string=item['right'],
+        action_url=action_url,
+        is_last=is_last,
+    )
 
 
 @core_bp.route('/k2', methods=['GET', 'POST'])
@@ -1470,36 +1631,9 @@ def done():
             cursor.close()
             link.close()
 
-    # lcOneRT and lcTwoRT (use time_interval of start markers)
-    try:
-        link = get_db_connection()
-        cursor = link.cursor(dictionary=True)
-        cursor.execute("SELECT time_interval FROM output1_url WHERE sid=%s AND uid=%s AND pageTypeID='start_lc1' ORDER BY op1ID DESC LIMIT 1", (sid, uid))
-        r = cursor.fetchone()
-        if r and r.get('time_interval') is not None:
-            cursor.execute("UPDATE tb11_profile SET lcOneRT=%s WHERE sid=%s AND uid=%s", (r['time_interval'], sid, uid))
-            link.commit()
-    except Exception as e:
-        print(f"Error updating lcOneRT: {e}")
-    finally:
-        if link and link.is_connected():
-            cursor.close()
-            link.close()
-
-    try:
-        link = get_db_connection()
-        cursor = link.cursor(dictionary=True)
-        cursor.execute("SELECT time_interval FROM output1_url WHERE sid=%s AND uid=%s AND pageTypeID='start_lc2' ORDER BY op1ID DESC LIMIT 1", (sid, uid))
-        r = cursor.fetchone()
-        if r and r.get('time_interval') is not None:
-            cursor.execute("UPDATE tb11_profile SET lcTwoRT=%s WHERE sid=%s AND uid=%s", (r['time_interval'], sid, uid))
-            link.commit()
-    except Exception as e:
-        print(f"Error updating lcTwoRT: {e}")
-    finally:
-        if link and link.is_connected():
-            cursor.close()
-            link.close()
+    # Sync letter comparison aggregates from per-item records
+    _finalize_letter_round(uid, sid, 1)
+    _finalize_letter_round(uid, sid, 2)
 
     # Bonus words processing
     try:

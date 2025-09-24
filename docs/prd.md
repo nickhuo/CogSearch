@@ -99,7 +99,7 @@ Key templates for front-end rendering include:
 - `consent.html`, `demographic.html`, `timer.html`
 - `prac_a.html`, `prac_b.html`, `prac_c1.html` to `prac_c3.html`
 - `task_a.html`, `task_b.html`, `task_c1.html` to `task_c4.html`
-- `let_comp_one.html`, `let_comp_two.html`
+- `letter_comp_item.html`
 - `vocab.html`, `done.html`
 
 ---

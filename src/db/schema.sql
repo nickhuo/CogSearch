@@ -344,5 +344,26 @@ CREATE TABLE `tb22_multiQop` (
     PRIMARY KEY (`tb22id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- tb27_letter_item
+DROP TABLE IF EXISTS `tb27_letter_item`;
+CREATE TABLE `tb27_letter_item` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `uid` int(11) NOT NULL,
+    `sid` varchar(100) NOT NULL,
+    `round_number` tinyint NOT NULL,
+    `item_index` tinyint NOT NULL,
+    `left_str` varchar(64) NOT NULL,
+    `right_str` varchar(64) NOT NULL,
+    `correct_answer` char(1) NOT NULL,
+    `response` char(1) NOT NULL,
+    `is_correct` tinyint(1) NOT NULL,
+    `reaction_time_ms` int(11) NOT NULL,
+    `inter_question_interval_ms` int(11) NOT NULL,
+    `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_letter_item` (`uid`, `sid`, `round_number`, `item_index`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Re-enable foreign key checks
 SET FOREIGN_KEY_CHECKS = 1;

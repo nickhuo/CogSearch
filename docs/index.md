@@ -8,7 +8,7 @@
 - 正式任务：instruction.html, task_a.html, task_b.html
 - 阅读后评分：task_c1.html, task_c2.html, task_c3.html, task_c4.html
 - 自由回忆：k2.html
-- 字母比对：let_comp_one_inst.html, let_comp_one.html, let_comp_two_inst.html, let_comp_two.html
+- 字母比对：let_comp_one_inst.html, letter_comp_item.html, let_comp_two_inst.html
 - 测验与收尾：questions.html, vocab.html, done.html
 - 工具与诊断：timer.html, settings.html, task_setting.html
 
@@ -118,15 +118,13 @@
 
 ## 字母比对（Letter Comparison）
 - templates/let_comp_one_inst.html
-  - 目的：第一轮字母比对说明；GET 前往 `core.let_comp_one`。
-- templates/let_comp_one.html
-  - 目的：第一轮 10 题，S/D 二选一（左右字符串是否一致）。
-  - 提交：`core.let_comp_two_inst`（POST）。
+  - 目的：第一轮字母比对说明；GET 前往 `core.let_comp_one?item=1`。
+- templates/letter_comp_item.html
+  - 目的：字母比对作答页，单题呈现，S/D 二选一。
+  - 变量：`round_number`、`item_index`、`total_items`、`left_string`、`right_string`、`is_last`。
+  - 提交：POST 至 `core.let_comp_one` / `core.let_comp_two`（根据轮次）；后端记录单题反应时与题间间隔。
 - templates/let_comp_two_inst.html
-  - 目的：第二轮字母比对说明；POST 前往 `core.let_comp_two`。
-- templates/let_comp_two.html
-  - 目的：第二轮 10 题，S/D 二选一。
-  - 提交：`core.let_comp_two`（POST；通常后端处理后进入后续环节）。
+  - 目的：第二轮字母比对说明；GET 前往 `core.let_comp_two?item=1`。
 
 ---
 
@@ -159,7 +157,7 @@
 - `practice.prac_instruction`，`practice.prac_a`，`practice.prac_b`
 - `core.instruction`，`core.task_a`，`core.task_b`
 - `core.task_c1`，`core.task_c2`（`task_c3/task_c4` 通过 `action_url` 传入）
-- `core.let_comp_one`，`core.let_comp_two_inst`，`core.let_comp_two`
+- `core.let_comp_one_inst`，`core.let_comp_one`，`core.let_comp_two_inst`，`core.let_comp_two`
 - `core.done`
 
 ---
@@ -203,10 +201,10 @@ flowchart TD
   C3 --> K2[K2 自由回忆\naction_url\n k2.html]
   C4 --> K2
 
-  K2 --> L1I[Let Comp 1 Inst (core.let_comp_one)\nlet_comp_one_inst.html]
-  L1I --> L1[Let Comp 1 (core.let_comp_two_inst)\nlet_comp_one.html]
-  L1 --> L2I[Let Comp 2 Inst (core.let_comp_two)\nlet_comp_two_inst.html]
-  L2I --> L2[Let Comp 2 (core.let_comp_two)\nlet_comp_two.html]
+  K2 --> L1I[Let Comp 1 Inst (core.let_comp_one_inst)\nlet_comp_one_inst.html]
+  L1I --> L1[Let Comp 1 Items (core.let_comp_one)\nletter_comp_item.html]
+  L1 --> L2I[Let Comp 2 Inst (core.let_comp_two_inst)\nlet_comp_two_inst.html]
+  L2I --> L2[Let Comp 2 Items (core.let_comp_two)\nletter_comp_item.html]
 
   L2 --> Q[Comprehension Questions (render-route)\nquestions.html]
   Q --> DONE[Done (core.done)\ndone.html]
@@ -235,9 +233,10 @@ flowchart TD
 | `core.instruction` | `instruction.html` | GET / POST(from prac_k2) | 正式说明 | 无 |
 | `core.task_a` | `task_a.html` | GET / POST(fid=begin) | 正式选题 | `topicResult`、`subtopics`、`visited_subtop`、`session.remainingTime`、`session.redirectPage` |
 | `core.task_b` | `task_b.html` | GET | 正式阅读 | `passResult['passText']`、`passOrder`、`session.remainingTime`、`session.redirectPage` |
-| `core.let_comp_one` | `let_comp_one_inst.html`(next) / `let_comp_one.html`(render) | GET / POST(next) | 字母比对1（说明→作答） | 作答页收集 `lc1`..`lc10` |
-| `core.let_comp_two_inst` | `let_comp_one.html`(submit target) | POST | 进入字母比对第二轮说明 | - |
-| `core.let_comp_two` | `let_comp_two_inst.html`(next) / `let_comp_two.html`(render/submit) | GET/POST | 字母比对2 | 作答页收集 `lc11`..`lc20` |
+| `core.let_comp_one_inst` | `let_comp_one_inst.html` | GET | 字母比对说明（第一轮） | - |
+| `core.let_comp_one` | `letter_comp_item.html` | GET / POST | 字母比对第一轮（逐题呈现） | `round_number`、`item_index`、`total_items`、`left_string`、`right_string`、`is_last` |
+| `core.let_comp_two_inst` | `let_comp_two_inst.html` | GET | 字母比对说明（第二轮） | - |
+| `core.let_comp_two` | `letter_comp_item.html` | GET / POST | 字母比对第二轮（逐题呈现） | 同上 |
 | 渲染路由（未命名） | `questions.html` | GET | 理解题（MCQ） | `pass_title`、`questions[*]`、`existing_answers` |
 | 提交 `core.done` | `questions.html` | POST | 提交理解题并收尾 | - |
 | 渲染路由（未命名） | `vocab.html` | GET | 词汇测试 | `action_url`（提交目的地） |

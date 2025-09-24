@@ -22,8 +22,8 @@
   </div>
 
   <div class="cl0" style="font-size:20pt">
-    <!-- The form posts to the next route. Replace 'let_comp_two' with your next Flask route name -->
-    <form method="post" action="{{ url_for('core.let_comp_two') }}">
+    <form method="get" action="{{ url_for('core.let_comp_two') }}">
+      <input type="hidden" name="item" value="1">
       <input type="image" name="submit" id="submit" src="{{ url_for('static', filename='images/nextpage_button.gif') }}" alt="Next">
     </form>
   </div>

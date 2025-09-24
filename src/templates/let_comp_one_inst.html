@@ -28,6 +28,7 @@
 
   <div class="cl0" style="font-size:20pt">
     <form method="get" action="{{ url_for('core.let_comp_one') }}">
+      <input type="hidden" name="item" value="1">
       <input type="image" name="submit" id="submit"
              src="{{ url_for('static', filename='images/nextpage_button.gif') }}"
              alt="Next">
