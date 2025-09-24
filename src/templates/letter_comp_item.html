@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Letter Comparison Round {{ round_number }}</title>
+  <base target="_top">
+  <style>
+    body { font-family: Arial, sans-serif; }
+    .lc-container { max-width: 720px; margin: 40px auto; }
+    .lc-header { margin-bottom: 24px; }
+    table { width: 100%; border-collapse: collapse; }
+    td { padding: 12px 8px; font-size: 20px; }
+    td.choice { text-align: center; }
+    .actions { margin-top: 24px; text-align: center; }
+    .progress { font-size: 18px; margin-bottom: 12px; }
+    .option-label { margin: 0 8px; font-size: 20px; }
+    .strings { font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="lc-container">
+    <div class="lc-header">
+      <h2>Letter Comparison Round {{ round_number }}</h2>
+      <div class="progress">Item {{ item_index }} of {{ total_items }}</div>
+      <p>Select <strong>S</strong> if the strings are the same, or <strong>D</strong> if they are different.</p>
+    </div>
+    <form method="post" action="{{ action_url }}">
+      <input type="hidden" name="item_index" value="{{ item_index }}" />
+      <table>
+        <tr>
+          <td class="strings" style="text-align:right;">{{ left_string }}</td>
+          <td class="choice">
+            <label class="option-label">
+              <input type="radio" name="choice" value="S" required />
+              S
+            </label>
+            <label class="option-label">
+              <input type="radio" name="choice" value="D" />
+              D
+            </label>
+          </td>
+          <td class="strings" style="text-align:left;">{{ right_string }}</td>
+        </tr>
+      </table>
+      <div class="actions">
+        {% if is_last %}
+          <input type="image" name="submit" src="{{ url_for('static', filename='images/done_button.gif') }}" alt="Done">
+        {% else %}
+          <input type="image" name="submit" src="{{ url_for('static', filename='images/nextpage_button.gif') }}" alt="Next">
+        {% endif %}
+      </div>
+    </form>
+  </div>
+</body>
+</html>
