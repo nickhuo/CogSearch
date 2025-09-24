@@ -1210,68 +1210,94 @@ def questions():
                 cursor.close()
                 link.close()
 
+    questions_by_passage = []
+    existing_answers = {}
+    pass_ids = []
+
+    conn = None
+    cursor = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        # Be tolerant to passID scheme differences by querying structured keys
         q_top = str(session.get('topID', '1'))
         q_sub = session.get('subtopID')
         q_con = session.get('conID')
         q_ord = session.get('passOrder')
 
-        # Prefer an explicit passID lookup; fall back to top/sub/con/order if needed.
-        if not passID and q_sub is not None and q_con is not None and q_ord is not None:
-            try:
-                passID = format_pass_id(int(q_sub), int(q_con), int(q_ord))
-            except (TypeError, ValueError):
-                passID = ''
+        cursor.execute(
+            """
+            SELECT passID, subtopID, passOrder
+            FROM tb5_passQop
+            WHERE uid=%s AND sid=%s AND topID=%s
+            GROUP BY passID, subtopID, passOrder
+            ORDER BY CAST(subtopID AS UNSIGNED), CAST(passOrder AS UNSIGNED)
+            """,
+            (uid, sid, q_top),
+        )
+        pass_rows = cursor.fetchall()
+        pass_ids = [row['passID'] for row in pass_rows if row.get('passID')]
 
-        if passID:
+        if not pass_ids:
+            if passID:
+                pass_ids = [passID]
+            elif q_sub is not None and q_con is not None and q_ord is not None:
+                try:
+                    pass_ids = [format_pass_id(int(q_sub), int(q_con), int(q_ord))]
+                except (TypeError, ValueError):
+                    pass_ids = []
+
+        if pass_ids:
+            placeholders = ','.join(['%s'] * len(pass_ids))
             cursor.execute(
-                """
+                f"""
                 SELECT * FROM tb21_questions
-                WHERE passID=%s
-                ORDER BY questionID
+                WHERE passID IN ({placeholders})
+                ORDER BY passID, questionID
                 """,
-                (passID,),
+                tuple(pass_ids),
             )
-            questions = cursor.fetchall()
-        else:
+            question_rows = cursor.fetchall()
+
+            questions_by_passage = []
+            current_block = None
+            for row in question_rows:
+                pass_key = row.get('passID')
+                if not current_block or current_block['passID'] != pass_key:
+                    current_block = {
+                        'passID': pass_key,
+                        'passTitle': row.get('passTitle') or pass_key,
+                        'questions': [],
+                    }
+                    questions_by_passage.append(current_block)
+                current_block['questions'].append(row)
+
             cursor.execute(
-                """
-                SELECT * FROM tb21_questions
-                WHERE topID=%s AND subtopID=%s AND conID=%s AND CAST(passOrder AS UNSIGNED)=%s
-                ORDER BY questionID
-                """,
-                (q_top, str(q_sub or ''), str(q_con or ''), int(q_ord or 0)),
-            )
-            questions = cursor.fetchall()
-        if passID:
-            cursor.execute(
-                """
+                f"""
                 SELECT questionID, choice 
                 FROM tb22_multiQop 
-                WHERE uid = %s AND sid = %s AND passID = %s
+                WHERE uid = %s AND sid = %s AND passID IN ({placeholders})
                 """,
-                (uid, sid, passID),
+                (uid, sid, *pass_ids),
             )
+            existing_answers = {row['questionID']: row['choice'] for row in cursor.fetchall()}
         else:
-            cursor.execute(
-                """
-                SELECT questionID, choice 
-                FROM tb22_multiQop 
-                WHERE uid = %s AND sid = %s AND topID = %s AND subtopID = %s AND conID = %s
-                """,
-                (uid, sid, q_top, str(q_sub or ''), str(q_con or '')),
-            )
-        existing_answers = {row['questionID']: row['choice'] for row in cursor.fetchall()}
-        return render_template('questions.html', questions=questions, existing_answers=existing_answers, pass_title=session.get('passTitle', ''))
+            questions_by_passage = []
+            existing_answers = {}
     except Exception as e:
-        print(f"Database error: {str(e)}")
+        print(f"Database error preparing comprehension questions: {str(e)}")
+        questions_by_passage = []
+        existing_answers = {}
     finally:
-        if conn and conn.is_connected():
+        if cursor:
             cursor.close()
+        if conn and conn.is_connected():
             conn.close()
+
+    return render_template(
+        'questions.html',
+        questions_by_passage=questions_by_passage,
+        existing_answers=existing_answers,
+    )
 
 
 @core_bp.route('/done', methods=['GET', 'POST'])
@@ -1285,60 +1311,94 @@ def done():
     bonusWordsCnt = 0
     topID = "1"
 
-    if request.method == 'POST' and passID:
+    pass_ids = []
+    pass_conn = None
+    pass_cursor = None
+    try:
+        pass_conn = get_db_connection()
+        pass_cursor = pass_conn.cursor(dictionary=True)
+        pass_cursor.execute(
+            """
+            SELECT passID, subtopID, passOrder
+            FROM tb5_passQop
+            WHERE uid=%s AND sid=%s AND topID=%s
+            GROUP BY passID, subtopID, passOrder
+            ORDER BY CAST(subtopID AS UNSIGNED), CAST(passOrder AS UNSIGNED)
+            """,
+            (uid, sid, topID),
+        )
+        for row in pass_cursor.fetchall():
+            pid = row.get('passID')
+            if pid:
+                pass_ids.append(pid)
+    except Exception as e:
+        print(f"Database error gathering comprehension pass IDs: {str(e)}")
+    finally:
+        if pass_cursor:
+            pass_cursor.close()
+        if pass_conn and pass_conn.is_connected():
+            pass_conn.close()
+
+    if not pass_ids and passID:
+        pass_ids = [passID]
+
+    if request.method == 'POST' and pass_ids:
+        submit_conn = None
+        submit_cursor = None
         try:
-            conn = get_db_connection()
-            cursor = conn.cursor(dictionary=True)
-            q_top = str(session.get('topID', '1'))
-            q_sub = str(session.get('subtopID', ''))
-            q_con = str(session.get('conID', '1'))
-            q_ord = int(session.get('passOrder', 1))
-            cursor.execute(
-                """
+            submit_conn = get_db_connection()
+            submit_cursor = submit_conn.cursor(dictionary=True)
+            placeholders = ','.join(['%s'] * len(pass_ids))
+            submit_cursor.execute(
+                f"""
                 SELECT * FROM tb21_questions
-                WHERE topID=%s AND subtopID=%s AND conID=%s AND CAST(passOrder AS UNSIGNED)=%s
-                ORDER BY questionID
+                WHERE passID IN ({placeholders})
+                ORDER BY passID, questionID
                 """,
-                (q_top, q_sub, q_con, q_ord),
+                tuple(pass_ids),
             )
-            questions = cursor.fetchall()
+            questions = submit_cursor.fetchall()
             for q in questions:
-                user_choice = request.form.get(f"q_{q['questionID']}", '').lower()
-                if user_choice:
-                    is_correct = 1 if user_choice == q['correctAns'].lower() else 0
-                    cursor.execute(
-                        """
-                        INSERT INTO tb22_multiQop (
-                            uid, sid, questionID, topID, subtopID,
-                            conID, passID, passOrder, choice, isCorrect
-                        ) VALUES (
-                            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
-                        )
-                        ON DUPLICATE KEY UPDATE
-                            choice = VALUES(choice),
-                            isCorrect = VALUES(isCorrect)
-                        """,
-                        (
-                            uid,
-                            sid,
-                            q['questionID'],
-                            session['topID'],
-                            session['subtopID'],
-                            session['conID'],
-                            passID,
-                            session['passOrder'],
-                            user_choice,
-                            is_correct,
-                        ),
+                field_name = f"q_{q['questionID']}"
+                user_choice = request.form.get(field_name, '').lower()
+                if not user_choice:
+                    continue
+                is_correct = 1 if user_choice == q['correctAns'].lower() else 0
+                submit_cursor.execute(
+                    """
+                    INSERT INTO tb22_multiQop (
+                        uid, sid, questionID, topID, subtopID,
+                        conID, passID, passOrder, choice, isCorrect
+                    ) VALUES (
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                     )
-            conn.commit()
+                    ON DUPLICATE KEY UPDATE
+                        choice = VALUES(choice),
+                        isCorrect = VALUES(isCorrect)
+                    """,
+                    (
+                        uid,
+                        sid,
+                        q['questionID'],
+                        q['topID'],
+                        q['subtopID'],
+                        q['conID'],
+                        q['passID'],
+                        q['passOrder'],
+                        user_choice,
+                        is_correct,
+                    ),
+                )
+            submit_conn.commit()
         except Exception as e:
             print(f"Database error processing answers: {str(e)}")
-            conn.rollback()
+            if submit_conn:
+                submit_conn.rollback()
         finally:
-            if conn and conn.is_connected():
-                cursor.close()
-                conn.close()
+            if submit_cursor:
+                submit_cursor.close()
+            if submit_conn and submit_conn.is_connected():
+                submit_conn.close()
 
     # Update time intervals in output1_url, update RTs, bonuses, etc. Kept same as original for brevity.
     try:

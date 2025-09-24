@@ -8,11 +8,18 @@
 </head>
 <body>
 <div class="container">
-    <h2>Comprehension Questions: {{ pass_title }}</h2>
+    <h2>Comprehension Questions</h2>
+
+    {% if not questions_by_passage %}
+      <p>No comprehension questions are available at this time.</p>
+    {% else %}
     <form method="POST" action="{{ url_for('core.done') }}">
-        {% for q in questions %}
-        <div class="card mb-4">
-            <div class="card-header">Question {{ loop.index }}</div>
+        {% set counter = namespace(value=1) %}
+        {% for block in questions_by_passage %}
+        <h4 class="mt-4">{{ block.passTitle }}</h4>
+          {% for q in block.questions %}
+          <div class="card mb-4">
+            <div class="card-header">Question {{ counter.value }}</div>
             <div class="card-body">
                 <p class="card-text">{{ q.questionText }}</p>
                 
@@ -56,7 +63,9 @@
                 </div>
                 {% endif %}
             </div>
-        </div>
+          </div>
+          {% set counter.value = counter.value + 1 %}
+          {% endfor %}
         {% endfor %}
         
         <div class="mt-4">
@@ -65,6 +74,7 @@
             </button>
         </div>
     </form>
+    {% endif %}
 </div>
 </body>
 </html>
