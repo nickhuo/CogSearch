@@ -398,6 +398,30 @@ def task_a():
             session['visitedSub'] = ','.join(current_list)
             visited_subtop = current_list
 
+            if lastPage == "c4" and request.method == 'POST':
+                ans = request.form.get('ans', '').strip()
+                if ans:
+                    save_pass_answer('c4', ans, table="tb5_passQop")
+                    cursor.execute(
+                        """
+                        UPDATE tb6_taskTime
+                        SET timeEnd=%s, timeEndStamp=%s
+                        WHERE uid=%s AND sid=%s AND topID=%s
+                        ORDER BY timeStart DESC LIMIT 1
+                        """,
+                        (
+                            int(time.time()),
+                            get_time_stamp_cdt(),
+                            uid,
+                            sid,
+                            str(session.get('topID', 1)),
+                        ),
+                    )
+                session.pop('formal_pending_stage', None)
+                session.pop('formal_pending_passID', None)
+                session.pop('formal_pending_fid', None)
+                session.pop('formal_last_page', None)
+
         # Load subtopics
         cursor.execute("SELECT * FROM tb3_subtopic WHERE topID=%s ORDER BY subtopID", (topID,))
         subtopics = cursor.fetchall()
@@ -1085,7 +1109,7 @@ def k2():
         session.pop('formal_pending_fid', None)
         session.pop('formal_last_page', None)
         session['redirectPage'] = url_for('core.let_comp_one_inst')
-        return redirect(url_for('core.let_comp_one_inst'))
+        return redirect(url_for('core.k2'))
 
     if lastPage == "c4" and request.method == "POST":
         ans_to_save = request.form.get('ans', '').strip()
