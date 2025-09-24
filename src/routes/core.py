@@ -1040,7 +1040,7 @@ def let_comp_two():
                 cursor.close()
                 link.close()
 
-        return redirect(url_for('core.questions'))
+        return redirect(url_for('core.vocab'))
 
     return render_template("let_comp_two.html", action_url=url_for('core.let_comp_two'))
 
@@ -1156,14 +1156,14 @@ def vocab():
         return redirect(url_for('core.index'))
     # Log entering vocab
     save_url(uid, sid, "1", "", "", "", "vocab", "Vocabulary", request.url)
-    return render_template('vocab.html', action_url=url_for('core.done'))
+    return render_template('vocab.html', action_url=url_for('core.questions'))
 
 
 @core_bp.route('/questions', methods=['GET', 'POST'])
 def questions():
     uid = session.get('uid')
     sid = session.get('sid', '')
-    passID = session.get('passID', '101101')
+    passID = session.get('passID', '')
     if not uid:
         return redirect(url_for('core.index'))
 
@@ -1215,26 +1215,55 @@ def questions():
         cursor = conn.cursor(dictionary=True)
         # Be tolerant to passID scheme differences by querying structured keys
         q_top = str(session.get('topID', '1'))
-        q_sub = str(session.get('subtopID', ''))
-        q_con = str(session.get('conID', '1'))
-        q_ord = int(session.get('passOrder', 1))
-        cursor.execute(
-            """
-            SELECT * FROM tb21_questions
-            WHERE topID=%s AND subtopID=%s AND conID=%s AND CAST(passOrder AS UNSIGNED)=%s
-            ORDER BY questionID
-            """,
-            (q_top, q_sub, q_con, q_ord),
-        )
-        questions = cursor.fetchall()
-        cursor.execute(
-            """
-            SELECT questionID, choice 
-            FROM tb22_multiQop 
-            WHERE uid = %s AND sid = %s AND passID = %s
-            """,
-            (uid, sid, passID),
-        )
+        q_sub = session.get('subtopID')
+        q_con = session.get('conID')
+        q_ord = session.get('passOrder')
+
+        # Prefer an explicit passID lookup; fall back to top/sub/con/order if needed.
+        if not passID and q_sub is not None and q_con is not None and q_ord is not None:
+            try:
+                passID = format_pass_id(int(q_sub), int(q_con), int(q_ord))
+            except (TypeError, ValueError):
+                passID = ''
+
+        if passID:
+            cursor.execute(
+                """
+                SELECT * FROM tb21_questions
+                WHERE passID=%s
+                ORDER BY questionID
+                """,
+                (passID,),
+            )
+            questions = cursor.fetchall()
+        else:
+            cursor.execute(
+                """
+                SELECT * FROM tb21_questions
+                WHERE topID=%s AND subtopID=%s AND conID=%s AND CAST(passOrder AS UNSIGNED)=%s
+                ORDER BY questionID
+                """,
+                (q_top, str(q_sub or ''), str(q_con or ''), int(q_ord or 0)),
+            )
+            questions = cursor.fetchall()
+        if passID:
+            cursor.execute(
+                """
+                SELECT questionID, choice 
+                FROM tb22_multiQop 
+                WHERE uid = %s AND sid = %s AND passID = %s
+                """,
+                (uid, sid, passID),
+            )
+        else:
+            cursor.execute(
+                """
+                SELECT questionID, choice 
+                FROM tb22_multiQop 
+                WHERE uid = %s AND sid = %s AND topID = %s AND subtopID = %s AND conID = %s
+                """,
+                (uid, sid, q_top, str(q_sub or ''), str(q_con or '')),
+            )
         existing_answers = {row['questionID']: row['choice'] for row in cursor.fetchall()}
         return render_template('questions.html', questions=questions, existing_answers=existing_answers, pass_title=session.get('passTitle', ''))
     except Exception as e:
