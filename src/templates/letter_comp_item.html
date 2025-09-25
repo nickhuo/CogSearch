@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>字母比对 {{ round_number }} - 第 {{ item_index }}/{{ total_items }} 题</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; margin: 24px; }
+    .container { max-width: 720px; margin: 0 auto; }
+    .meta { color: #666; margin-bottom: 16px; }
+    .pairs { display: flex; justify-content: space-between; gap: 24px; align-items: center; margin: 24px 0; }
+    .pair-box { flex: 1; padding: 16px; border: 1px solid #ddd; border-radius: 8px; text-align: center; }
+    .letters { font-size: 28px; letter-spacing: 4px; font-weight: 600; }
+    .actions { display: flex; gap: 12px; justify-content: center; margin-top: 8px; }
+    .btn { font-size: 16px; padding: 10px 18px; cursor: pointer; border-radius: 6px; border: 1px solid #ccc; background: #f7f7f7; }
+    .btn-primary { background: #2563eb; color: #fff; border-color: #2563eb; }
+    .btn-secondary { background: #6b7280; color: #fff; border-color: #6b7280; }
+    .hint { color: #999; font-size: 14px; text-align: center; margin-top: 8px; }
+  </style>
+  <script>
+    // 允许使用键盘快捷键：S(相同) / D(不同)
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('lc-form');
+      function submitChoice(value) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'choice';
+        input.value = value;
+        form.appendChild(input);
+        form.submit();
+      }
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 's' || e.key === 'S') { submitChoice('S'); }
+        if (e.key === 'd' || e.key === 'D') { submitChoice('D'); }
+      });
+      document.getElementById('btn-same').addEventListener('click', function () { submitChoice('S'); });
+      document.getElementById('btn-diff').addEventListener('click', function () { submitChoice('D'); });
+    });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="meta">第 {{ round_number }} 轮 · 第 {{ item_index }} / {{ total_items }} 题</div>
+
+    <div class="pairs">
+      <div class="pair-box">
+        <div>左侧</div>
+        <div class="letters">{{ left_string }}</div>
+      </div>
+      <div class="pair-box">
+        <div>右侧</div>
+        <div class="letters">{{ right_string }}</div>
+      </div>
+    </div>
+
+    <form id="lc-form" action="{{ action_url }}" method="post">
+      <input type="hidden" name="item_index" value="{{ item_index }}">
+      <div class="actions">
+        <button type="button" id="btn-same" class="btn btn-primary">相同 (S)</button>
+        <button type="button" id="btn-diff" class="btn btn-secondary">不同 (D)</button>
+      </div>
+      {% if is_last %}
+      <div class="hint">这是本轮最后一题。</div>
+      {% else %}
+      <div class="hint">可按键盘 S (相同) 或 D (不同) 快速作答。</div>
+      {% endif %}
+    </form>
+  </div>
+</body>
+</html>
+
+
