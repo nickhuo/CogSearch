@@ -7,14 +7,16 @@ from flask import Flask
 def create_app() -> Flask:
     """Application factory. Config is loaded from env and instance."""
     # Since templates, static, and instance are now in the src package
-    template_folder = os.path.join(os.path.dirname(__file__), 'templates')
-    static_folder = os.path.join(os.path.dirname(__file__), 'static')
-    instance_folder = os.path.join(os.path.dirname(__file__), 'instance')
+    template_folder = os.path.join(os.path.dirname(__file__), "templates")
+    static_folder = os.path.join(os.path.dirname(__file__), "static")
+    instance_folder = os.path.join(os.path.dirname(__file__), "instance")
 
-    app = Flask(__name__,
-                template_folder=template_folder,
-                static_folder=static_folder,
-                instance_path=instance_folder)
+    app = Flask(
+        __name__,
+        template_folder=template_folder,
+        static_folder=static_folder,
+        instance_path=instance_folder,
+    )
 
     # Defaults (kept to avoid breaking current local dev)
     app.config.update(
@@ -22,7 +24,7 @@ def create_app() -> Flask:
         MYSQL_HOST=os.environ.get("MYSQL_HOST", "localhost"),
         MYSQL_USER=os.environ.get("MYSQL_USER", "root"),
         # 使用非空默认值避免出现 "using password: NO"；若不匹配，请在环境变量或 instance/config.py 中覆盖
-        MYSQL_PASSWORD=os.environ.get("MYSQL_PASSWORD", "root"),
+        MYSQL_PASSWORD=os.environ.get("MYSQL_PASSWORD", ""),
         MYSQL_DB=os.environ.get("MYSQL_DB", "cogsearch_textsearch3"),
     )
 

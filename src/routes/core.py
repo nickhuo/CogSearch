@@ -586,10 +586,11 @@ def task_b():
     })
 
     link = None
+    cursor = None
     passResult = None
     try:
         link = get_db_connection()
-        cursor = link.cursor(dictionary=True)
+        cursor = link.cursor(dictionary=True, buffered=True)
 
         cursor.execute(
             """
@@ -694,8 +695,9 @@ def task_b():
         print(f"Error in /task_b route: {e}")
         return f"Database error: {e}", 500
     finally:
-        if link and link.is_connected():
+        if cursor:
             cursor.close()
+        if link:
             link.close()
 
     if redirect_to_next_section:
@@ -1121,7 +1123,7 @@ def _finalize_letter_round_with_total_time(uid: int, sid: str, round_number: int
     cursor = None
     try:
         link = get_db_connection()
-        cursor = link.cursor(dictionary=True)
+        cursor = link.cursor(dictionary=True, buffered=True)
         
         # 计算正确题目数量
         cursor.execute(
@@ -1151,7 +1153,7 @@ def _finalize_letter_round_with_total_time(uid: int, sid: str, round_number: int
     finally:
         if cursor:
             cursor.close()
-        if link and link.is_connected():
+        if link:
             link.close()
 
 
@@ -1161,7 +1163,7 @@ def _finalize_letter_round(uid: int, sid: str, round_number: int) -> None:
     cursor = None
     try:
         link = get_db_connection()
-        cursor = link.cursor(dictionary=True)
+        cursor = link.cursor(dictionary=True, buffered=True)
         cursor.execute(
             """
             SELECT
@@ -1189,7 +1191,7 @@ def _finalize_letter_round(uid: int, sid: str, round_number: int) -> None:
     finally:
         if cursor:
             cursor.close()
-        if link and link.is_connected():
+        if link:
             link.close()
 
 
@@ -1400,9 +1402,11 @@ def k2():
             return redirect(pending_redirect)
 
     topID = "1"
+    link = None
+    cursor = None
     try:
         link = get_db_connection()
-        cursor = link.cursor(dictionary=True)
+        cursor = link.cursor(dictionary=True, buffered=True)
         cursor.execute("SELECT * FROM tb2_topic WHERE topID = %s", (topID,))
         topic_row = cursor.fetchone()
         topicTitle = topic_row['topTitle'] if topic_row else "Unknown Topic"
@@ -1415,8 +1419,9 @@ def k2():
         print(f"Error retrieving topic/subtopics: {e}")
         return f"Database error: {e}", 500
     finally:
-        if link and link.is_connected():
+        if cursor:
             cursor.close()
+        if link:
             link.close()
 
     subtopString = ", ".join(subtop_list)
@@ -1741,9 +1746,11 @@ def done():
                 submit_conn.close()
 
     # Update time intervals in output1_url, update RTs, bonuses, etc. Kept same as original for brevity.
+    link = None
+    cursor = None
     try:
         link = get_db_connection()
-        cursor = link.cursor(dictionary=True)
+        cursor = link.cursor(dictionary=True, buffered=True)
         cursor.execute(
             """
             SELECT * FROM output1_url
@@ -1766,14 +1773,17 @@ def done():
     except Exception as e:
         print(f"Error updating time intervals: {e}")
     finally:
-        if link and link.is_connected():
+        if cursor:
             cursor.close()
+        if link:
             link.close()
 
     # passage RT for formal reading pages (pageTypeID='b')
+    link = None
+    cursor = None
     try:
         link = get_db_connection()
-        cursor = link.cursor(dictionary=True)
+        cursor = link.cursor(dictionary=True, buffered=True)
         cursor.execute("SELECT passID, time_interval FROM output1_url WHERE sid=%s AND uid=%s AND pageTypeID='b'", (sid, uid))
         for row in cursor.fetchall():
             qryPassID = row['passID']
@@ -1786,14 +1796,17 @@ def done():
     except Exception as e:
         print(f"Error updating passage reading time for b: {e}")
     finally:
-        if link and link.is_connected():
+        if cursor:
             cursor.close()
+        if link:
             link.close()
 
     # passage RT for practice reading pages (pageTypeID='prac_b')
+    link = None
+    cursor = None
     try:
         link = get_db_connection()
-        cursor = link.cursor(dictionary=True)
+        cursor = link.cursor(dictionary=True, buffered=True)
         cursor.execute("SELECT passID, time_interval FROM output1_url WHERE sid=%s AND uid=%s AND pageTypeID='prac_b'", (sid, uid))
         for row in cursor.fetchall():
             qryPassID = row['passID']
@@ -1806,8 +1819,9 @@ def done():
     except Exception as e:
         print(f"Error updating passage reading time for prac_b: {e}")
     finally:
-        if link and link.is_connected():
+        if cursor:
             cursor.close()
+        if link:
             link.close()
 
     # Sync letter comparison aggregates from per-item records
@@ -1815,9 +1829,12 @@ def done():
     _finalize_letter_round(uid, sid, 2)
 
     # Bonus words processing
+    link = None
+    cursor = None
+    bonusWordsCnt = 0
     try:
         link = get_db_connection()
-        cursor = link.cursor(dictionary=True)
+        cursor = link.cursor(dictionary=True, buffered=True)
         cursor.execute("SELECT * FROM tb2_topic WHERE topID=%s", (topID,))
         topicRow = cursor.fetchone()
         topicIdeasBWsString = topicRow.get('topIdeasBonusWords', "") if topicRow else ""
@@ -1834,7 +1851,6 @@ def done():
                     cleaned = re.sub(r"[^0-9a-zA-Z]+", "", cleaned)
                     topicIdeasAnsStringAry.append(cleaned.lower())
         bonusWordsAry = []
-        bonusWordsCnt = 0
         for word in topicIdeasAnsStringAry:
             if word and word in topicIdeasBWsArray:
                 bonusWordsAry.append(word)
@@ -1853,8 +1869,9 @@ def done():
     except Exception as e:
         print(f"Error processing bonus words: {e}")
     finally:
-        if link and link.is_connected():
+        if cursor:
             cursor.close()
+        if link:
             link.close()
 
     try:
