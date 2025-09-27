@@ -391,7 +391,7 @@ def task_a():
         if fid == "begin":
             session['startUnixTime'] = int(time.time())
             session['startTimeStamp'] = get_time_stamp_cdt()
-            session['remainingTime'] = 1200  
+            session['remainingTime'] = 900  
             session['lastPageSwitchUnixTime'] = int(time.time())
             session.pop('formal_pending_stage', None)
             session.pop('formal_pending_passID', None)

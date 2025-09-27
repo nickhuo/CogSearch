@@ -21,8 +21,8 @@ def create_app() -> Flask:
         SECRET_KEY=os.environ.get("SECRET_KEY", "dev-secret-key"),
         MYSQL_HOST=os.environ.get("MYSQL_HOST", "localhost"),
         MYSQL_USER=os.environ.get("MYSQL_USER", "root"),
-        # Default to 'root' instead of empty to avoid "using password: NO"
-        MYSQL_PASSWORD=os.environ.get("MYSQL_PASSWORD", ""),
+        # 使用非空默认值避免出现 "using password: NO"；若不匹配，请在环境变量或 instance/config.py 中覆盖
+        MYSQL_PASSWORD=os.environ.get("MYSQL_PASSWORD", "root"),
         MYSQL_DB=os.environ.get("MYSQL_DB", "cogsearch_textsearch3"),
     )
 

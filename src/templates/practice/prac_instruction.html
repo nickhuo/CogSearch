@@ -3,10 +3,54 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Prac Instruction</title>
   <base target="_top">
   <style>
-    input[type="range"] { width: 100vw; }
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+    
+    .cl2 {
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 0 10px;
+    }
+    
+    table {
+      width: 100%;
+      max-width: 100%;
+      table-layout: fixed;
+    }
+    
+    input[type="range"] { 
+      width: 100%; 
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    
+    td {
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+      
+      .cl2 {
+        padding: 0 5px;
+      }
+      
+      td {
+        font-size: 14pt !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -26,78 +70,91 @@
     </p>
     <div>
     <table>
+
+
+    <!-- quesation 1-->
     <tr>
-      <td text-align='left' style='font-size:16pt; color:#0B3861;'>
+      <td style='font-size:14pt; color:#0B3861; text-align:left;'>
       <b>1. "How easy was this article to read?"</b>
       </td>
     </tr>
     <tr>
-      <td text-align='center'>
+      <td style='text-align:center;'>
         <form id='form_c1' name='form_c1'>
-           <tabl style="width: 100%;">
+           <table style="width: 100%;">
              <tr>
-               <td colspan='2' text-align='center'><input type='range' name='ans_range' id='ans_range' min='0' max='100'/></td>
+               <td colspan='2' style='text-align:center;'><input type='range' name='ans_range' id='ans_range' min='0' max='100'/></td>
              </tr>
+             <!-- 分数-->
              <tr>
-               <td text-align='left' style='font-size:16pt; color:#0B3861;'><b>0</b></td>
-               <td text-align='right' style='font-size:16pt; color:#0B3861;'><b>100</b></td>
+               <td style='font-size:16pt; color:#0B3861; text-align:left;'><b>0</b></td>
+               <td style='font-size:16pt; color:#0B3861; text-align:right;'><b>100</b></td>
              </tr>
+             <!-- 分数解释-->
              <tr>
-               <td text-align='left'  style='font-size:16pt; color:#0B3861;'>Very </br>Difficult</td>
-               <td text-align='right'  style='font-size:16pt; color:#0B3861;'>Very</br> Easy</td>
+               <td style='font-size:13pt; color:#0B3861; text-align:left;'>Very Difficult</td>
+               <td style='font-size:13pt; color:#0B3861; text-align:right;'>Very Easy</td>
              </tr>
            </table>
         </form>
       </td>
     </tr>
+
+
+    <!-- 问题 2--> 
     <tr>
-      <td text-align='left' style='font-size:16pt; color:#0B3861;'>
-      <b>2. "Including the other articles that you have read today, how much new information was in this article?"</b>
+      <td style='font-size:14pt; color:#0B3861; text-align:left;'>
+      <b><br>2. "Including the other articles that you have read today, how much new information was in this article?"</b>
       </td>
     </tr>
     <tr>
-      <td text-align='center'>
+      <td style='text-align:center;'>
         <form id='form_c2' name='form_c2'>
            <table style="width: 100%;">
              <tr>
-               <td colspan='2' text-align='center'><input type='range' name='ans_range' id='ans_range' min='0' max='100'/></td>
+               <td colspan='2' style='text-align:center;'><input type='range' name='ans_range' id='ans_range' min='0' max='100'/></td>
              </tr>
              <tr>
-               <td text-align='left' style='font-size:16pt; color:#0B3861;'><b>0</b></td>
-               <td text-align='right' style='font-size:16pt; color:#0B3861;'><b>100</b></td>
+               <td style='font-size:13pt; color:#0B3861; text-align:left;'><b>0</b></td>
+               <td style='font-size:13pt; color:#0B3861; text-align:right;'><b>100</b></td>
              </tr>
              <tr>
-               <td text-align='left' style='font-size:16pt; color:#0B3861;'>No New </br>Information</td>
-               <td text-align='right' style='font-size:16pt; color:#0B3861;'>Completely</br> New Information</td>
+               <td style='font-size:13pt; color:#0B3861; text-align:left;'>No New Information</td>
+               <td style='font-size:13pt; color:#0B3861; text-align:right;'>Completely New Information</td>
              </tr>
            </table>
         </form>
       </td>
     </tr>
+
+
+
     <tr>
-      <td text-align='left' style='font-size:16pt; color:#0B3861;'>
-      <b>3. "How much did you learn from this particular article?"</b>
+      <td style='font-size:14pt; color:#0B3861; text-align:left;'>
+      <b><br>3. "How much did you learn from this particular article?"</b>
       </td>
     </tr>
     <tr>
-      <td text-align='center'>
+      <td style='text-align:center;'>
         <form id='form_c3' name='form_c3'>
            <table style="width: 100%;">
              <tr>
-               <td colspan='2' text-align='center'><input type='range' name='ans_range' id='ans_range' min='0' max='100'/></td>
+               <td colspan='2' style='text-align:center;'><input type='range' name='ans_range' id='ans_range' min='0' max='100'/></td>
             </tr>
              <tr>
-               <td text-align='left' style='font-size:16pt; color:#0B3861;'><b>0</b></td>
-               <td text-align='right' style='font-size:16pt; color:#0B3861;'><b>100</b></td>
+               <td style='font-size:13pt; color:#0B3861; text-align:left;'><b>0</b></td>
+               <td style='font-size:13pt; color:#0B3861; text-align:right;'><b>100</b></td>
              </tr>
              <tr>
-               <td text-align='left' style='font-size:16pt; color:#0B3861;'>Didn't Learn </br>Anything at All</td>
-               <td text-align='right' style='font-size:16pt; color:#0B3861;'>Learned a Lot</td>
+               <td style='font-size:13pt; color:#0B3861; text-align:left;'>Didn't Learn Anything at All</td>
+               <td style='font-size:13pt; color:#0B3861; text-align:right;'>Learned a Lot</td>
              </tr>
            </table>
         </form>
       </td>
     </tr>
+
+    
     </table>
     </div>
 

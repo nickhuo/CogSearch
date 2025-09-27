@@ -5,13 +5,19 @@ from flask import current_app
 
 def get_db_connection():
     """Create a new DB connection using Flask config."""
-    return mysql.connector.connect(
-        host=current_app.config.get("MYSQL_HOST", "localhost"),
-        user=current_app.config.get("MYSQL_USER", "root"),
-        password=current_app.config.get("MYSQL_PASSWORD", ""),
-        database=current_app.config.get("MYSQL_DB", "cogsearch_textsearch3"),
-        auth_plugin="mysql_native_password",
-    )
+    connection_args = {
+        "host": current_app.config.get("MYSQL_HOST", "localhost"),
+        "user": current_app.config.get("MYSQL_USER", "root"),
+        "password": current_app.config.get("MYSQL_PASSWORD", ""),
+        "database": current_app.config.get("MYSQL_DB", "cogsearch_textsearch3"),
+    }
+
+    # Only set auth_plugin if explicitly provided in config to avoid mismatches
+    auth_plugin = current_app.config.get("MYSQL_AUTH_PLUGIN")
+    if auth_plugin:
+        connection_args["auth_plugin"] = auth_plugin
+
+    return mysql.connector.connect(**connection_args)
 
 
 def get_time_stamp_cdt():
