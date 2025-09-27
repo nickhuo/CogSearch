@@ -991,6 +991,66 @@ def _letter_round_pass_id(round_number: int, item_index: int) -> str:
     return f"LC{round_number}{item_index:02d}"
 
 
+def _save_letter_item_response_simple(
+    uid: int,
+    sid: str,
+    round_number: int,
+    item_index: int,
+    item: dict,
+    response: str,
+    is_correct: int,
+):
+    """Save letter comparison response without individual reaction times."""
+    link = None
+    cursor = None
+    try:
+        link = get_db_connection()
+        cursor = link.cursor()
+
+        cursor.execute(
+            """
+            INSERT INTO tb27_letter_item
+                (uid, sid, round_number, item_index, left_str, right_str, correct_answer,
+                 response, is_correct, reaction_time_ms, inter_question_interval_ms)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                response = VALUES(response),
+                is_correct = VALUES(is_correct),
+                updated_at = CURRENT_TIMESTAMP
+            """,
+            (
+                uid,
+                sid,
+                round_number,
+                item_index,
+                item["left"],
+                item["right"],
+                item["answer"],
+                response,
+                is_correct,
+                0,  # 不记录单个题目反应时间
+                0,  # 不记录间隔时间
+            ),
+        )
+
+        column_name = _letter_round_column(round_number, item_index)
+        cursor.execute(
+            f"UPDATE tb11_profile SET {column_name}=%s WHERE sid=%s AND uid=%s",
+            (response, sid, uid),
+        )
+
+        link.commit()
+    except Exception as e:
+        print(f"Error saving letter comparison response: {e}")
+        if link:
+            link.rollback()
+    finally:
+        if cursor:
+            cursor.close()
+        if link and link.is_connected():
+            link.close()
+
+
 def _save_letter_item_response(
     uid: int,
     sid: str,
@@ -1055,6 +1115,46 @@ def _save_letter_item_response(
             link.close()
 
 
+def _finalize_letter_round_with_total_time(uid: int, sid: str, round_number: int, total_rt_sec: int) -> None:
+    """Save total time (seconds) for letter comparison round without individual item times."""
+    link = None
+    cursor = None
+    try:
+        link = get_db_connection()
+        cursor = link.cursor(dictionary=True)
+        
+        # 计算正确题目数量
+        cursor.execute(
+            """
+            SELECT COALESCE(SUM(is_correct), 0) AS correct_count
+            FROM tb27_letter_item
+            WHERE uid=%s AND sid=%s AND round_number=%s
+            """,
+            (uid, sid, round_number),
+        )
+        row = cursor.fetchone() or {"correct_count": 0}
+        
+        # 根据轮次设置字段名
+        score_col = "lcOneScore" if round_number == 1 else "lcTwoScore"
+        rt_col = "lcOneRT" if round_number == 1 else "lcTwoRT"
+        
+        # 更新到tb11_profile表
+        cursor.execute(
+            f"UPDATE tb11_profile SET {score_col}=%s, {rt_col}=%s WHERE sid=%s AND uid=%s",
+            (row["correct_count"], total_rt_sec, sid, uid),
+        )
+        link.commit()
+    except Exception as e:
+        print(f"Error finalizing letter comparison round {round_number}: {e}")
+        if link:
+            link.rollback()
+    finally:
+        if cursor:
+            cursor.close()
+        if link and link.is_connected():
+            link.close()
+
+
 def _finalize_letter_round(uid: int, sid: str, round_number: int) -> None:
     """Aggregate per-round accuracy and RT totals into tb11_profile."""
     link = None
@@ -1075,9 +1175,11 @@ def _finalize_letter_round(uid: int, sid: str, round_number: int) -> None:
         row = cursor.fetchone() or {"correct_count": 0, "total_rt": 0}
         score_col = "lcOneScore" if round_number == 1 else "lcTwoScore"
         rt_col = "lcOneRT" if round_number == 1 else "lcTwoRT"
+        # 将 per-item 累加的毫秒总和改为秒
+        total_rt_sec = int(round((row["total_rt"] or 0) / 1000.0))
         cursor.execute(
             f"UPDATE tb11_profile SET {score_col}=%s, {rt_col}=%s WHERE sid=%s AND uid=%s",
-            (row["correct_count"], row["total_rt"], sid, uid),
+            (row["correct_count"], total_rt_sec, sid, uid),
         )
         link.commit()
     except Exception as e:
@@ -1093,7 +1195,7 @@ def _finalize_letter_round(uid: int, sid: str, round_number: int) -> None:
 
 @core_bp.route('/let_comp_one', methods=['GET', 'POST'])
 def let_comp_one():
-    return _handle_letter_round(round_number=1, completion_endpoint='core.let_comp_two_inst')
+    return _handle_letter_round_all(round_number=1, completion_endpoint='core.let_comp_two_inst')
 
 
 @core_bp.route('/let_comp_two_inst', methods=['GET', 'POST'])
@@ -1113,7 +1215,84 @@ def let_comp_two_inst():
 
 @core_bp.route('/let_comp_two', methods=['GET', 'POST'])
 def let_comp_two():
-    return _handle_letter_round(round_number=2, completion_endpoint='core.vocab')
+    return _handle_letter_round_all(round_number=2, completion_endpoint='core.vocab')
+
+
+def _handle_letter_round_all(round_number: int, completion_endpoint: str):
+    """Handle letter comparison round with all items displayed on one page."""
+    uid = session.get('uid')
+    sid = session.get('sid', '')
+    if not uid:
+        return "No user session found; please start from the beginning.", 400
+
+    items = _letter_round_items(round_number)
+    total_items = len(items)
+    if total_items == 0:
+        print(f"No letter comparison items configured for round {round_number}")
+        return redirect(url_for(completion_endpoint))
+
+    if request.method == 'POST':
+        # 从前端获取总时间（从页面加载到点击done）
+        total_time_ms = request.form.get('total_time_ms')
+        if not total_time_ms:
+            return "Missing total time data.", 400
+        
+        try:
+            # 转换为整数毫秒
+            total_rt_ms = int(total_time_ms)
+        except (ValueError, TypeError):
+            return "Invalid total time data.", 400
+        
+        # 统一改为以秒为单位写入
+        total_rt_sec = int(round(total_rt_ms / 1000.0))
+        
+        # 处理所有题目的回答
+        responses = []
+        for i, item in enumerate(items, 1):
+            choice_key = f'choice_{i}'
+            choice = request.form.get(choice_key, '').strip().upper()
+            
+            if choice not in {'S', 'D'}:
+                return f"Invalid response for item {i}.", 400
+            
+            is_correct = 1 if choice == item['answer'] else 0
+            responses.append({
+                'item_index': i,
+                'item': item,
+                'choice': choice,
+                'is_correct': is_correct
+            })
+        
+        # 保存所有回答（不记录单个题目反应时间）
+        for response in responses:
+            _save_letter_item_response_simple(
+                uid, sid, round_number, response['item_index'], 
+                response['item'], response['choice'], 
+                response['is_correct']
+            )
+        
+        # 完成这一轮，保存总时间（单位：秒）
+        _finalize_letter_round_with_total_time(uid, sid, round_number, total_rt_sec)
+        return redirect(url_for(completion_endpoint))
+
+    # GET请求 - 显示所有题目
+    top_id = session.get('topID', '1')
+    page_type = f'start_lc{round_number}_all'
+    page_title = f"Letter Comparison {round_number} - All Items"
+    pass_id = f"LC{round_number}00"  # 使用特殊ID表示所有题目
+    
+    save_url(
+        uid, sid, top_id, '', '', pass_id, page_type, page_title, request.url
+    )
+
+    action_url = url_for(request.endpoint)
+    return render_template(
+        'letter_comp_all.html',
+        round_number=round_number,
+        items=items,
+        total_items=total_items,
+        action_url=action_url,
+    )
 
 
 def _handle_letter_round(round_number: int, completion_endpoint: str):

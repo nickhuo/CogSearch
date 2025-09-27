@@ -13,7 +13,22 @@
     td.choice { text-align: center; }
     .actions { margin-top: 24px; text-align: center; }
     .progress { font-size: 18px; margin-bottom: 12px; }
-    .option-label { margin: 0 8px; font-size: 20px; }
+    .option-label { 
+      margin: 0 8px; 
+      font-size: 20px; 
+      display: inline-flex; 
+      align-items: center; 
+      gap: 8px; 
+      padding: 6px 12px; 
+      border: 2px solid #ddd; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      user-select: none;
+    }
+    .option-label:hover { border-color: #4CAF50; background-color: #f0f8f0; }
+    .option-label input[type="radio"] { margin: 0; }
+    .option-label input[type="radio"]:checked + span { color: #4CAF50; font-weight: 700; }
+    .option-label:has(input[type="radio"]:checked) { border-color: #4CAF50; background-color: #e8f5e8; }
     .strings { font-weight: 600; }
   </style>
 </head>
@@ -32,11 +47,11 @@
           <td class="choice">
             <label class="option-label">
               <input type="radio" name="choice" value="S" required />
-              S
+              <span>S</span>
             </label>
             <label class="option-label">
               <input type="radio" name="choice" value="D" />
-              D
+              <span>D</span>
             </label>
           </td>
           <td class="strings" style="text-align:left;">{{ right_string }}</td>
