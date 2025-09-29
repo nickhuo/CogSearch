@@ -16,7 +16,6 @@
     <form method="POST" action="{{ url_for('core.done') }}">
         {% set counter = namespace(value=1) %}
         {% for block in questions_by_passage %}
-        <h4 class="mt-4">{{ block.passTitle }}</h4>
           {% for q in block.questions %}
           <div class="card mb-4">
             <div class="card-header">Question {{ counter.value }}</div>
