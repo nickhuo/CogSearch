@@ -1835,6 +1835,40 @@ def done():
     try:
         link = get_db_connection()
         cursor = link.cursor(dictionary=True, buffered=True)
+        '''
+        cursor.execute("SELECT * FROM tb2_topic WHERE topID=%s", (topID,))
+        topicRow = cursor.fetchone()
+        topicIdeasBWsString = topicRow.get('topIdeasBonusWords', "") if topicRow else ""
+        topicIdeasBWsArray = topicIdeasBWsString.split(" ") if topicIdeasBWsString else []
+        cursor.execute("SELECT * FROM tb8_topicIdeas WHERE topID=%s AND sid=%s AND uid=%s", (topID, sid, uid))
+        topicIdeasAnsRow = cursor.fetchone()
+        topicIdeasAnsString = topicIdeasAnsRow.get('quesAns', "") if topicIdeasAnsRow else ""
+        topicIdeasAnsStringAry = []
+        for line in topicIdeasAnsString.split("\n"):
+            for word in line.split(" "):
+                cleaned = word.strip()
+                if cleaned:
+                    import re
+                    cleaned = re.sub(r"[^0-9a-zA-Z]+", "", cleaned)
+                    topicIdeasAnsStringAry.append(cleaned.lower())
+        bonusWordsAry = []
+        for word in topicIdeasAnsStringAry:
+            if word and word in topicIdeasBWsArray:
+                bonusWordsAry.append(word)
+                bonusWordsCnt += 1
+        bonusWordsMoney = 0.05 * bonusWordsCnt
+        bonusWordsString = " ".join(bonusWordsAry)
+        cursor.execute(
+            """
+            INSERT INTO tb9_topicBonus 
+                (uid, sid, topID, quesID, quesAns, bonusWord, bonusWordCnt, bonusMoney)
+            VALUES (%s, %s, %s, 'k2', %s, %s, %s, %s)
+            """,
+            (uid, sid, topID, topicIdeasAnsString, bonusWordsString, bonusWordsCnt, bonusWordsMoney),
+        )
+        link.commit()
+        print(f"Error processing bonus words: {e}")
+        '''
 
         if pass_ids:
             placeholders = ','.join(['%s'] * len(pass_ids))
@@ -1861,6 +1895,7 @@ def done():
         correct = int(row.get("correct") or 0)
         bonusWordsCnt = int(round((correct / total) * 100)) if total > 0 else 0
     except Exception as e:
+        '''print(f"Error processing bonus words: {e}")'''
         print(f"Error computing comprehension accuracy: {e}")
         bonusWordsCnt = 0
     finally:
