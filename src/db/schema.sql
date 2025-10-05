@@ -357,10 +357,8 @@ CREATE TABLE `tb27_letter_item` (
     `correct_answer` char(1) NOT NULL,
     `response` char(1) NOT NULL,
     `is_correct` tinyint(1) NOT NULL,
-    `reaction_time_ms` int(11) NOT NULL,
-    `inter_question_interval_ms` int(11) NOT NULL,
-    `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `created_at` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    `updated_at` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     PRIMARY KEY (`id`),
     UNIQUE KEY `uq_letter_item` (`uid`, `sid`, `round_number`, `item_index`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

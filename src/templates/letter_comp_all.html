@@ -189,11 +189,11 @@
           <div class="strings">{{ item.left }}</div>
           <div class="choice-container">
             <label class="choice-option">
-              <input type="radio" name="choice_{{ loop.index }}" value="S" id="s_{{ loop.index }}" required />
+              <input type="radio" name="choice_{{ loop.index }}" value="S" id="s_{{ loop.index }}" data-index="{{ loop.index }}" required />
               <span>S</span>
             </label>
             <label class="choice-option">
-              <input type="radio" name="choice_{{ loop.index }}" value="D" id="d_{{ loop.index }}" />
+              <input type="radio" name="choice_{{ loop.index }}" value="D" id="d_{{ loop.index }}" data-index="{{ loop.index }}" />
               <span>D</span>
             </label>
           </div>
@@ -211,12 +211,53 @@
   </div>
 
   <script>
+    const form = document.getElementById('letterCompForm');
+    const actionUrl = form.getAttribute('action');
+    const totalItems = parseInt('{{ total_items }}', 10);
+    const savedItems = new Set();
+    const pendingItems = new Set();
+
+    function saveChoice(itemIndex, choiceValue) {
+      const data = new FormData();
+      data.append('item_index', itemIndex);
+      data.append('choice', choiceValue);
+      data.append('save_only', '1');
+
+      pendingItems.add(Number(itemIndex));
+
+      return fetch(actionUrl, {
+        method: 'POST',
+        body: data,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin'
+      }).then((response) => {
+        if (!response.ok) {
+          throw new Error('Bad response status: ' + response.status);
+        }
+        savedItems.add(Number(itemIndex));
+        pendingItems.delete(Number(itemIndex));
+      });
+    }
+
+    document.querySelectorAll('.choice-option input[type="radio"]').forEach((input) => {
+      input.addEventListener('change', () => {
+        const itemIndex = input.dataset.index;
+        saveChoice(itemIndex, input.value).catch((err) => {
+          console.error('Failed to save letter comparison response', err);
+          savedItems.delete(Number(itemIndex));
+          pendingItems.delete(Number(itemIndex));
+          window.alert('Network issue: answer not saved. Please try selecting again.');
+        });
+      });
+    });
+
     // 记录页面加载时间
     const pageLoadTime = Date.now();
     
     // 添加表单验证和提交处理
-    document.getElementById('letterCompForm').addEventListener('submit', function(e) {
-      const totalItems = parseInt('{{ total_items }}');
+    form.addEventListener('submit', function(e) {
       let allAnswered = true;
       
       for (let i = 1; i <= totalItems; i++) {
@@ -232,6 +273,18 @@
         alert('Please complete all items before submitting!');
         return false;
       }
+
+      if (pendingItems.size > 0) {
+        e.preventDefault();
+        alert('Please wait for answers to finish saving before submitting.');
+        return false;
+      }
+
+      if (savedItems.size !== totalItems) {
+        e.preventDefault();
+        alert('Please make sure each answer is saved before submitting.');
+        return false;
+      }
       
       // 计算总时间（从页面加载到点击done）
       const totalTime = Date.now() - pageLoadTime;
@@ -242,6 +295,12 @@
       timeInput.name = 'total_time_ms';
       timeInput.value = totalTime;
       this.appendChild(timeInput);
+
+      const skipInput = document.createElement('input');
+      skipInput.type = 'hidden';
+      skipInput.name = 'skip_save';
+      skipInput.value = '1';
+      this.appendChild(skipInput);
       
     });
 

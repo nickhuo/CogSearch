@@ -976,10 +976,6 @@ def let_comp_one_inst():
     return render_template("let_comp_one_inst.html")
 
 
-def _letter_round_session_key(round_number: int, name: str) -> str:
-    return f"lc_r{round_number}_{name}"
-
-
 def _letter_round_items(round_number: int):
     return LETTER_COMPARISON_ROUNDS.get(round_number, [])
 
@@ -993,66 +989,6 @@ def _letter_round_pass_id(round_number: int, item_index: int) -> str:
     return f"LC{round_number}{item_index:02d}"
 
 
-def _save_letter_item_response_simple(
-    uid: int,
-    sid: str,
-    round_number: int,
-    item_index: int,
-    item: dict,
-    response: str,
-    is_correct: int,
-):
-    """Save letter comparison response without individual reaction times."""
-    link = None
-    cursor = None
-    try:
-        link = get_db_connection()
-        cursor = link.cursor()
-
-        cursor.execute(
-            """
-            INSERT INTO tb27_letter_item
-                (uid, sid, round_number, item_index, left_str, right_str, correct_answer,
-                 response, is_correct, reaction_time_ms, inter_question_interval_ms)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE
-                response = VALUES(response),
-                is_correct = VALUES(is_correct),
-                updated_at = CURRENT_TIMESTAMP
-            """,
-            (
-                uid,
-                sid,
-                round_number,
-                item_index,
-                item["left"],
-                item["right"],
-                item["answer"],
-                response,
-                is_correct,
-                0,  # 不记录单个题目反应时间
-                0,  # 不记录间隔时间
-            ),
-        )
-
-        column_name = _letter_round_column(round_number, item_index)
-        cursor.execute(
-            f"UPDATE tb11_profile SET {column_name}=%s WHERE sid=%s AND uid=%s",
-            (response, sid, uid),
-        )
-
-        link.commit()
-    except Exception as e:
-        print(f"Error saving letter comparison response: {e}")
-        if link:
-            link.rollback()
-    finally:
-        if cursor:
-            cursor.close()
-        if link and link.is_connected():
-            link.close()
-
-
 def _save_letter_item_response(
     uid: int,
     sid: str,
@@ -1061,10 +997,8 @@ def _save_letter_item_response(
     item: dict,
     response: str,
     is_correct: int,
-    rt_ms: int,
-    inter_ms: int,
 ):
-    """Persist per-item letter comparison response and reaction times."""
+    """Persist per-item letter comparison response and timestamp metadata."""
     link = None
     cursor = None
     try:
@@ -1075,14 +1009,12 @@ def _save_letter_item_response(
             """
             INSERT INTO tb27_letter_item
                 (uid, sid, round_number, item_index, left_str, right_str, correct_answer,
-                 response, is_correct, reaction_time_ms, inter_question_interval_ms)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                 response, is_correct)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE
                 response = VALUES(response),
                 is_correct = VALUES(is_correct),
-                reaction_time_ms = VALUES(reaction_time_ms),
-                inter_question_interval_ms = VALUES(inter_question_interval_ms),
-                updated_at = CURRENT_TIMESTAMP
+                updated_at = CURRENT_TIMESTAMP(6)
             """,
             (
                 uid,
@@ -1094,8 +1026,6 @@ def _save_letter_item_response(
                 item["answer"],
                 response,
                 is_correct,
-                rt_ms,
-                inter_ms,
             ),
         )
 
@@ -1168,17 +1098,23 @@ def _finalize_letter_round(uid: int, sid: str, round_number: int) -> None:
             """
             SELECT
                 COALESCE(SUM(is_correct), 0) AS correct_count,
-                COALESCE(SUM(reaction_time_ms), 0) AS total_rt
+                COALESCE(
+                    TIMESTAMPDIFF(
+                        SECOND,
+                        MIN(created_at),
+                        MAX(updated_at)
+                    ),
+                    0
+                ) AS span_seconds
             FROM tb27_letter_item
             WHERE uid=%s AND sid=%s AND round_number=%s
             """,
             (uid, sid, round_number),
         )
-        row = cursor.fetchone() or {"correct_count": 0, "total_rt": 0}
+        row = cursor.fetchone() or {"correct_count": 0, "span_seconds": 0}
         score_col = "lcOneScore" if round_number == 1 else "lcTwoScore"
         rt_col = "lcOneRT" if round_number == 1 else "lcTwoRT"
-        # 将 per-item 累加的毫秒总和改为秒
-        total_rt_sec = int(round((row["total_rt"] or 0) / 1000.0))
+        total_rt_sec = int(row.get("span_seconds") or 0)
         cursor.execute(
             f"UPDATE tb11_profile SET {score_col}=%s, {rt_col}=%s WHERE sid=%s AND uid=%s",
             (row["correct_count"], total_rt_sec, sid, uid),
@@ -1234,46 +1170,57 @@ def _handle_letter_round_all(round_number: int, completion_endpoint: str):
         return redirect(url_for(completion_endpoint))
 
     if request.method == 'POST':
+        if request.form.get('save_only') == '1':
+            item_index = safe_int_param(request.form.get('item_index'), 1)
+            if item_index < 1 or item_index > total_items:
+                return "Invalid item index.", 400
+            choice = request.form.get('choice', '').strip().upper()
+            if choice not in {'S', 'D'}:
+                return "Invalid response.", 400
+            item = items[item_index - 1]
+            is_correct = 1 if choice == item['answer'] else 0
+            _save_letter_item_response(uid, sid, round_number, item_index, item, choice, is_correct)
+            return ("", 204)
+
         # 从前端获取总时间（从页面加载到点击done）
         total_time_ms = request.form.get('total_time_ms')
         if not total_time_ms:
             return "Missing total time data.", 400
-        
+
         try:
-            # 转换为整数毫秒
             total_rt_ms = int(total_time_ms)
         except (ValueError, TypeError):
             return "Invalid total time data.", 400
-        
-        # 统一改为以秒为单位写入
+
         total_rt_sec = int(round(total_rt_ms / 1000.0))
-        
-        # 处理所有题目的回答
-        responses = []
-        for i, item in enumerate(items, 1):
-            choice_key = f'choice_{i}'
-            choice = request.form.get(choice_key, '').strip().upper()
-            
-            if choice not in {'S', 'D'}:
-                return f"Invalid response for item {i}.", 400
-            
-            is_correct = 1 if choice == item['answer'] else 0
-            responses.append({
-                'item_index': i,
-                'item': item,
-                'choice': choice,
-                'is_correct': is_correct
-            })
-        
-        # 保存所有回答（不记录单个题目反应时间）
-        for response in responses:
-            _save_letter_item_response_simple(
-                uid, sid, round_number, response['item_index'], 
-                response['item'], response['choice'], 
-                response['is_correct']
-            )
-        
-        # 完成这一轮，保存总时间（单位：秒）
+
+        skip_save = request.form.get('skip_save') == '1'
+        if not skip_save:
+            responses = []
+            for i, item in enumerate(items, 1):
+                choice_key = f'choice_{i}'
+                choice = request.form.get(choice_key, '').strip().upper()
+                if choice not in {'S', 'D'}:
+                    return f"Invalid response for item {i}.", 400
+                is_correct = 1 if choice == item['answer'] else 0
+                responses.append({
+                    'item_index': i,
+                    'item': item,
+                    'choice': choice,
+                    'is_correct': is_correct
+                })
+
+            for response in responses:
+                _save_letter_item_response(
+                    uid,
+                    sid,
+                    round_number,
+                    response['item_index'],
+                    response['item'],
+                    response['choice'],
+                    response['is_correct'],
+                )
+
         _finalize_letter_round_with_total_time(uid, sid, round_number, total_rt_sec)
         return redirect(url_for(completion_endpoint))
 
@@ -1314,15 +1261,6 @@ def _handle_letter_round(round_number: int, completion_endpoint: str):
         if item_index < 1 or item_index > total_items:
             return redirect(url_for(completion_endpoint))
 
-        session_key_start = _letter_round_session_key(round_number, 'current_start')
-        start_time = session.pop(session_key_start, None)
-        if start_time is None:
-            start_time = time.time()
-
-        rt_ms = int((time.time() - start_time) * 1000)
-        inter_key = _letter_round_session_key(round_number, 'current_inter_ms')
-        inter_ms = session.pop(inter_key, 0)
-
         choice = request.form.get('choice', '').strip().upper()
         if choice not in {'S', 'D'}:
             return "Invalid response.", 400
@@ -1330,28 +1268,24 @@ def _handle_letter_round(round_number: int, completion_endpoint: str):
         item = items[item_index - 1]
         is_correct = 1 if choice == item['answer'] else 0
 
-        _save_letter_item_response(uid, sid, round_number, item_index, item, choice, is_correct, rt_ms, inter_ms)
+        if request.form.get('save_only') == '1':
+            _save_letter_item_response(uid, sid, round_number, item_index, item, choice, is_correct)
+            return ("", 204)
 
-        session[_letter_round_session_key(round_number, 'last_finish')] = time.time()
+        skip_save = request.form.get('skip_save') == '1'
+        if not skip_save:
+            _save_letter_item_response(uid, sid, round_number, item_index, item, choice, is_correct)
 
         next_index = item_index + 1
         if next_index <= total_items:
             return redirect(url_for(request.endpoint, item=next_index))
 
         _finalize_letter_round(uid, sid, round_number)
-        session.pop(_letter_round_session_key(round_number, 'last_finish'), None)
         return redirect(url_for(completion_endpoint))
 
     item_index = safe_int_param(request.args.get('item'), 1)
     if item_index < 1 or item_index > total_items:
         return redirect(url_for(completion_endpoint))
-
-    now = time.time()
-    last_finish_key = _letter_round_session_key(round_number, 'last_finish')
-    last_finish = session.get(last_finish_key)
-    inter_ms = 0 if last_finish is None else int((now - last_finish) * 1000)
-    session[_letter_round_session_key(round_number, 'current_inter_ms')] = inter_ms
-    session[_letter_round_session_key(round_number, 'current_start')] = now
 
     item = items[item_index - 1]
     top_id = session.get('topID', '1')

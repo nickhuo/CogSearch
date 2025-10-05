@@ -39,7 +39,7 @@
       <div class="progress">Item {{ item_index }} of {{ total_items }}</div>
       <p>Select <strong>S</strong> if the strings are the same, or <strong>D</strong> if they are different.</p>
     </div>
-    <form method="post" action="{{ action_url }}">
+    <form method="post" action="{{ action_url }}" id="letterCompItemForm">
       <input type="hidden" name="item_index" value="{{ item_index }}" />
       <table>
         <tr>
@@ -67,4 +67,107 @@
     </form>
   </div>
 </body>
+<script>
+  (function() {
+    const form = document.getElementById('letterCompItemForm');
+    if (!form) { return; }
+
+    const actionUrl = form.getAttribute('action');
+    const itemIndex = form.querySelector('input[name="item_index"]').value;
+    const choiceInputs = form.querySelectorAll('input[name="choice"]');
+
+    let isSaving = false;
+    let queuedChoice = null;
+    let pendingSubmit = false;
+
+    const hasSavedInput = document.createElement('input');
+    hasSavedInput.type = 'hidden';
+    hasSavedInput.name = 'has_saved';
+    hasSavedInput.value = '0';
+    form.appendChild(hasSavedInput);
+
+    function createSkipInput() {
+      const skipInput = document.createElement('input');
+      skipInput.type = 'hidden';
+      skipInput.name = 'skip_save';
+      skipInput.value = '1';
+      return skipInput;
+    }
+
+    function sendSave(choiceValue) {
+      if (isSaving) {
+        queuedChoice = choiceValue;
+        return;
+      }
+
+      isSaving = true;
+      hasSavedInput.value = '0';
+
+      const data = new FormData();
+      data.append('item_index', itemIndex);
+      data.append('choice', choiceValue);
+      data.append('save_only', '1');
+
+      fetch(actionUrl, {
+        method: 'POST',
+        body: data,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin'
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Bad response status: ' + response.status);
+          }
+          hasSavedInput.value = '1';
+        })
+        .catch((err) => {
+          console.error('Failed to save letter comparison response', err);
+          window.alert('Network issue: your answer was not saved. Please try selecting again.');
+          hasSavedInput.value = '0';
+        })
+        .finally(() => {
+          isSaving = false;
+          if (queuedChoice !== null) {
+            const nextChoice = queuedChoice;
+            queuedChoice = null;
+            sendSave(nextChoice);
+            return;
+          }
+          if (pendingSubmit && hasSavedInput.value === '1') {
+            pendingSubmit = false;
+            form.appendChild(createSkipInput());
+            form.submit();
+          } else if (pendingSubmit) {
+            // Save failed; allow user to retry
+            pendingSubmit = false;
+          }
+        });
+    }
+
+    choiceInputs.forEach((input) => {
+      input.addEventListener('change', () => {
+        queuedChoice = null;
+        sendSave(input.value);
+      });
+    });
+
+    form.addEventListener('submit', (event) => {
+      const selected = form.querySelector('input[name="choice"]:checked');
+      if (!selected) {
+        return;
+      }
+
+      if (hasSavedInput.value === '1' && !isSaving) {
+        form.appendChild(createSkipInput());
+        return;
+      }
+
+      event.preventDefault();
+      pendingSubmit = true;
+      sendSave(selected.value);
+    });
+  })();
+</script>
 </html>

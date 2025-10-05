@@ -354,8 +354,6 @@ CREATE TABLE IF NOT EXISTS tb27_letter_item (
     correct_answer TEXT NOT NULL,
     response TEXT NOT NULL,
     is_correct INTEGER NOT NULL,
-    reaction_time_ms INTEGER NOT NULL,
-    inter_question_interval_ms INTEGER NOT NULL,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
