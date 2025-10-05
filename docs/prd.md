@@ -9,11 +9,11 @@ This Flask web application implements a cognitive experiment workflow. It manage
 ## 1. Project Structure
 
 - **Main Application File:** `app.py`
-- **Templates Directory:** `/templates`  
+- **Templates Directory:** `/templates`
   Contains all HTML templates (e.g., `index.html`, `task_a.html`, etc.)
-- **Static Files Directory:** `/static`  
+- **Static Files Directory:** `/static`
   Stores JavaScript, CSS, and image assets.
-- **Database Utility File:** `db_utils.py`  
+- **Database Utility File:** `db_utils.py`
   Encapsulates database connection logic and utility functions such as `save_url()`.
 
 ---
@@ -25,7 +25,7 @@ This Flask web application implements a cognitive experiment workflow. It manage
   ```python
   app.config['MYSQL_HOST'] = 'localhost'
   app.config['MYSQL_USER'] = 'root'
-  app.config['MYSQL_PASSWORD'] = 'root'
+  app.config['MYSQL_PASSWORD'] = ''
   app.config['MYSQL_DB'] = 'cogsearch_textsearch3'
   ```
 
@@ -83,11 +83,11 @@ The application tracks time per page, per passage, and for letter comparison/voc
 
 ## 8. Score Computation
 
-- **Vocabulary:**  
+- **Vocabulary:**
   +1 per correct answer, -0.2 per incorrect answer, 0 for "unsure" (choice = "6")
-- **Letter Comparison:**  
+- **Letter Comparison:**
   +1 per correct answer; no penalty for incorrect answers
-- **Bonus Words:**  
+- **Bonus Words:**
   Matched from user's topic ideas against `topIdeasBonusWords`
 
 ---

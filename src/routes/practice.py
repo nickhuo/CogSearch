@@ -422,6 +422,35 @@ def prac_b():
         elif lastPage == "c4":
             session["lastPageSwitchUnixTime"] = now
             session["redirectPage"] = url_for("practice.prac_c1", fid="done")
+
+            if request.method == "POST":
+                c4_ans = request.form.get("ans", "").strip()
+                passid_to_save = request.form.get("savepassid", "").strip()
+                if c4_ans and passid_to_save:
+                    cursor.execute(
+                        """
+                        UPDATE tb15_prac_passQop
+                        SET c4Ans=%s
+                        WHERE sid=%s AND uid=%s AND passID=%s
+                        """,
+                        (c4_ans, sid, uid, passid_to_save),
+                    )
+                    cursor.execute(
+                        """
+                        UPDATE tb16_prac_taskTime
+                        SET timeEnd=%s, timeEndStamp=%s
+                        WHERE uid=%s AND sid=%s AND topID=%s
+                        ORDER BY timeStart DESC LIMIT 1
+                        """,
+                        (
+                            int(time.time()),
+                            get_time_stamp_cdt(),
+                            uid,
+                            sid,
+                            str(practice_top_id),
+                        ),
+                    )
+
             # clear pending flow references after completing c4
             session.pop("practice_pending_stage", None)
             session.pop("practice_pending_passID", None)
@@ -496,7 +525,7 @@ def prac_c3():
         ans = request.form.get("ans", "").strip()
         qid = request.form.get("qid", "c3")
         if ans:
-            save_pass_answer(qid, ans, table="tb15_prac_passQop")
+            save_pass_answer(qid, ans, table="tb15_prac_passQop", pass_id=passID)
             session["practice_pending_stage"] = "c4"
             return redirect(url_for("practice.prac_c4", fid=fid))
         else:
@@ -569,10 +598,15 @@ def prac_c4():
     )
 
     if request.method == "POST":
+        passid_override = request.form.get("savepassid", "").strip()
+        target_pass_id = passid_override or passID
+        if passid_override:
+            passID = passid_override
+            session["passID"] = passID
         ans = request.form.get("ans", "").strip()
         qid = request.form.get("qid", "c4")
         if ans:
-            save_pass_answer(qid, ans, table="tb15_prac_passQop")
+            save_pass_answer(qid, ans, table="tb15_prac_passQop", pass_id=target_pass_id)
             link = None
             cursor = None
             try:
@@ -613,7 +647,7 @@ def prac_c4():
         else:
             return "No answer provided.", 400
 
-    return render_template("practice/prac_c4.html", fid=fid)
+    return render_template("practice/prac_c4.html", fid=fid, passID=passID)
 
 
 @practice_bp.route("/prac_c1", methods=["GET", "POST"])
@@ -666,7 +700,7 @@ def prac_c1():
         ans = request.form.get("ans", "").strip()
         qid = request.form.get("qid", "c1")
         if ans:
-            save_pass_answer(qid, ans, table="tb15_prac_passQop")
+            save_pass_answer(qid, ans, table="tb15_prac_passQop", pass_id=passID)
             session["practice_pending_stage"] = "c2"
             return redirect(url_for("practice.prac_c2", fid=fid))
         else:
@@ -722,7 +756,7 @@ def prac_c2():
         ans = request.form.get("ans", "").strip()
         qid = request.form.get("qid", "c2")
         if ans:
-            save_pass_answer(qid, ans, table="tb15_prac_passQop")
+            save_pass_answer(qid, ans, table="tb15_prac_passQop", pass_id=passID)
             session["practice_pending_stage"] = "c3"
             return redirect(url_for("practice.prac_c3", fid=fid))
         else:
