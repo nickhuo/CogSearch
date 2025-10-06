@@ -9,7 +9,7 @@
   <div id="timer" class="timer">
     <p><strong>TIME REMAINS:</strong></p>
     <script>
-      var RemainingTime = Number({{ session.get('remainingTime', 0) }});
+      var RemainingTime = Number("{{ session.get('remainingTime', 0) }}");
       var BackColor = "white";
       var ForeColor = "navy";
       var CountActive = true;

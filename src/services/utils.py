@@ -82,15 +82,26 @@ def save_pass_answer(
                 )
         elif qid in ["c2", "c3", "c4"]:
             col = f"{qid}Ans"
-            query = f"""
+            # First, attempt to update. This may affect 0 rows if the record doesn't exist
+            # OR if the value is unchanged. We cannot rely on rowcount to detect existence.
+            cursor.execute(
+                f"""
                 UPDATE {table}
                 SET {col} = %s
                 WHERE sid = %s AND uid = %s AND passID = %s
-            """
-            cursor.execute(query, (ans_to_save, sid, uid, passID))
+                """,
+                (ans_to_save, sid, uid, passID),
+            )
 
-            if cursor.rowcount == 0:
-                # No existing row to update; fall back to inserting a fresh record so answers persist.
+            # Determine whether the target record exists regardless of whether the value changed
+            cursor.execute(
+                f"SELECT 1 FROM {table} WHERE sid=%s AND uid=%s AND passID=%s LIMIT 1",
+                (sid, uid, passID),
+            )
+            exists = cursor.fetchone() is not None
+
+            if not exists:
+                # No existing row; insert a new one with sensible defaults
                 subtop_val = session.get("subtopID")
                 con_val = session.get("conID")
                 pass_order_val = session.get("passOrder")

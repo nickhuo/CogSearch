@@ -1688,10 +1688,10 @@ def done():
         cursor.execute(
             """
             SELECT * FROM output1_url
-            WHERE topID=%s AND sid=%s AND uid=%s
+            WHERE sid=%s AND uid=%s
             ORDER BY op1ID DESC
             """,
-            (topID, sid, uid),
+            (sid, uid),
         )
         op_results = cursor.fetchall()
         nextUnixTime = 0
