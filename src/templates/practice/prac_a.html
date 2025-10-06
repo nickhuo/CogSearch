@@ -1,0 +1,107 @@
+<!-- templates/practice/prac_a.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Practice A</title>
+  <!-- If you want to use the same CSS classes as in setting.php, 
+       copy them to a .css file or inline <style> block. -->
+</head>
+<body>
+
+  <!-- TIMER SECTION -->
+  <div id="timer" class="timer">
+    <p><strong>TIME REMAINS:</strong></p>
+    <script>
+      /*
+        We pull the needed variables from Flask session/context.
+        'RemainingTime' and 'RedirectPage' are set in your /prac_a route, e.g.:
+            session['remainingTime'] = 30
+            session['redirectPage'] = "/some_next_page"
+      */
+      var RemainingTime = {{ session.get('remainingTime', 0) | int }};
+      RemainingTime = Number(RemainingTime)
+      console.log({{session.get('remainingTime')}})
+      console.log("yooooo")
+      console.log(RemainingTime)
+      var BackColor = "white";
+      var ForeColor = "navy";
+      var CountActive = true;
+      var CountStepper = -1;
+      var LeadingZero = true;
+      var DisplayFormat = "%%M%% Minutes, %%S%% Seconds.";
+      var FinishMessage = "Time is UP!";
+      var RedirectPage = "{{ session.get('redirectPage', '') }}";
+    </script>
+    <!-- Load your countdown.js from static/js/countdown.js -->
+    <script src="{{ url_for('static', filename='js/countdown.js') }}"></script>
+  </div>
+
+  <!-- TOPIC + SUBTOPICS TABLE SECTION -->
+  <div id="topic" style="margin-top:20px;">
+    <table id="subtopic" width="100%" style="table-layout:fixed;">
+      <tr>
+        <td class="cl4" colspan="2">
+          <!-- topic_result[1] is likely topTitle if your columns are (topID, topTitle, ...) -->
+          <h1 style="font-size: 28px; font-weight: bold; text-align: left; margin: 20px 0; color: #0B3861;">{{ topic_result[1] }}</h1>
+        </td>
+      </tr>
+      {# 
+        'subtopics' is a list of rows from tb13_prac_subtopic. 
+        Typically row[0] = subtopID, row[2] = subtopTitle.
+        'visited_subtop' is a list of visited subtopic IDs.
+      #}
+      {% set i = 0 %}
+      {% for row in subtopics %}
+        {% if i % 2 == 0 %}
+          <tr>
+        {% endif %}
+
+        {% set subtop_id = row[0] %}
+        {% set subtop_id_str = subtop_id|string %}
+        {% set subtop_title = row[2] %}
+
+
+        {% if subtop_id_str in visited_subtop %}
+          <!-- Already visited -->
+          <td class="cl6">
+            <div style="width: 100%; border: 1px solid #ccc; padding: 10px; background-color: #f5f5f5; font-size: 16pt; color: #0B3861; border-radius: 4px;">
+              {{ subtop_title }}
+            </div>
+          </td>
+        {% else %}
+          <!-- Not visited yet => display as a clickable text box -->
+          <td class="cl5">
+            <div style="width: 100%; border: 1px solid #007BFF; padding: 10px; background-color: #e9f5ff; font-size: 16pt; color: #0B3861; border-radius: 4px; cursor: pointer;"
+                onclick="window.top.location.href='{{ url_for('practice.prac_b', subtop=subtop_id, passOrd='01', lastPage='a') }}';">
+              {{ subtop_title }}
+            </div>
+          </td>
+        {% endif %}
+
+        {% if i % 2 == 1 %}
+          </tr>
+        {% endif %}
+        {% set i = i + 1 %}
+      {% endfor %}
+    </table>
+  </div>
+
+  {% if all_completed %}
+  <div style="margin-top: 24px; text-align: center;">
+    <button type="button" style="
+      padding: 10px 24px;
+      font-size: 16px;
+      background-color: #0B3861;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    " onclick="window.top.location.href='{{ next_section_url }}';">
+      Go to next section
+    </button>
+  </div>
+  {% endif %}
+
+</body>
+</html>

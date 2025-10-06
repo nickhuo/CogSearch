@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>K2</title>
+  <base target="_top">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+</head>
+<body>
+  <br><br>
+  <div id="k2" style="text-align:center;">
+    <div class="passQ">
+      <p>
+        Now, please tell us about what you have learned today about 
+        <b>{{ topicTitle }}</b>.
+        You can either make a list of facts or write a paragraph, but try to be as specific as you can and tell us as much as you can about 
+        {{ trimSubtop }}.
+        <br>
+      </p>
+      <br>
+      <p style="font-size:18pt;">
+        (And please do not use copy and paste. Sometimes the texts pasted cannot be recorded in the database.)
+      </p>
+      <br>
+      <!-- The form posts to the Flask route for letCompOneInst (action_url) -->
+      <form id="form_k2" name="form_k2" action="{{ action_url }}" method="POST" onsubmit="return saveAns();">
+        <textarea id="textarea_k2" name="textarea_k2" rows="10" cols="60" required></textarea>
+        <br><br>
+        <input type="image" name="submit" id="submit" src="{{ url_for('static', filename='images/next_button.gif') }}" alt="Next"/>
+      </form>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    function saveAns() {
+      var input = document.getElementById('textarea_k2');
+      if (input.value == '') {
+        return false;
+      } else {
+        // Optionally, you could use AJAX here.
+        return true;
+      }
+    }
+  </script>
+</body>
+</html>

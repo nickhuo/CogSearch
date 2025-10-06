@@ -1,0 +1,29 @@
+<!-- templates/timer.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Countdown Timer</title>
+  <base target="_top">
+  <!-- If you have a global CSS, link it here
+       <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  -->
+</head>
+<body>
+  <p><strong>TIME REMAINS:</strong></p>
+  <script>
+    // These variables mirror your PHP echoes:
+    var RemainingTime = Number({{ remaining_time }});
+    var BackColor = "white";
+    var ForeColor = "navy";
+    var CountActive = true;
+    var CountStepper = -1;
+    var LeadingZero = true;
+    var DisplayFormat = "%%M%% Minutes, %%S%% Seconds.";
+    var FinishMessage = "Time is UP!";
+    var RedirectPage = "{{ redirect_page }}";
+  </script>
+  <!-- Countdown script goes here. Place countdown.js in /static/js -->
+  <script src="{{ url_for('static', filename='js/countdown.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!-- templates/settings.html -->
+{% extends "base.html" %}
+{% block content %}
+  <center>
+    <p>You are logged in as {{ sid }}. Your study id is {{ uid }}</p>
+  </center>
+
+  {% if topID %}
+    <p>The current topID is {{ topID }}</p>
+  {% endif %}
+
+  {% if conID %}
+    <p>The current conID is {{ conID }}</p>
+  {% endif %}
+
+  <p>taskDone = {{ taskDone }}, conDone = {{ conDone }}</p>
+{% endblock %}

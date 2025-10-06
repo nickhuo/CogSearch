@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Letter Comparison Round {{ round_number }} - All Items</title>
+  <base target="_top">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f5f5f5;
+    }
+    .lc-container {
+      max-width: 960px;
+      margin: 12px auto;
+      padding: 20px 28px 24px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+    .lc-header {
+      margin-bottom: 16px;
+      text-align: center;
+      border-bottom: 1px solid #e0e0e0;
+      padding-bottom: 12px;
+    }
+    .lc-header h2 {
+      color: #333;
+      margin-bottom: 6px;
+      font-size: 22px;
+      letter-spacing: 0.5px;
+    }
+    .progress {
+      font-size: 15px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+    .instructions {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 0;
+    }
+    .warning {
+      background-color: #fff9e6;
+      border: 1px solid #ffe08a;
+      color: #7a5a00;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin: 12px auto 16px;
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .items-container {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 18px;
+      margin-bottom: 18px;
+      align-items: start;
+    }
+    .item {
+      display: grid;
+      grid-template-columns: 40px 1fr auto 1fr;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border: 1px solid #dcdcdc;
+      border-radius: 6px;
+      background-color: #fafafa;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+    .item:hover {
+      border-color: #4CAF50;
+      background-color: #f3f9f3;
+    }
+    .item-number {
+      font-weight: 600;
+      color: #4CAF50;
+      font-size: 15px;
+      text-align: center;
+    }
+    .strings {
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+      font-size: 16px;
+      letter-spacing: 1.5px;
+      color: #222;
+    }
+    .choice-container {
+      display: flex;
+      flex-direction: row;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+    }
+    .choice-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border: 1px solid #d0d0d0;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background-color: #fff;
+      font-size: 14px;
+      user-select: none;
+    }
+    .choice-option:hover {
+      border-color: #4CAF50;
+      background-color: #ecf7ec;
+    }
+    .choice-option input[type="radio"] {
+      margin: 0;
+    }
+    .choice-option input[type="radio"]:checked + span {
+      color: #4CAF50;
+      font-weight: 600;
+    }
+    .choice-option:has(input[type="radio"]:checked) {
+      border-color: #4CAF50;
+      background-color: #e8f5e8;
+    }
+    .choice-option span {
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .actions {
+      text-align: center;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #e0e0e0;
+    }
+    .submit-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .submit-btn:hover {
+      transform: scale(1.04);
+    }
+    .submit-btn:active {
+      transform: scale(0.96);
+    }
+    @media (max-width: 920px) {
+      .items-container {
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      }
+      .item {
+        grid-template-columns: 36px 1fr auto 1fr;
+        padding: 10px 12px;
+        gap: 8px;
+      }
+      .strings {
+        font-size: 15px;
+        letter-spacing: 1.2px;
+      }
+    }
+    @media (max-width: 640px) {
+      .items-container {
+        grid-template-columns: 1fr;
+      }
+      .choice-container {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="lc-container">
+    <div class="lc-header">
+      <h2>Letter Comparison Round {{ round_number }}</h2>
+      <div class="progress">Complete all {{ total_items }} items below</div>
+      <div class="instructions">
+        For each pair of letter strings, select <strong>S</strong> if they are the same, or <strong>D</strong> if they are different.
+      </div>
+    </div>
+
+    <div class="warning">
+      <strong>Note:</strong> Please carefully compare each pair of letter strings and select the correct answer. Click the "Done" button after completing all items.
+    </div>
+
+    <form method="post" action="{{ action_url }}" id="letterCompForm">
+      <div class="items-container">
+        {% for item in items %}
+        <div class="item">
+          <div class="item-number">{{ loop.index }}</div>
+          <div class="strings">{{ item.left }}</div>
+          <div class="choice-container">
+            <label class="choice-option">
+              <input type="radio" name="choice_{{ loop.index }}" value="S" id="s_{{ loop.index }}" data-index="{{ loop.index }}" required />
+              <span>S</span>
+            </label>
+            <label class="choice-option">
+              <input type="radio" name="choice_{{ loop.index }}" value="D" id="d_{{ loop.index }}" data-index="{{ loop.index }}" />
+              <span>D</span>
+            </label>
+          </div>
+          <div class="strings">{{ item.right }}</div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="submit-btn">
+          <img src="{{ url_for('static', filename='images/done_button.gif') }}" alt="Done" />
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('letterCompForm');
+    const actionUrl = form.getAttribute('action');
+    const totalItems = parseInt('{{ total_items }}', 10);
+    const savedItems = new Set();
+    const pendingItems = new Set();
+
+    function saveChoice(itemIndex, choiceValue) {
+      const data = new FormData();
+      data.append('item_index', itemIndex);
+      data.append('choice', choiceValue);
+      data.append('save_only', '1');
+
+      pendingItems.add(Number(itemIndex));
+
+      return fetch(actionUrl, {
+        method: 'POST',
+        body: data,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin'
+      }).then((response) => {
+        if (!response.ok) {
+          throw new Error('Bad response status: ' + response.status);
+        }
+        savedItems.add(Number(itemIndex));
+        pendingItems.delete(Number(itemIndex));
+      });
+    }
+
+    document.querySelectorAll('.choice-option input[type="radio"]').forEach((input) => {
+      input.addEventListener('change', () => {
+        const itemIndex = input.dataset.index;
+        saveChoice(itemIndex, input.value).catch((err) => {
+          console.error('Failed to save letter comparison response', err);
+          savedItems.delete(Number(itemIndex));
+          pendingItems.delete(Number(itemIndex));
+          window.alert('Network issue: answer not saved. Please try selecting again.');
+        });
+      });
+    });
+
+    // 记录页面加载时间
+    const pageLoadTime = Date.now();
+    
+    // 添加表单验证和提交处理
+    form.addEventListener('submit', function(e) {
+      let allAnswered = true;
+      
+      for (let i = 1; i <= totalItems; i++) {
+        const choice = document.querySelector(`input[name="choice_${i}"]:checked`);
+        if (!choice) {
+          allAnswered = false;
+          break;
+        }
+      }
+      
+      if (!allAnswered) {
+        e.preventDefault();
+        alert('Please complete all items before submitting!');
+        return false;
+      }
+
+      if (pendingItems.size > 0) {
+        e.preventDefault();
+        alert('Please wait for answers to finish saving before submitting.');
+        return false;
+      }
+
+      if (savedItems.size !== totalItems) {
+        e.preventDefault();
+        alert('Please make sure each answer is saved before submitting.');
+        return false;
+      }
+      
+      // 计算总时间（从页面加载到点击done）
+      const totalTime = Date.now() - pageLoadTime;
+      
+      // 添加隐藏字段传递总时间
+      const timeInput = document.createElement('input');
+      timeInput.type = 'hidden';
+      timeInput.name = 'total_time_ms';
+      timeInput.value = totalTime;
+      this.appendChild(timeInput);
+
+      const skipInput = document.createElement('input');
+      skipInput.type = 'hidden';
+      skipInput.name = 'skip_save';
+      skipInput.value = '1';
+      this.appendChild(skipInput);
+      
+    });
+
+    // 添加键盘快捷键支持
+    document.addEventListener('keydown', function(e) {
+      // 按Enter键提交表单
+      if (e.key === 'Enter' && e.ctrlKey) {
+        document.getElementById('letterCompForm').submit();
+      }
+    });
+  </script>
+</body>
+</html>

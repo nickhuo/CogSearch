@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Comprehension Questions</title>
+  <base target="_top">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+    <h2>Comprehension Questions</h2>
+
+    {% if not questions_by_passage %}
+      <p>No comprehension questions are available at this time.</p>
+    {% else %}
+    <form method="POST" action="{{ url_for('core.done') }}">
+        {% set counter = namespace(value=1) %}
+        <div class="row" id="questionsGrid">
+        {% for block in questions_by_passage %}
+          {% for q in block.questions %}
+          <div class="col-md-6 question-item" data-index="{{ counter.value - 1 }}">
+            <div class="card mb-4">
+              <div class="card-header">Question {{ counter.value }}</div>
+              <div class="card-body">
+                  <p class="card-text">{{ q.questionText }}</p>
+                  
+                  <div class="form-check">
+                      <input class="form-check-input" type="radio" 
+                             name="q_{{ q.questionID }}" value="a" required
+                             {% if existing_answers.get(q.questionID) == 'a' %}checked{% endif %}>
+                      <label class="form-check-label">
+                          {{ q.choiceA }}
+                      </label>
+                  </div>
+
+                  <div class="form-check">
+                      <input class="form-check-input" type="radio" 
+                             name="q_{{ q.questionID }}" value="b"
+                             {% if existing_answers.get(q.questionID) == 'b' %}checked{% endif %}>
+                      <label class="form-check-label">
+                          {{ q.choiceB }}
+                      </label>
+                  </div>
+
+                  {% if q.choiceC %}
+                  <div class="form-check">
+                      <input class="form-check-input" type="radio" 
+                             name="q_{{ q.questionID }}" value="c"
+                             {% if existing_answers.get(q.questionID) == 'c' %}checked{% endif %}>
+                      <label class="form-check-label">
+                          {{ q.choiceC }}
+                      </label>
+                  </div>
+                  {% endif %}
+
+                  {% if q.choiceD %}
+                  <div class="form-check">
+                      <input class="form-check-input" type="radio" 
+                             name="q_{{ q.questionID }}" value="d"
+                             {% if existing_answers.get(q.questionID) == 'd' %}checked{% endif %}>
+                      <label class="form-check-label">
+                          {{ q.choiceD }}
+                      </label>
+                  </div>
+                  {% endif %}
+              </div>
+            </div>
+          </div>
+          {% set counter.value = counter.value + 1 %}
+          {% endfor %}
+        {% endfor %}
+        </div>
+
+        <nav class="d-flex justify-content-between align-items-center mt-3" aria-label="Question pagination">
+          <button type="button" class="btn btn-secondary" id="prevPage">Previous</button>
+          <span id="pageIndicator" class="mx-3"></span>
+          <button type="button" class="btn btn-secondary" id="nextPage">Next</button>
+        </nav>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary btn-lg">
+                Submit Answers and Finish
+            </button>
+        </div>
+    </form>
+    {% endif %}
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var ITEMS_PER_PAGE = 10;
+  var grid = document.getElementById('questionsGrid');
+  if (!grid) { return; }
+  var items = Array.prototype.slice.call(grid.querySelectorAll('.question-item'));
+  var totalItems = items.length;
+  var totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
+  var currentPage = 1;
+
+  var prevBtn = document.getElementById('prevPage');
+  var nextBtn = document.getElementById('nextPage');
+  var indicator = document.getElementById('pageIndicator');
+
+  function renderPage(page) {
+    if (page < 1) page = 1;
+    if (page > totalPages) page = totalPages;
+    currentPage = page;
+    var start = (currentPage - 1) * ITEMS_PER_PAGE;
+    var end = start + ITEMS_PER_PAGE;
+
+    for (var i = 0; i < totalItems; i++) {
+      var item = items[i];
+      if (i >= start && i < end) {
+        item.style.display = '';
+      } else {
+        item.style.display = 'none';
+      }
+    }
+
+    if (prevBtn) prevBtn.disabled = currentPage === 1;
+    if (nextBtn) nextBtn.disabled = currentPage === totalPages;
+    if (indicator) {
+      indicator.textContent = 'Page ' + currentPage + ' of ' + totalPages;
+    }
+  }
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', function() { renderPage(currentPage - 1); });
+  }
+  if (nextBtn) {
+    nextBtn.addEventListener('click', function() { renderPage(currentPage + 1); });
+  }
+
+  // Disable native validation to allow custom cross-page validation
+  var form = document.querySelector('form');
+  if (form) {
+    form.setAttribute('novalidate', 'novalidate');
+    form.addEventListener('submit', function(e) {
+      var firstUnansweredIndex = -1;
+      for (var i = 0; i < totalItems; i++) {
+        var item = items[i];
+        var radios = item.querySelectorAll('input[type="radio"]');
+        var answered = false;
+        for (var r = 0; r < radios.length; r++) {
+          if (radios[r].checked) { answered = true; break; }
+        }
+        if (!answered) { firstUnansweredIndex = i; break; }
+      }
+      if (firstUnansweredIndex !== -1) {
+        e.preventDefault();
+        var targetPage = Math.floor(firstUnansweredIndex / ITEMS_PER_PAGE) + 1;
+        renderPage(targetPage);
+        // Highlight and scroll to the first unanswered item
+        var target = items[firstUnansweredIndex];
+        if (target) {
+          target.classList.add('border', 'border-danger');
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          setTimeout(function() { target.classList.remove('border', 'border-danger'); }, 2000);
+        }
+        alert('Please complete all questions. Navigated to the first unanswered question.');
+        return false;
+      }
+      return true;
+    });
+  }
+
+  renderPage(1);
+});
+</script>
+</body>
+</html>

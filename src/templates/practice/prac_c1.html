@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Task C1</title>
+  <base target="_top">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+</head>
+<body>
+  <div class="b_up">
+    <div class="task_c_up">
+      Please make rating from 0 to 100 by moving the circle on the scale.
+    </div>
+  </div>
+
+  <div class="b_down">
+    <div class="article">
+      <div id="c1" style="text-align:center;">
+        <br>
+        <div id="passQ" class="passQ">
+          <p><b>1. How easy was this article to read?</b></p>
+          <br><br>
+
+          <form id="form_c1" name="form_c1" action="{{ url_for('practice.prac_c1', fid=fid) }}" method="POST" onsubmit="return saveAns();">
+            <table style="width:100%;">
+              <tr>
+                <td colspan="2" style="text-align:center;">
+                  <input type="text" name="ans" id="ans" readonly="readonly" class="readonly" />
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2" style="text-align:center;">
+                  <input type="range" name="ans_range" id="ans_range" min="0" max="100" style="width:100%;" onchange="printValue()" />
+                </td>
+              </tr>
+              <tr>
+                <td style="text-align:left; vertical-align:top;"><b>0</b><br>Didn’t Learn<br>Anything at All</td>
+                <td style="text-align:right; vertical-align:top;"><b>100</b><br>Learned a Lot</td>
+              </tr>
+            </table>
+            <br>
+            <input type="hidden" name="fid" value="{{ fid }}">
+            <input type="image" name="submit" id="submit" src="{{ url_for('static', filename='images/next_button.gif') }}" alt="Next">
+            <input type="hidden" name="qid" value="c1">
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function printValue() { var x = document.getElementById('ans_range'); var y = document.getElementById('ans'); y.value = x.value; }
+    function saveAns() { var input = document.getElementById('ans'); if (!input.value) { return false; } return true; }
+  </script>
+</body>
+</html>

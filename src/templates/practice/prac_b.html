@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ pageTitle if pageTitle else "Practice B" }}</title>
+  <base target="_top">
+</head>
+<body>
+  <div class="b_up">
+    <div id="timer" class="timer" data-remaining-time="{{ session.get('remainingTime', 0) }}" data-redirect="{{ session.get('redirectPage', '') }}">
+      <p><strong>TIME REMAINS:</strong></p>
+      <script>
+        (function(){
+          var timerEl = document.getElementById('timer');
+          var RemainingTime = Number(timerEl?.dataset?.remainingTime || 0);
+          var BackColor = "white";
+          var ForeColor = "navy";
+          var CountActive = true;
+          var CountStepper = -1;
+          var LeadingZero = true;
+          var DisplayFormat = "%%M%% Minutes, %%S%% Seconds.";
+          var FinishMessage = "Time is UP!";
+          var RedirectPage = timerEl?.dataset?.redirect || "";
+          window.RemainingTime = RemainingTime;
+          window.BackColor = BackColor;
+          window.ForeColor = ForeColor;
+          window.CountActive = CountActive;
+          window.CountStepper = CountStepper;
+          window.LeadingZero = LeadingZero;
+          window.DisplayFormat = DisplayFormat;
+          window.FinishMessage = FinishMessage;
+          window.RedirectPage = RedirectPage;
+        })();
+      </script>
+      <script src="{{ url_for('static', filename='js/countdown.js') }}"></script>
+    </div>
+  </div>
+
+  <div class="b_down">
+    <div id="article" class="article">
+      <div id="artText" class="artText">
+        {% if passResult %}
+          <p>{{ passResult['passText'] | safe }}</p>
+        {% else %}
+          <p>No passage found.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="nextArt" style="border: 1px solid #ccc; padding: 10px; display: flex; align-items: center; justify-content: space-between; gap: 24px;">
+      <a href="{{ url_for('practice.prac_c1', fid='back') }}" target="_top" style="color:#0a0000;">Go to other topics</a>
+      {% if passOrder != 5 %}
+      <a href="{{ url_for('practice.prac_c1', fid='same') }}" target="_top" style="color:#0a0000;">Continue to next article</a>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

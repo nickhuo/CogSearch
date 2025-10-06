@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demographic Information</title>
+  <base target="_top">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+</head>
+<body>
+  <div class="cl0">
+    <h2><b>Demographic Information</b></h2>
+    <p>
+      <h3>Please answer the following questions:</h3>
+      <form id="form_demog"
+            name="form_demog"
+           action="{{ url_for('practice.prac_instruction') }}"
+            method="POST"
+            onsubmit="return saveDemog();">
+
+        <table class="cl0">
+          <colgroup>
+            <col style="width:15%;" />
+            <col style="width:35%;" />
+            <col style="width:35%;" />
+            <col style="width:15%;" />
+          </colgroup>
+
+          <tr>
+            <td class="cl0">Date of Birth:</td>
+            <td class="cl0" colspan="3">
+              <input type="number" name="demog_bm" id="demog_bm" min="1" max="12" required />
+              (Month, MM)/
+              <input type="number" name="demog_bd" id="demog_bd" min="1" max="31" required />
+              (Day, DD)/
+              <input type="number" name="demog_by" id="demog_by" min="1900" max="2015" required />
+              (Year, YYYY)
+            </td>
+          </tr>
+
+          <tr>
+            <td class="cl0">Age:</td>
+            <td class="cl0" colspan="3">
+              <input type="number" name="demog_age" id="demog_age" min="18" max="100" required />
+              Years Old
+            </td>
+          </tr>
+
+          <tr>
+            <td class="cl0">Gender:</td>
+            <td class="cl0" colspan="3">
+              <input type="radio" name="demog_gen" id="demog_gen_male" value="1" required />Male
+              <input type="radio" name="demog_gen" id="demog_gen_female" value="2" />Female
+            </td>
+          </tr>
+
+          <tr>
+            <td class="cl0" colspan="4">
+              Using the scale below, how many years of formal education did you complete?
+              <input type="text" name="demog_edu" id="demog_edu" required />(Years)
+            </td>
+          </tr>
+
+          <tr>
+            <td class="cl0"></td>
+            <td class="cl0">
+              Fewer than 8 years (1-7.5)<br>
+              Some high school (9-11.5)<br>
+              Some college (12.5-15.5)<br>
+              Master's degree (18)
+            </td>
+            <td class="cl0">
+              Completed 8th grade (8)<br>
+              Graduated high school (12)<br>
+              Graduated college (16)<br>
+              Doctoral or medical degree (20)
+            </td>
+            <td class="cl0"></td>
+          </tr>
+
+          <tr><td class="cl0" colspan="4"></td></tr>
+
+          <tr>
+            <td class="cl0" colspan="4">
+              Are you a native speaker of English?
+              <input type="radio" name="demog_eng" id="demog_eng_yes" value="1" required />Yes
+              <input type="radio" name="demog_eng" id="demog_eng_no" value="0" />No
+            </td>
+          </tr>
+
+          <tr><td class="cl0" text-align="right">If not,</td><td class="cl0" colspan="3"></td></tr>
+
+          <tr>
+            <td class="cl0"></td>
+            <td class="cl0" colspan="3">
+              - What is your first language?
+              <input type="text" name="demog_firlan" id="demog_firlan" style="width:300px;" />
+            </td>
+          </tr>
+
+          <tr>
+            <td class="cl0"></td>
+            <td class="cl0" colspan="3">
+              - At what age did you begin to acquire English?
+              <input type="number" name="demog_ageeng" id="demog_ageeng" min="1" /> Years Old
+            </td>
+          </tr>
+
+          <tr><td class="cl0" colspan="4"></td></tr>
+
+          <tr>
+            <td class="cl0" colspan="4">
+              Are you Hispanic or Latino?
+              <input type="radio" name="demog_hislat" id="demog_hislat_yes" value="1" required />Yes
+              <input type="radio" name="demog_hislat" id="demog_hislat_no" value="0" />No
+            </td>
+          </tr>
+          <tr>
+            <td class="cl0" colspan="4">
+              Please check one of the following ethnic or racial categories that best describe you.
+            </td>
+          </tr>
+
+          <tr>
+            <td class="cl0" colspan="4">
+              <input type="radio" name="demog_race" id="demog_race_native" value="1" required />
+              Native American/Alaska Native<br>
+
+              <input type="radio" name="demog_race" id="demog_race_asian" value="2" />
+              Asian<br>
+
+              <input type="radio" name="demog_race" id="demog_race_hawaian" value="3" required />
+              Native Hawaiian or Other Pacific Islander<br>
+
+              <input type="radio" name="demog_race" id="demog_race_african" value="4" required />
+              Black or African American<br>
+
+              <input type="radio" name="demog_race" id="demog_race_white" value="5" required />
+              White or Caucasian<br>
+
+              <input type="radio" name="demog_race" id="demog_race_multi" value="6" required />
+              Multiple categories<br>
+            </td>
+          </tr>
+        </table>
+
+        <br>
+        <input type="image" name="submit" id="submit" src="{{ url_for('static', filename='images/nextpage_button.gif') }}" alt="Next" />
+      </form>
+    </p>
+  </div>
+
+  <script type="text/javascript">
+    function saveDemog() {
+      var bm     = document.getElementById('demog_bm').value;
+      var bd     = document.getElementById('demog_bd').value;
+      var by     = document.getElementById('demog_by').value;
+      var age    = document.getElementById('demog_age').value;
+      var gen    = getRadioVal(document.getElementById('form_demog'), 'demog_gen');
+      var edu    = document.getElementById('demog_edu').value;
+      var nateng = getRadioVal(document.getElementById('form_demog'), 'demog_eng');
+      var firlan = document.getElementById('demog_firlan').value;
+      var ageeng = document.getElementById('demog_ageeng').value;
+      var hislat = getRadioVal(document.getElementById('form_demog'), 'demog_hislat');
+      var race   = getRadioVal(document.getElementById('form_demog'), 'demog_race');
+
+      if (bm === '') {
+        return false;
+      } else {
+        // In your original code, you had an AJAX post (commented out):
+        // jQuery.post('saveDemog.php',{...});
+        // We'll skip that because we’re now posting the entire form 
+        // to /prac_instruction
+        return true;
+      }
+    }
+
+    function getRadioVal(form, name) {
+      var val;
+      var radios = form.elements[name];
+      for (var i = 0; i < radios.length; i++) {
+        if (radios[i].checked) {
+          val = radios[i].value;
+          break;
+        }
+      }
+      return val;
+    }
+  </script>
+</body>
+</html>

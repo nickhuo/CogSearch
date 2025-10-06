@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Consent</title>
+  <base target="_top">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+</head>
+<body>
+  <div class="cl0">
+		<h2><b>Learning From Multiple Texts</b></h2>
+    <p>You are being asked to participate in a voluntary research study. The purpose of this study is to understand how people learn information through reading and searching from multiple texts. Participating in this study will involve filling out surveys, learning health topics, answering what you have learned, and completing cognitive ability measures. During the study, you will need to learn several health topics under a limit of time. Some health topics are more difficult than others. You can decide how you want to allocate your time. The goal is to learn as much as you can. After learning, you will need to report what you have learned and answer comprehension questions. You will receive additional bonus money if the accuracy of your comprehension questions is higher than 90%. Your participation will last about 45 minutes.</p>
+
+    <h2>Principal Investigator</h2>
+    <p><strong>Name and Title:</strong> Jessie Chin, Associate Professor<br>
+       <strong>Department and Institution:</strong> School of Information Sciences, University of Illinois Urbana-Champaign<br>
+       <strong>Contact Information:</strong> <a href="mailto:chin5@illinois.edu">chin5@illinois.edu</a></p>
+
+    <h2>What procedures are involved?</h2>
+    <p>The study procedures are:</p>
+    <ol>
+        <li>Completing a survey about your demographic information</li>
+        <li>Learning information online</li>
+        <li>Reporting what you have learned</li>
+        <li>Taking some cognitive ability tasks</li>
+    </ol>
+    <p>The study will last about 45 minutes.</p>
+
+    <h2>Will my study-related information be kept confidential?</h2>
+    <p>Faculty, students, and staff who may see your information will maintain confidentiality to the extent of laws and university policies. No personal identifiers will be collected. Participation is fully anonymous.</p>
+
+    <h2>Will I be reimbursed for any expenses or paid for my participation in this research?</h2>
+    <p>You will be paid $10 after the completion of the study. In addition, participants will receive $5 bonus if the accuracy of comprehension questions is higher than 90%.</p>
+
+    <h2>Can I withdraw or be removed from the study?</h2>
+    <p>If you decide to participate, you are free to withdraw your consent and discontinue participation at any time. Your participation in this research is voluntary. Your decision whether or not to participate, or to withdraw after beginning participation, will not affect your current or future dealings with the University of Illinois Urbana-Champaign.</p>
+
+    <h2>Will data collected from me be used for any other research?</h2>
+    <p>Your data will not be used or distributed for other research.</p>
+
+    <h2>What are the risks and benefits of the study?</h2>
+    <p>No risk is expected in this study; benefits related to this research include advancing our understandings in learning science.</p>
+
+    <h2>Who should I contact if I have questions?</h2>
+    <p>Contact the researcher Jessie Chin, Associate Professor in Information Sciences, <a href="mailto:chin5@illinois.edu">chin5@illinois.edu</a> if you have any questions about this study or your part in it, or if you have concerns or complaints about the research.</p>
+
+    <h2>What are my rights as a research subject?</h2>
+    <p>If you have any questions about your rights as a research subject, including concerns, complaints, or to offer input, you may call the Office for the Protection of Research Subjects (OPRS) at 217-333-2670 or e-mail OPRS at <a href="mailto:irb@illinois.edu">irb@illinois.edu</a>. If you would like to complete a brief survey to provide OPRS feedback about your experiences as a research participant, please follow the <a href="https://redcap.healthinstitute.illinois.edu/surveys/?s=47X9T4NE4X" target="_blank">link here</a>. You will have the option to provide feedback or concerns anonymously or you may provide your name and contact information for follow-up purposes.</p>
+
+    <p>Please print this consent form if you would like to retain a copy for your records.</p>
+
+    <p>I have read and understand the above consent form. I certify that I am a native speaker of English and aged 18 years old or older. By clicking the “Submit” button to enter the survey, I indicate my willingness to voluntarily take part in this study.</p>
+	</div>
+
+  <div class="cl0" style="font-size:20pt">
+    <span><b>
+      I have read and understand the above consent form, ... voluntarily take part in the study.
+    </b></span>
+    <br><br>
+
+    <!-- The form now posts to /demographic instead of demographic.php -->
+      <form id="form_consent"
+            action="{{ url_for('core.demographic') }}"
+            method="POST"
+            onsubmit="return saveConsent();">
+
+      {% if error %}
+      <p style="color:#b30000; margin:0 0 1em 0; font-weight:bold;">{{ error }}</p>
+      {% endif %}
+      <b>Participant ID:
+        <input
+          type="text"
+          name="participant_id"
+          id="participant_id"
+          style="width:300px;"
+          inputmode="numeric"
+          pattern="[0-9]+"
+          title="Participant ID must be numeric"
+          value="{{ participant_id|default('', true) }}"
+          oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+          required
+        />
+      </b>
+      (required)
+      <br><br>
+
+      <input type="checkbox"
+             name="consentCheck"
+             id="consentCheck"
+             value="Yes"
+             class="regular-checkbox big-checkbox"
+             required>
+      <label for="consentCheck"></label>
+      <span><b>Yes, I consent.</b></span>
+
+      <br><br>
+      <input type="image" 
+             name="submit" 
+             id="submit" 
+             src="{{ url_for('static', filename='images/start_button.gif') }}" 
+             alt="Start">
+    </form>
+  </div>
+
+  <script type="text/javascript">
+    function saveConsent() {
+      var input = document.getElementById('consentCheck').checked;
+      if (!input) {
+        alert('You must consent to participate in the study.');
+        return false;
+      } else {
+        return true;
+      }
+    }
+  </script>
+</body>
+</html>
