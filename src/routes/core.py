@@ -900,7 +900,18 @@ def task_c4():
     passTitle = session.get('passTitle', '')
     pageTitle = f"C4: {passTitle}"
     if request.method == "GET":
-        save_url(uid, sid, "", "", "", "", pageTypeID, pageTitle, request.url)
+        # 记录进入 C4 页面时的完整上下文，便于后续计算与追踪
+        save_url(
+            uid=uid,
+            sid=sid,
+            topID=session.get('topID', '1'),
+            subtopID=session.get('subtopID', ''),
+            conID=session.get('conID', '1'),
+            passID=session.get('passID', ''),
+            pageTypeID=pageTypeID,
+            pageTitle=pageTitle,
+            url=request.url,
+        )
 
     if request.method == "POST":
         ans = request.form.get("ans", "").strip()

@@ -1,76 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Comprehension Questions</title>
-  <base target="_top">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-</head>
-<body>
-<div class="container">
-    <h2>Comprehension Questions</h2>
-
-    {% if not questions_by_passage %}
-      <p>No comprehension questions are available at this time.</p>
-    {% else %}
-    <form method="POST" action="{{ url_for('core.done') }}">
-        {% set counter = namespace(value=1) %}
-        <div class="row" id="questionsGrid">
-        {% for block in questions_by_passage %}
-          {% for q in block.questions %}
-          <div class="col-md-6 question-item" data-index="{{ counter.value - 1 }}">
-            <div class="card mb-4">
-              <div class="card-header">Question {{ counter.value }}</div>
-              <div class="card-body">
-                  <p class="card-text">{{ q.questionText }}</p>
-                  
-                  <div class="form-check">
+  <head>
+    <meta charset="UTF-8">
+    <title>Comprehension Questions</title>
+    <base target="_top">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+      /* Make the entire option line clickable, with a soft hover effect */
+      .form-check-label {
+        display: block;
+        width: 100%;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.15s ease-in-out;
+      }
+      .form-check-label:hover {
+        background-color: #f1f3f5;
+      }
+      /* Adjust the vertical alignment of the radio button */
+      .form-check-input {
+        margin-top: 0.4rem;
+        margin-right: 10px;
+      }
+    </style>
+  </head>
+  
+  <body>
+  <div class="container">
+      <h2>Comprehension Questions</h2>
+  
+      {% if not questions_by_passage %}
+        <p>No comprehension questions are available at this time.</p>
+      {% else %}
+      <form method="POST" action="{{ url_for('core.done') }}">
+          {% set counter = namespace(value=1) %}
+          <div class="row" id="questionsGrid">
+          {% for block in questions_by_passage %}
+            {% for q in block.questions %}
+            <div class="col-md-6 question-item" data-index="{{ counter.value - 1 }}">
+              <div class="card mb-4">
+                <div class="card-header">Question {{ counter.value }}</div>
+                <div class="card-body">
+                    <p class="card-text">{{ q.questionText }}</p>
+  
+                    <label class="form-check-label">
                       <input class="form-check-input" type="radio" 
                              name="q_{{ q.questionID }}" value="a" required
                              {% if existing_answers.get(q.questionID) == 'a' %}checked{% endif %}>
-                      <label class="form-check-label">
-                          {{ q.choiceA }}
-                      </label>
-                  </div>
-
-                  <div class="form-check">
+                      {{ q.choiceA }}
+                    </label>
+  
+                    <label class="form-check-label">
                       <input class="form-check-input" type="radio" 
                              name="q_{{ q.questionID }}" value="b"
                              {% if existing_answers.get(q.questionID) == 'b' %}checked{% endif %}>
-                      <label class="form-check-label">
-                          {{ q.choiceB }}
-                      </label>
-                  </div>
-
-                  {% if q.choiceC %}
-                  <div class="form-check">
+                      {{ q.choiceB }}
+                    </label>
+  
+                    {% if q.choiceC %}
+                    <label class="form-check-label">
                       <input class="form-check-input" type="radio" 
                              name="q_{{ q.questionID }}" value="c"
                              {% if existing_answers.get(q.questionID) == 'c' %}checked{% endif %}>
-                      <label class="form-check-label">
-                          {{ q.choiceC }}
-                      </label>
-                  </div>
-                  {% endif %}
-
-                  {% if q.choiceD %}
-                  <div class="form-check">
+                      {{ q.choiceC }}
+                    </label>
+                    {% endif %}
+  
+                    {% if q.choiceD %}
+                    <label class="form-check-label">
                       <input class="form-check-input" type="radio" 
                              name="q_{{ q.questionID }}" value="d"
                              {% if existing_answers.get(q.questionID) == 'd' %}checked{% endif %}>
-                      <label class="form-check-label">
-                          {{ q.choiceD }}
-                      </label>
-                  </div>
-                  {% endif %}
+                      {{ q.choiceD }}
+                    </label>
+                    {% endif %}
+                </div>
               </div>
             </div>
-          </div>
-          {% set counter.value = counter.value + 1 %}
+            {% set counter.value = counter.value + 1 %}
+            {% endfor %}
           {% endfor %}
-        {% endfor %}
-        </div>
-
+          </div>
         <nav class="d-flex justify-content-between align-items-center mt-3" aria-label="Question pagination">
           <button type="button" class="btn btn-secondary" id="prevPage">Previous</button>
           <span id="pageIndicator" class="mx-3"></span>
