@@ -491,17 +491,18 @@ def prac_c3():
 
     pageTypeID = "prac_c3"
     pageTitle = f"C3: {passTitle}"
-    save_url(
-        uid,
-        sid,
-        practice_top_id,
-        str(subtopID),
-        str(conID),
-        passID,
-        pageTypeID,
-        pageTitle,
-        request.url,
-    )
+    if request.method == "GET":
+        save_url(
+            uid,
+            sid,
+            practice_top_id,
+            str(subtopID),
+            str(conID),
+            passID,
+            pageTypeID,
+            pageTitle,
+            request.url,
+        )
 
     if request.method == "POST":
         ans = request.form.get("ans", "").strip()
@@ -567,17 +568,18 @@ def prac_c4():
 
     pageTypeID = "prac_c4"
     pageTitle = f"C4 Prac: {passTitle}"
-    save_url(
-        uid,
-        sid,
-        practice_top_id,
-        str(subtopID),
-        str(conID),
-        passID,
-        pageTypeID,
-        pageTitle,
-        request.url,
-    )
+    if request.method == "GET":
+        save_url(
+            uid,
+            sid,
+            practice_top_id,
+            str(subtopID),
+            str(conID),
+            passID,
+            pageTypeID,
+            pageTitle,
+            request.url,
+        )
 
     if request.method == "POST":
         passid_override = request.form.get("savepassid", "").strip()
@@ -666,17 +668,18 @@ def prac_c1():
 
     pageTypeID = "prac_c1"
     pageTitle = f"C1 Prac: {passTitle}"
-    save_url(
-        uid,
-        sid,
-        practice_top_id,
-        str(subtopID),
-        str(conID),
-        passID,
-        pageTypeID,
-        pageTitle,
-        request.url,
-    )
+    if request.method == "GET":
+        save_url(
+            uid,
+            sid,
+            practice_top_id,
+            str(subtopID),
+            str(conID),
+            passID,
+            pageTypeID,
+            pageTitle,
+            request.url,
+        )
 
     if request.method == "POST":
         ans = request.form.get("ans", "").strip()
@@ -722,17 +725,18 @@ def prac_c2():
 
     pageTypeID = "prac_c2"
     pageTitle = f"C2 Prac: {passTitle}"
-    save_url(
-        uid,
-        sid,
-        practice_top_id,
-        str(subtopID),
-        str(conID),
-        passID,
-        pageTypeID,
-        pageTitle,
-        request.url,
-    )
+    if request.method == "GET":
+        save_url(
+            uid,
+            sid,
+            practice_top_id,
+            str(subtopID),
+            str(conID),
+            passID,
+            pageTypeID,
+            pageTitle,
+            request.url,
+        )
 
     if request.method == "POST":
         ans = request.form.get("ans", "").strip()

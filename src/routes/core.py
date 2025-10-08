@@ -740,7 +740,8 @@ def task_c1():
         if stored_fid:
             fid = stored_fid
 
-    save_url(uid, sid, topID, subtopID, conID, passID, pageTypeID, pageTitle, request.url)
+    if request.method == "GET":
+        save_url(uid, sid, topID, subtopID, conID, passID, pageTypeID, pageTitle, request.url)
 
     now = int(time.time())
     last_switch = session.get('lastPageSwitchUnixTime', now)
@@ -792,7 +793,8 @@ def task_c2():
     if not fid:
         fid = session.get('formal_pending_fid', 'same')
 
-    save_url(uid, sid, topID, subtopID, conID, passID, pageTypeID, pageTitle, request.url)
+    if request.method == "GET":
+        save_url(uid, sid, topID, subtopID, conID, passID, pageTypeID, pageTitle, request.url)
 
     if request.method == "POST":
         ans = request.form.get("ans", "").strip()
@@ -842,7 +844,8 @@ def task_c3():
     if not fid:
         fid = session.get('formal_pending_fid', 'same')
 
-    save_url(uid, sid, topID, subtopID, conID, passID, pageTypeID, pageTitle, request.url)
+    if request.method == "GET":
+        save_url(uid, sid, topID, subtopID, conID, passID, pageTypeID, pageTitle, request.url)
 
     if request.method == "POST":
         ans = request.form.get("ans", "").strip()
@@ -896,7 +899,8 @@ def task_c4():
     pageTypeID = "c4"
     passTitle = session.get('passTitle', '')
     pageTitle = f"C4: {passTitle}"
-    save_url(uid, sid, "", "", "", "", pageTypeID, pageTitle, request.url)
+    if request.method == "GET":
+        save_url(uid, sid, "", "", "", "", pageTypeID, pageTitle, request.url)
 
     if request.method == "POST":
         ans = request.form.get("ans", "").strip()
@@ -1447,8 +1451,8 @@ def questions():
         return redirect(url_for('core.index'))
 
     topID = "1"
-    pageTypeID = "DONE"
-    pageTitle = "DONE"
+    pageTypeID = "questions"
+    pageTitle = "Comprehension Questions"
     save_url(uid, sid, topID, "", "", "", pageTypeID, pageTitle, request.url)
 
     if request.method == "POST" and request.form.get("voc1", "").strip() != "":
@@ -1589,6 +1593,8 @@ def done():
 
     bonusWordsCnt = 0
     topID = "1"
+    # Log entering DONE page so the previous page's stay time (e.g., questions) can be computed
+    save_url(uid, sid, topID, "", "", "", "DONE", "DONE", request.url)
 
     pass_ids = []
     pass_conn = None
