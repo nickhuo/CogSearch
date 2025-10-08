@@ -10,7 +10,7 @@
 <body>
 
   <!-- TIMER SECTION -->
-  <div id="timer" class="timer">
+  <div id="timer" class="timer" data-remaining-time="{{ session.get('remainingTime', 0) }}" data-redirect="{{ session.get('redirectPage', '') }}">
     <p><strong>TIME REMAINS:</strong></p>
     <script>
       /*
@@ -19,9 +19,9 @@
             session['remainingTime'] = 30
             session['redirectPage'] = "/some_next_page"
       */
-      var RemainingTime = {{ session.get('remainingTime', 0) | int }};
-      RemainingTime = Number(RemainingTime)
-      console.log({{session.get('remainingTime')}})
+      var timerEl = document.getElementById('timer');
+      var RemainingTime = Number((timerEl && timerEl.dataset && timerEl.dataset.remainingTime) || 0);
+      console.log(RemainingTime)
       console.log("yooooo")
       console.log(RemainingTime)
       var BackColor = "white";
@@ -31,7 +31,7 @@
       var LeadingZero = true;
       var DisplayFormat = "%%M%% Minutes, %%S%% Seconds.";
       var FinishMessage = "Time is UP!";
-      var RedirectPage = "{{ session.get('redirectPage', '') }}";
+      var RedirectPage = (timerEl && timerEl.dataset && timerEl.dataset.redirect) || "";
     </script>
     <!-- Load your countdown.js from static/js/countdown.js -->
     <script src="{{ url_for('static', filename='js/countdown.js') }}"></script>
@@ -72,10 +72,11 @@
         {% else %}
           <!-- Not visited yet => display as a clickable text box -->
           <td class="cl5">
-            <div style="width: 100%; border: 1px solid #007BFF; padding: 10px; background-color: #e9f5ff; font-size: 16pt; color: #0B3861; border-radius: 4px; cursor: pointer;"
-                onclick="window.top.location.href='{{ url_for('practice.prac_b', subtop=subtop_id, passOrd='01', lastPage='a') }}';">
-              {{ subtop_title }}
-            </div>
+            <a href="{{ url_for('practice.prac_b', subtop=subtop_id, passOrd='01', lastPage='a') }}" target="_top" style="text-decoration: none;">
+              <div style="width: 100%; border: 1px solid #007BFF; padding: 10px; background-color: #e9f5ff; font-size: 16pt; color: #0B3861; border-radius: 4px; cursor: pointer;">
+                {{ subtop_title }}
+              </div>
+            </a>
           </td>
         {% endif %}
 

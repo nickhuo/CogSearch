@@ -221,14 +221,8 @@ def prac_a():
             ans = request.form.get("ans", "")
             passid_to_save = request.form.get("savepassid", "")
             if ans:
-                cursor.execute(
-                    """
-                    UPDATE tb15_prac_passQop
-                    SET c3Ans=%s
-                    WHERE sid=%s AND uid=%s AND passID=%s
-                    """,
-                    (ans, sid, uid, passid_to_save),
-                )
+                # 统一使用保存函数，自动处理不存在记录时的插入
+                save_pass_answer("c3", ans, table="tb15_prac_passQop", pass_id=passid_to_save)
             visited_subtop = sorted(_get_visited_subtopics())
 
             session.pop("practice_pending_stage", None)
@@ -411,14 +405,8 @@ def prac_b():
                 ans_to_save = request.form.get('ans', '')
                 passid_to_save = request.form.get('savepassid', '')
                 if ans_to_save:
-                    cursor.execute(
-                        """
-                        UPDATE tb15_prac_passQop
-                        SET c3Ans=%s
-                        WHERE sid=%s AND uid=%s AND passID=%s
-                        """,
-                        (ans_to_save, sid, uid, passid_to_save),
-                    )
+                    # 统一使用保存函数，自动处理不存在记录时的插入
+                    save_pass_answer('c3', ans_to_save, table="tb15_prac_passQop", pass_id=passid_to_save)
         elif lastPage == "c4":
             session["lastPageSwitchUnixTime"] = now
             session["redirectPage"] = url_for("practice.prac_c1", fid="done")
@@ -427,14 +415,8 @@ def prac_b():
                 c4_ans = request.form.get("ans", "").strip()
                 passid_to_save = request.form.get("savepassid", "").strip()
                 if c4_ans and passid_to_save:
-                    cursor.execute(
-                        """
-                        UPDATE tb15_prac_passQop
-                        SET c4Ans=%s
-                        WHERE sid=%s AND uid=%s AND passID=%s
-                        """,
-                        (c4_ans, sid, uid, passid_to_save),
-                    )
+                    # 统一使用保存函数，自动处理不存在记录时的插入
+                    save_pass_answer('c4', c4_ans, table="tb15_prac_passQop", pass_id=passid_to_save)
                     cursor.execute(
                         """
                         UPDATE tb16_prac_taskTime
@@ -509,17 +491,18 @@ def prac_c3():
 
     pageTypeID = "prac_c3"
     pageTitle = f"C3: {passTitle}"
-    save_url(
-        uid,
-        sid,
-        practice_top_id,
-        str(subtopID),
-        str(conID),
-        passID,
-        pageTypeID,
-        pageTitle,
-        request.url,
-    )
+    if request.method == "GET":
+        save_url(
+            uid,
+            sid,
+            practice_top_id,
+            str(subtopID),
+            str(conID),
+            passID,
+            pageTypeID,
+            pageTitle,
+            request.url,
+        )
 
     if request.method == "POST":
         ans = request.form.get("ans", "").strip()
@@ -585,17 +568,18 @@ def prac_c4():
 
     pageTypeID = "prac_c4"
     pageTitle = f"C4 Prac: {passTitle}"
-    save_url(
-        uid,
-        sid,
-        practice_top_id,
-        str(subtopID),
-        str(conID),
-        passID,
-        pageTypeID,
-        pageTitle,
-        request.url,
-    )
+    if request.method == "GET":
+        save_url(
+            uid,
+            sid,
+            practice_top_id,
+            str(subtopID),
+            str(conID),
+            passID,
+            pageTypeID,
+            pageTitle,
+            request.url,
+        )
 
     if request.method == "POST":
         passid_override = request.form.get("savepassid", "").strip()
@@ -684,17 +668,18 @@ def prac_c1():
 
     pageTypeID = "prac_c1"
     pageTitle = f"C1 Prac: {passTitle}"
-    save_url(
-        uid,
-        sid,
-        practice_top_id,
-        str(subtopID),
-        str(conID),
-        passID,
-        pageTypeID,
-        pageTitle,
-        request.url,
-    )
+    if request.method == "GET":
+        save_url(
+            uid,
+            sid,
+            practice_top_id,
+            str(subtopID),
+            str(conID),
+            passID,
+            pageTypeID,
+            pageTitle,
+            request.url,
+        )
 
     if request.method == "POST":
         ans = request.form.get("ans", "").strip()
@@ -740,17 +725,18 @@ def prac_c2():
 
     pageTypeID = "prac_c2"
     pageTitle = f"C2 Prac: {passTitle}"
-    save_url(
-        uid,
-        sid,
-        practice_top_id,
-        str(subtopID),
-        str(conID),
-        passID,
-        pageTypeID,
-        pageTitle,
-        request.url,
-    )
+    if request.method == "GET":
+        save_url(
+            uid,
+            sid,
+            practice_top_id,
+            str(subtopID),
+            str(conID),
+            passID,
+            pageTypeID,
+            pageTitle,
+            request.url,
+        )
 
     if request.method == "POST":
         ans = request.form.get("ans", "").strip()
