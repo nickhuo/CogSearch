@@ -5,25 +5,7 @@
     <title>Comprehension Questions</title>
     <base target="_top">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <style>
-      /* Make the entire option line clickable, with a soft hover effect */
-      .form-check-label {
-        display: block;
-        width: 100%;
-        padding: 8px 12px;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: background-color 0.15s ease-in-out;
-      }
-      .form-check-label:hover {
-        background-color: #f1f3f5;
-      }
-      /* Adjust the vertical alignment of the radio button */
-      .form-check-input {
-        margin-top: 0.4rem;
-        margin-right: 10px;
-      }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/questions_style.css') }}">
   </head>
   
   <body>
@@ -126,6 +108,23 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
 
+    // Equalize visible card min-heights on current page (elastic growth permitted)
+    var visibleCards = [];
+    var maxHeight = 0;
+    for (var j = start; j < Math.min(end, totalItems); j++) {
+      var itemEl = items[j];
+      if (!itemEl || itemEl.style.display === 'none') continue;
+      var cardEl = itemEl.querySelector('.card');
+      if (!cardEl) continue;
+      cardEl.style.minHeight = '0px';
+      var h = cardEl.offsetHeight;
+      if (h > maxHeight) maxHeight = h;
+      visibleCards.push(cardEl);
+    }
+    for (var k = 0; k < visibleCards.length; k++) {
+      visibleCards[k].style.minHeight = maxHeight + 'px';
+    }
+
     if (prevBtn) prevBtn.disabled = currentPage === 1;
     if (nextBtn) nextBtn.disabled = currentPage === totalPages;
     if (indicator) {
@@ -174,6 +173,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   renderPage(1);
+  // Re-equalize on window resize
+  window.addEventListener('resize', function() { renderPage(currentPage); });
 });
 </script>
 </body>
