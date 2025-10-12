@@ -1,7 +1,7 @@
 /* ===== Theme aligned to vocab_style.css ===== */
 body {
   font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: #f5f5f5;
+  background-color: #f0f0f0;
   color: #333333;
 }
 
@@ -22,7 +22,7 @@ body {
   color: #333333;
   background-color: #ffffff !important; /* override bootstrap */
   border-bottom: 1px solid #e0e0e0;
-  border-left: 5px solid #4CAF50;
+  border-left: 5px solid #0066ff;
 }
 
 .card-text {
@@ -50,8 +50,8 @@ body {
 }
 
 .form-check-label:hover {
-  background-color: #ecf7ec;
-  border-color: #4CAF50;
+  background-color: #e6f0ff;
+  border-color: #0066ff;
 }
 
 .form-check-label:active {
@@ -60,9 +60,9 @@ body {
 
 /* Highlight when selected (modern browsers support :has) */
 .form-check-label:has(input[type="radio"]:checked) {
-  border-color: #4CAF50;
-  background-color: #e8f5e8;
-  color: #4CAF50;
+  border-color: #0066ff;
+  background-color: #e6f0ff;
+  color: #0066ff;
   font-weight: 600;
 }
 
@@ -79,21 +79,21 @@ body {
   transform: scale(1.3);
   transform-origin: left center;
   cursor: pointer;
-  accent-color: #000000;
+  accent-color: #0066ff;
   flex-shrink: 0;
 }
 
 /* Buttons to match theme */
 .btn-primary {
-  background-color: #4CAF50 !important;
-  border-color: #4CAF50 !important;
+  background-color: #0066ff !important;
+  border-color: #0066ff !important;
   color: #ffffff !important;
 }
 
 .btn-primary:hover,
 .btn-primary:focus {
-  background-color: #43a047 !important;
-  border-color: #43a047 !important;
+  background-color: #0057e6 !important;
+  border-color: #0057e6 !important;
 }
 
 .btn-secondary {
@@ -104,8 +104,8 @@ body {
 
 .btn-secondary:hover,
 .btn-secondary:focus {
-  background-color: #ecf7ec !important;
-  border-color: #4CAF50 !important;
+  background-color: #e6f0ff !important;
+  border-color: #0066ff !important;
   color: #333333 !important;
 }
 
