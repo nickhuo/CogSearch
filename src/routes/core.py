@@ -319,7 +319,12 @@ def instruction():
                 )
 
         strDomain = "01#"
-        remain = uid % 6
+        # Ensure uid is an integer before modulo operation to avoid runtime errors
+        try:
+            uid_int = int(uid)
+        except (TypeError, ValueError):
+            uid_int = 0
+        remain = uid_int % 6
         if remain == 1:
             strCon = "1#2#3#1#2#3#1#2#3#1#2#3#"
         elif remain == 2:
@@ -445,6 +450,11 @@ def task_a():
                             str(session.get('topID', 1)),
                         ),
                     )
+                    # Increment conDone by 1
+                    cursor.execute(
+                        "UPDATE tb1_user SET conDone = conDone + 1 WHERE sid = %s AND uid = %s",
+                        (sid, uid),
+                    )
                 session.pop('formal_pending_stage', None)
                 session.pop('formal_pending_passID', None)
                 session.pop('formal_pending_fid', None)
@@ -538,9 +548,36 @@ def task_b():
         return "No user session found; please start from the beginning.", 400
 
     subtopID = safe_int_param(request.args.get('subtop'), 0)
-    conID = safe_int_param(session.get('conID'), 1)
     passOrd = safe_int_param(request.args.get('passOrd'), 1)
     lastPage = request.args.get('lastPage', '')
+
+    # Consume conIDorder and update session['conID'] before using it
+    pre_link = None
+    pre_cursor = None
+    try:
+        pre_link = get_db_connection()
+        pre_cursor = pre_link.cursor(dictionary=True)
+        pre_cursor.execute(
+            "SELECT conIDorder, conDone FROM tb1_user WHERE uid = %s AND sid = %s",
+            (uid, sid),
+        )
+        user_row = pre_cursor.fetchone()
+        if user_row:
+            con_order_str = user_row.get('conIDorder') or ''
+            con_done = user_row.get('conDone') or 0
+            if con_order_str:
+                parts = [p for p in con_order_str.split('#') if p]
+                if isinstance(con_done, int) and 0 <= con_done < len(parts):
+                    session['conID'] = safe_int_param(parts[con_done], 1)
+    except Exception as _:
+        # If anything goes wrong here, fall back to existing session value
+        pass
+    finally:
+        if pre_link and pre_link.is_connected():
+            pre_cursor.close()
+            pre_link.close()
+
+    conID = safe_int_param(session.get('conID'), 1)
 
     try:
         passOrderInt = int(passOrd)
@@ -900,7 +937,18 @@ def task_c4():
     passTitle = session.get('passTitle', '')
     pageTitle = f"C4: {passTitle}"
     if request.method == "GET":
-        save_url(uid, sid, "", "", "", "", pageTypeID, pageTitle, request.url)
+        # 记录进入 C4 页面时的完整上下文，便于后续计算与追踪
+        save_url(
+            uid=uid,
+            sid=sid,
+            topID=session.get('topID', '1'),
+            subtopID=session.get('subtopID', ''),
+            conID=session.get('conID', '1'),
+            passID=session.get('passID', ''),
+            pageTypeID=pageTypeID,
+            pageTitle=pageTitle,
+            url=request.url,
+        )
 
     if request.method == "POST":
         ans = request.form.get("ans", "").strip()

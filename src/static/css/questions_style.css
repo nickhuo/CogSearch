@@ -1,0 +1,125 @@
+/* ===== Theme aligned to vocab_style.css ===== */
+body {
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #f0f0f0;
+  color: #333333;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+  font-weight: 600;
+  color: #333333;
+  background-color: #ffffff !important; /* override bootstrap */
+  border-bottom: 1px solid #e0e0e0;
+  border-left: 5px solid #0066ff;
+}
+
+.card-text {
+  color: #000000;
+  font-size: 14pt;
+}
+
+/* Make the entire option line clickable, match vocab option style */
+.form-check-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #d0d0d0;
+  background-color: #ffffff;
+  font-size: 12pt;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+  white-space: normal;            /* allow wrapping */
+  overflow-wrap: anywhere;        /* break long words/URLs if needed */
+  word-break: break-word;         /* compatibility */
+}
+
+.form-check-label:hover {
+  background-color: #e6f0ff;
+  border-color: #0066ff;
+}
+
+.form-check-label:active {
+  transform: scale(0.98);
+}
+
+/* Highlight when selected (modern browsers support :has) */
+.form-check-label:has(input[type="radio"]:checked) {
+  border-color: #0066ff;
+  background-color: #e6f0ff;
+  color: #0066ff;
+  font-weight: 600;
+}
+
+/* Spacing between adjacent options */
+.card-body .form-check-label + .form-check-label {
+  margin-top: 10px;
+}
+
+/* Adjust radio appearance to match theme */
+.form-check-input {
+  position: static !important; /* override Bootstrap absolute positioning */
+  display: inline-block;
+  margin: 0 10px 0 0; /* spacing to text */
+  transform: scale(1.3);
+  transform-origin: left center;
+  cursor: pointer;
+  accent-color: #0066ff;
+  flex-shrink: 0;
+}
+
+/* Buttons to match theme */
+.btn-primary {
+  background-color: #0066ff !important;
+  border-color: #0066ff !important;
+  color: #ffffff !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #0057e6 !important;
+  border-color: #0057e6 !important;
+}
+
+.btn-secondary {
+  background-color: #ffffff !important;
+  color: #333333 !important;
+  border: 1px solid #d0d0d0 !important;
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus {
+  background-color: #e6f0ff !important;
+  border-color: #0066ff !important;
+  color: #333333 !important;
+}
+
+#pageIndicator {
+  color: #333333;
+}
+
+/* Equal height cards per page */
+.question-item {
+  display: flex;
+}
+.question-item .card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0; /* JS will set min-height per page; card can grow */
+}

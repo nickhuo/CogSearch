@@ -5,16 +5,7 @@
   <title>Vocabulary Test</title>
   <base target="_top">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-  <style>
-    .vocab-grid { display: grid; grid-template-columns: repeat(3, minmax(280px, 1fr)); grid-column-gap: 16px; grid-row-gap: 12px; align-items: start; max-width: 1200px; margin: 0 auto; }
-    .vocab-item { padding: 8px 0; }
-    .vocab-question { font-size:16pt; margin-bottom: 4px; }
-    .vocab-options { font-size:16pt; line-height: 1.6; }
-    #submit { display: block; margin: 12px auto 0 auto; }
-    .vocab-container { max-width: 1240px; margin: 16px auto; padding: 0 12px; }
-    .section-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); padding: 16px 20px; margin-bottom: 16px; }
-    .section-title { font-size: 18pt; margin: 0 0 8px 0; }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/vocab_style.css') }}">
 </head>
 <body>
   <div class="vocab-container">
@@ -31,180 +22,216 @@
         </p>
       </div>
     </section>
+
     <section class="section-card" id="task">
       <div class="section-title">Vocabulary Task</div>
       <form id="form_vocab" name="form_vocab" action="{{ action_url }}" method="POST" onsubmit="return saveVocab();">
-      <div class="vocab-grid">
-        <div class="vocab-item">
-          <div class="vocab-question">1. <b>mumble</b></div>
-          <div class="vocab-options">
-            <input type="radio" name="voc1" id="voc1_1" value="1" required/>1-speak indistinctly<br>
-            <input type="radio" name="voc1" id="voc1_2" value="2"/>2-complain<br>
-            <input type="radio" name="voc1" id="voc1_3" value="3"/>3-handle awkwardly<br>
-            <input type="radio" name="voc1" id="voc1_4" value="4"/>4-fall over something<br>
-            <input type="radio" name="voc1" id="voc1_5" value="5"/>5-tear apart<br>
-            <input type="radio" name="voc1" id="voc1_6" value="6"/>6-Not sure about the answer<br>
+        <div class="vocab-grid">
+
+          <!-- 1 -->
+          <div class="vocab-item">
+            <div class="vocab-question">1. <b>mumble</b></div>
+            <div class="vocab-options">
+              <label class="option-label"><input type="radio" name="voc1" value="1" required><span>1 - speak indistinctly</span></label>
+              <label class="option-label"><input type="radio" name="voc1" value="2"><span>2 - complain</span></label>
+              <label class="option-label"><input type="radio" name="voc1" value="3"><span>3 - handle awkwardly</span></label>
+              <label class="option-label"><input type="radio" name="voc1" value="4"><span>4 - fall over something</span></label>
+              <label class="option-label"><input type="radio" name="voc1" value="5"><span>5 - tear apart</span></label>
+              <label class="option-label"><input type="radio" name="voc1" value="6"><span>6 - Not sure about the answer</span></label>
+            </div>
           </div>
-        </div>
-        <div class="vocab-item">
-          <div class="vocab-question">2. <b>perspire</b></div>
-          <div class="vocab-options">
-            <input type="radio" name="voc2" id="voc2_1" value="1" required/>1-struggle<br>
-            <input type="radio" name="voc2" id="voc2_2" value="2"/>2-sweat<br>
-            <input type="radio" name="voc2" id="voc2_3" value="3"/>3-happen<br>
-            <input type="radio" name="voc2" id="voc2_4" value="4"/>4-penetrate<br>
-            <input type="radio" name="voc2" id="voc2_5" value="5"/>5-submit<br>
-            <input type="radio" name="voc2" id="voc2_6" value="6"/>6-Not sure about the answer<br>
+
+          <!-- 2 -->
+          <div class="vocab-item">
+            <div class="vocab-question">2. <b>perspire</b></div>
+            <div class="vocab-options">
+              <label class="option-label"><input type="radio" name="voc2" value="1" required><span>1 - struggle</span></label>
+              <label class="option-label"><input type="radio" name="voc2" value="2"><span>2 - sweat</span></label>
+              <label class="option-label"><input type="radio" name="voc2" value="3"><span>3 - happen</span></label>
+              <label class="option-label"><input type="radio" name="voc2" value="4"><span>4 - penetrate</span></label>
+              <label class="option-label"><input type="radio" name="voc2" value="5"><span>5 - submit</span></label>
+              <label class="option-label"><input type="radio" name="voc2" value="6"><span>6 - Not sure about the answer</span></label>
+            </div>
           </div>
-        </div>
-        <div class="vocab-item">
-          <div class="vocab-question">3. <b>gush</b></div>
-          <div class="vocab-options">
-            <input type="radio" name="voc3" id="voc3_1" value="1" required/>1-giggle<br>
-            <input type="radio" name="voc3" id="voc3_2" value="2"/>2-spout<br>
-            <input type="radio" name="voc3" id="voc3_3" value="3"/>3-sprinkle<br>
-            <input type="radio" name="voc3" id="voc3_4" value="4"/>4-hurry<br>
-            <input type="radio" name="voc3" id="voc3_5" value="5"/>5-cry<br>
-            <input type="radio" name="voc3" id="voc3_6" value="6"/>6-Not sure about the answer<br>
+
+          <!-- 3 -->
+          <div class="vocab-item">
+            <div class="vocab-question">3. <b>gush</b></div>
+            <div class="vocab-options">
+              <label class="option-label"><input type="radio" name="voc3" value="1" required><span>1 - giggle</span></label>
+              <label class="option-label"><input type="radio" name="voc3" value="2"><span>2 - spout</span></label>
+              <label class="option-label"><input type="radio" name="voc3" value="3"><span>3 - sprinkle</span></label>
+              <label class="option-label"><input type="radio" name="voc3" value="4"><span>4 - hurry</span></label>
+              <label class="option-label"><input type="radio" name="voc3" value="5"><span>5 - cry</span></label>
+              <label class="option-label"><input type="radio" name="voc3" value="6"><span>6 - Not sure about the answer</span></label>
+            </div>
           </div>
-        </div>
-        <div class="vocab-item">
-          <div class="vocab-question">4. <b>massive</b></div>
-          <div class="vocab-options">
-            <input type="radio" name="voc4" id="voc4_1" value="1" required/>1-strong and muscular<br>
-            <input type="radio" name="voc4" id="voc4_2" value="2"/>2-thickly populated<br>
-            <input type="radio" name="voc4" id="voc4_3" value="3"/>3-ugly and awkward<br>
-            <input type="radio" name="voc4" id="voc4_4" value="4"/>4-huge and solid<br>
-            <input type="radio" name="voc4" id="voc4_5" value="5"/>5-everlasting<br>
-            <input type="radio" name="voc4" id="voc4_6" value="6"/>6-Not sure about the answer<br>
+
+          <!-- 4 -->
+          <div class="vocab-item">
+            <div class="vocab-question">4. <b>massive</b></div>
+            <div class="vocab-options">
+              <label class="option-label"><input type="radio" name="voc4" value="1" required><span>1 - strong and muscular</span></label>
+              <label class="option-label"><input type="radio" name="voc4" value="2"><span>2 - thickly populated</span></label>
+              <label class="option-label"><input type="radio" name="voc4" value="3"><span>3 - ugly and awkward</span></label>
+              <label class="option-label"><input type="radio" name="voc4" value="4"><span>4 - huge and solid</span></label>
+              <label class="option-label"><input type="radio" name="voc4" value="5"><span>5 - everlasting</span></label>
+              <label class="option-label"><input type="radio" name="voc4" value="6"><span>6 - Not sure about the answer</span></label>
+            </div>
           </div>
-        </div>
-        <div class="vocab-item">
-          <div class="vocab-question">5. <b>feign</b></div>
-          <div class="vocab-options">
-            <input type="radio" name="voc5" id="voc5_1" value="1" required/>1-pretend<br>
-            <input type="radio" name="voc5" id="voc5_2" value="2"/>2-prefer<br>
-            <input type="radio" name="voc5" id="voc5_3" value="3"/>3-wear<br>
-            <input type="radio" name="voc5" id="voc5_4" value="4"/>4-be cautious<br>
-            <input type="radio" name="voc5" id="voc5_5" value="5"/>5-surrender<br>
-            <input type="radio" name="voc5" id="voc5_6" value="6"/>6-Not sure about the answer<br>
+
+          <!-- 5 -->
+          <div class="vocab-item">
+            <div class="vocab-question">5. <b>feign</b></div>
+            <div class="vocab-options">
+              <label class="option-label"><input type="radio" name="voc5" value="1" required><span>1 - pretend</span></label>
+              <label class="option-label"><input type="radio" name="voc5" value="2"><span>2 - prefer</span></label>
+              <label class="option-label"><input type="radio" name="voc5" value="3"><span>3 - wear</span></label>
+              <label class="option-label"><input type="radio" name="voc5" value="4"><span>4 - be cautious</span></label>
+              <label class="option-label"><input type="radio" name="voc5" value="5"><span>5 - surrender</span></label>
+              <label class="option-label"><input type="radio" name="voc5" value="6"><span>6 - Not sure about the answer</span></label>
+            </div>
           </div>
-        </div>
-        <div class="vocab-item">
-          <div class="vocab-question">6. <b>unwary</b></div>
-          <div class="vocab-options">
-            <input type="radio" name="voc6" id="voc6_1" value="1" required/>1-unusual<br>
-            <input type="radio" name="voc6" id="voc6_2" value="2"/>2-deserted<br>
-            <input type="radio" name="voc6" id="voc6_3" value="3"/>3-incautious<br>
-            <input type="radio" name="voc6" id="voc6_4" value="4"/>4-sudden<br>
-            <input type="radio" name="voc6" id="voc6_5" value="5"/>5-tireless<br>
-            <input type="radio" name="voc6" id="voc6_6" value="6"/>6-Not sure about the answer<br>
+
+          <!-- 6 -->
+          <div class="vocab-item">
+            <div class="vocab-question">6. <b>unwary</b></div>
+            <div class="vocab-options">
+              <label class="option-label"><input type="radio" name="voc6" value="1" required><span>1 - unusual</span></label>
+              <label class="option-label"><input type="radio" name="voc6" value="2"><span>2 - deserted</span></label>
+              <label class="option-label"><input type="radio" name="voc6" value="3"><span>3 - incautious</span></label>
+              <label class="option-label"><input type="radio" name="voc6" value="4"><span>4 - sudden</span></label>
+              <label class="option-label"><input type="radio" name="voc6" value="5"><span>5 - tireless</span></label>
+              <label class="option-label"><input type="radio" name="voc6" value="6"><span>6 - Not sure about the answer</span></label>
+            </div>
           </div>
-        </div>
-        <div class="vocab-item">
-          <div class="vocab-question">7. <b>veer</b></div>
-          <div class="vocab-options">
-            <input type="radio" name="voc7" id="voc7_1" value="1" required/>1-change direction<br>
-            <input type="radio" name="voc7" id="voc7_2" value="2"/>2-hesitate<br>
-            <input type="radio" name="voc7" id="voc7_3" value="3"/>3-catch sight of<br>
-            <input type="radio" name="voc7" id="voc7_4" value="4"/>4-cover with a thin layer<br>
-            <input type="radio" name="voc7" id="voc7_5" value="5"/>5-slide<br>
-            <input type="radio" name="voc7" id="voc7_6" value="6"/>6-Not sure about the answer<br>
+
+          <!-- 7 -->
+          <div class="vocab-item">
+            <div class="vocab-question">7. <b>veer</b></div>
+            <div class="vocab-options">
+              <label class="option-label"><input type="radio" name="voc7" value="1" required><span>1 - change direction</span></label>
+              <label class="option-label"><input type="radio" name="voc7" value="2"><span>2 - hesitate</span></label>
+              <label class="option-label"><input type="radio" name="voc7" value="3"><span>3 - catch sight of</span></label>
+              <label class="option-label"><input type="radio" name="voc7" value="4"><span>4 - cover with a thin layer</span></label>
+              <label class="option-label"><input type="radio" name="voc7" value="5"><span>5 - slide</span></label>
+              <label class="option-label"><input type="radio" name="voc7" value="6"><span>6 - Not sure about the answer</span></label>
+            </div>
           </div>
-        </div>
-        <div class="vocab-item">
-          <div class="vocab-question">8. <b>orthodox</b></div>
-          <div class="vocab-options">
-            <input type="radio" name="voc8" id="voc8_1" value="1" required/>1-conventional<br>
-            <input type="radio" name="voc8" id="voc8_2" value="2"/>2-straight<br>
-            <input type="radio" name="voc8" id="voc8_3" value="3"/>3-surgical<br>
-            <input type="radio" name="voc8" id="voc8_4" value="4"/>4-right-angled<br>
-            <input type="radio" name="voc8" id="voc8_5" value="5"/>5-religious<br>
-            <input type="radio" name="voc8" id="voc8_6" value="6"/>6-Not sure about the answer<br>
+
+          <!-- 8 -->
+          <div class="vocab-item">
+            <div class="vocab-question">8. <b>orthodox</b></div>
+            <div class="vocab-options">
+              <label class="option-label"><input type="radio" name="voc8" value="1" required><span>1 - conventional</span></label>
+              <label class="option-label"><input type="radio" name="voc8" value="2"><span>2 - straight</span></label>
+              <label class="option-label"><input type="radio" name="voc8" value="3"><span>3 - surgical</span></label>
+              <label class="option-label"><input type="radio" name="voc8" value="4"><span>4 - right-angled</span></label>
+              <label class="option-label"><input type="radio" name="voc8" value="5"><span>5 - religious</span></label>
+              <label class="option-label"><input type="radio" name="voc8" value="6"><span>6 - Not sure about the answer</span></label>
+            </div>
           </div>
-        </div>
-        <div class="vocab-item">
-          <div class="vocab-question">9. <b>stripling</b></div>
-          <div class="vocab-options">
-            <input type="radio" name="voc9" id="voc9_1" value="1" required/>1-stream<br>
-            <input type="radio" name="voc9" id="voc9_2" value="2"/>2-narrow path<br>
-            <input type="radio" name="voc9" id="voc9_3" value="3"/>3-engraving<br>
-            <input type="radio" name="voc9" id="voc9_4" value="4"/>4-lad<br>
-            <input type="radio" name="voc9" id="voc9_5" value="5"/>5-beginner<br>
-            <input type="radio" name="voc9" id="voc9_6" value="6"/>6-Not sure about the answer<br>
+
+          <!-- 9 -->
+          <div class="vocab-item">
+            <div class="vocab-question">9. <b>stripling</b></div>
+            <div class="vocab-options">
+              <label class="option-label"><input type="radio" name="voc9" value="1" required><span>1 - stream</span></label>
+              <label class="option-label"><input type="radio" name="voc9" value="2"><span>2 - narrow path</span></label>
+              <label class="option-label"><input type="radio" name="voc9" value="3"><span>3 - engraving</span></label>
+              <label class="option-label"><input type="radio" name="voc9" value="4"><span>4 - lad</span></label>
+              <label class="option-label"><input type="radio" name="voc9" value="5"><span>5 - beginner</span></label>
+              <label class="option-label"><input type="radio" name="voc9" value="6"><span>6 - Not sure about the answer</span></label>
+            </div>
           </div>
-        </div>
-        <div class="vocab-item">
-          <div class="vocab-question">10. <b>salubrious</b></div>
-          <div class="vocab-options">
-            <input type="radio" name="voc10" id="voc10_1" value="1" required/>1-mirthful<br>
-            <input type="radio" name="voc10" id="voc10_2" value="2"/>2-indecent<br>
-            <input type="radio" name="voc10" id="voc10_3" value="3"/>3-salty<br>
-            <input type="radio" name="voc10" id="voc10_4" value="4"/>4-mournful<br>
-            <input type="radio" name="voc10" id="voc10_5" value="5"/>5-healthful<br>
-            <input type="radio" name="voc10" id="voc10_6" value="6"/>6-Not sure about the answer<br>
+
+          <!-- 10 -->
+          <div class="vocab-item">
+            <div class="vocab-question">10. <b>salubrious</b></div>
+            <div class="vocab-options">
+              <label class="option-label"><input type="radio" name="voc10" value="1" required><span>1 - mirthful</span></label>
+              <label class="option-label"><input type="radio" name="voc10" value="2"><span>2 - indecent</span></label>
+              <label class="option-label"><input type="radio" name="voc10" value="3"><span>3 - salty</span></label>
+              <label class="option-label"><input type="radio" name="voc10" value="4"><span>4 - mournful</span></label>
+              <label class="option-label"><input type="radio" name="voc10" value="5"><span>5 - healthful</span></label>
+              <label class="option-label"><input type="radio" name="voc10" value="6"><span>6 - Not sure about the answer</span></label>
+            </div>
           </div>
-        </div>
-        <div class="vocab-item">
-          <div class="vocab-question">11. <b>limpid</b></div>
-          <div class="vocab-options">
-            <input type="radio" name="voc11" id="voc11_1" value="1" required/>1-lazy<br>
-            <input type="radio" name="voc11" id="voc11_2" value="2"/>2-crippled<br>
-            <input type="radio" name="voc11" id="voc11_3" value="3"/>3-clear<br>
-            <input type="radio" name="voc11" id="voc11_4" value="4"/>4-hot<br>
-            <input type="radio" name="voc11" id="voc11_5" value="5"/>5-slippery<br>
-            <input type="radio" name="voc11" id="voc11_6" value="6"/>6-Not sure about the answer<br>
+
+          <!-- 11 -->
+          <div class="vocab-item">
+            <div class="vocab-question">11. <b>limpid</b></div>
+            <div class="vocab-options">
+              <label class="option-label"><input type="radio" name="voc11" value="1" required><span>1 - lazy</span></label>
+              <label class="option-label"><input type="radio" name="voc11" value="2"><span>2 - crippled</span></label>
+              <label class="option-label"><input type="radio" name="voc11" value="3"><span>3 - clear</span></label>
+              <label class="option-label"><input type="radio" name="voc11" value="4"><span>4 - hot</span></label>
+              <label class="option-label"><input type="radio" name="voc11" value="5"><span>5 - slippery</span></label>
+              <label class="option-label"><input type="radio" name="voc11" value="6"><span>6 - Not sure about the answer</span></label>
+            </div>
           </div>
-        </div>
-        <div class="vocab-item">
-          <div class="vocab-question">12. <b>procreate</b></div>
-          <div class="vocab-options">
-            <input type="radio" name="voc12" id="voc12_1" value="1" required/>1-sketch<br>
-            <input type="radio" name="voc12" id="voc12_2" value="2"/>2-inhabit<br>
-            <input type="radio" name="voc12" id="voc12_3" value="3"/>3-imitate<br>
-            <input type="radio" name="voc12" id="voc12_4" value="4"/>4-beget<br>
-            <input type="radio" name="voc12" id="voc12_5" value="5"/>5-encourage<br>
-            <input type="radio" name="voc12" id="voc12_6" value="6"/>6-Not sure about the answer<br>
+
+          <!-- 12 -->
+          <div class="vocab-item">
+            <div class="vocab-question">12. <b>procreate</b></div>
+            <div class="vocab-options">
+              <label class="option-label"><input type="radio" name="voc12" value="1" required><span>1 - sketch</span></label>
+              <label class="option-label"><input type="radio" name="voc12" value="2"><span>2 - inhabit</span></label>
+              <label class="option-label"><input type="radio" name="voc12" value="3"><span>3 - imitate</span></label>
+              <label class="option-label"><input type="radio" name="voc12" value="4"><span>4 - beget</span></label>
+              <label class="option-label"><input type="radio" name="voc12" value="5"><span>5 - encourage</span></label>
+              <label class="option-label"><input type="radio" name="voc12" value="6"><span>6 - Not sure about the answer</span></label>
+            </div>
           </div>
-        </div>
-        <div class="vocab-item">
-          <div class="vocab-question">13. <b>replete</b></div>
-          <div class="vocab-options">
-            <input type="radio" name="voc13" id="voc13_1" value="1" required/>1-full<br>
-            <input type="radio" name="voc13" id="voc13_2" value="2"/>2-elderly<br>
-            <input type="radio" name="voc13" id="voc13_3" value="3"/>3-resentful<br>
-            <input type="radio" name="voc13" id="voc13_4" value="4"/>4-discredited<br>
-            <input type="radio" name="voc13" id="voc13_5" value="5"/>5-restful<br>
-            <input type="radio" name="voc13" id="voc13_6" value="6"/>6-Not sure about the answer<br>
+
+          <!-- 13 -->
+          <div class="vocab-item">
+            <div class="vocab-question">13. <b>replete</b></div>
+            <div class="vocab-options">
+              <label class="option-label"><input type="radio" name="voc13" value="1" required><span>1 - full</span></label>
+              <label class="option-label"><input type="radio" name="voc13" value="2"><span>2 - elderly</span></label>
+              <label class="option-label"><input type="radio" name="voc13" value="3"><span>3 - resentful</span></label>
+              <label class="option-label"><input type="radio" name="voc13" value="4"><span>4 - discredited</span></label>
+              <label class="option-label"><input type="radio" name="voc13" value="5"><span>5 - restful</span></label>
+              <label class="option-label"><input type="radio" name="voc13" value="6"><span>6 - Not sure about the answer</span></label>
+            </div>
           </div>
-        </div>
-        <div class="vocab-item">
-          <div class="vocab-question">14. <b>frieze</b></div>
-          <div class="vocab-options">
-            <input type="radio" name="voc14" id="voc14_1" value="1" required/>1-fringe of curls on the forehead<br>
-            <input type="radio" name="voc14" id="voc14_2" value="2"/>2-statue<br>
-            <input type="radio" name="voc14" id="voc14_3" value="3"/>3-ornamental band<br>
-            <input type="radio" name="voc14" id="voc14_4" value="4"/>4-embroidery<br>
-            <input type="radio" name="voc14" id="voc14_5" value="5"/>5-sherbet<br>
-            <input type="radio" name="voc14" id="voc14_6" value="6"/>6-Not sure about the answer<br>
+
+          <!-- 14 -->
+          <div class="vocab-item">
+            <div class="vocab-question">14. <b>frieze</b></div>
+            <div class="vocab-options">
+              <label class="option-label"><input type="radio" name="voc14" value="1" required><span>1 - fringe of curls on the forehead</span></label>
+              <label class="option-label"><input type="radio" name="voc14" value="2"><span>2 - statue</span></label>
+              <label class="option-label"><input type="radio" name="voc14" value="3"><span>3 - ornamental band</span></label>
+              <label class="option-label"><input type="radio" name="voc14" value="4"><span>4 - embroidery</span></label>
+              <label class="option-label"><input type="radio" name="voc14" value="5"><span>5 - sherbet</span></label>
+              <label class="option-label"><input type="radio" name="voc14" value="6"><span>6 - Not sure about the answer</span></label>
+            </div>
           </div>
-        </div>
-        <div class="vocab-item">
-          <div class="vocab-question">15. <b>treacle</b></div>
-          <div class="vocab-options">
-            <input type="radio" name="voc15" id="voc15_1" value="1" required/>1-sewing machine<br>
-            <input type="radio" name="voc15" id="voc15_2" value="2"/>2-framework<br>
-            <input type="radio" name="voc15" id="voc15_3" value="3"/>3-leak<br>
-            <input type="radio" name="voc15" id="voc15_4" value="4"/>4-apple butter<br>
-            <input type="radio" name="voc15" id="voc15_5" value="5"/>5-molasses<br>
-            <input type="radio" name="voc15" id="voc15_6" value="6"/>6-Not sure about the answer<br>
+
+          <!-- 15 -->
+          <div class="vocab-item">
+            <div class="vocab-question">15. <b>treacle</b></div>
+            <div class="vocab-options">
+              <label class="option-label"><input type="radio" name="voc15" value="1" required><span>1 - sewing machine</span></label>
+              <label class="option-label"><input type="radio" name="voc15" value="2"><span>2 - framework</span></label>
+              <label class="option-label"><input type="radio" name="voc15" value="3"><span>3 - leak</span></label>
+              <label class="option-label"><input type="radio" name="voc15" value="4"><span>4 - apple butter</span></label>
+              <label class="option-label"><input type="radio" name="voc15" value="5"><span>5 - molasses</span></label>
+              <label class="option-label"><input type="radio" name="voc15" value="6"><span>6 - Not sure about the answer</span></label>
+            </div>
           </div>
+
         </div>
-      </div>
+
         <br>
       </form>
     </section>
-    <input type="image" name="submit" id="submit" form="form_vocab" src="{{ url_for('static', filename='images/done_button.gif') }}" alt="Done">
+
+    <input type="image" name="submit" id="submit" form="form_vocab"
+      src="{{ url_for('static', filename='images/done_button.gif') }}" alt="Done" style="display:block;margin:18px auto;">
+
   </div>
 
   <script type="text/javascript">
@@ -224,8 +251,8 @@
       var input13 = getRadioVal(document.getElementById('form_vocab'),'voc13');
       var input14 = getRadioVal(document.getElementById('form_vocab'),'voc14');
       var input15 = getRadioVal(document.getElementById('form_vocab'),'voc15');
-       
-       if(input1==''){
+
+       if(input1=='' || typeof input1 === 'undefined'){
         return false;
        } else {
         return true;
