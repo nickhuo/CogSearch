@@ -10,16 +10,8 @@
   <div class="lc-container">
     <div class="lc-header">
       <h2>Letter Comparison Round {{ round_number }}</h2>
-      <div class="progress">Complete all {{ total_items }} items below</div>
-      <div class="instructions">
-        For each pair of letter strings, select <strong>S</strong> if they are the same, or <strong>D</strong> if they are different.
-      </div>
     </div>
-
-    <div class="warning">
-      <strong>Note:</strong> Please carefully compare each pair of letter strings and select the correct answer. Click the "Done" button after completing all items.
-    </div>
-
+    
     <form method="post" action="{{ action_url }}" id="letterCompForm">
       <div class="items-container">
         {% for item in items %}

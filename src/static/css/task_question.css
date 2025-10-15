@@ -1,0 +1,6 @@
+.question-text {
+    font-size: 20px;       /* 调整文本大小 */
+    line-height: 1.5;      /* 行高，可选 */
+    margin: 0 auto;        /* 居中 */
+    text-align: center;    /* 文本居中，可选 */
+  }

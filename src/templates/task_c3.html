@@ -18,7 +18,9 @@
       <div id="c3" style="text-align:center;">
         <br>
         <div id="passQ" class="passQ">
-          <p><b>3. How much did you learn from this particular article?</b></p>
+          <p class="question-text">
+            <b>3. How much did you learn from this particular article?</b>
+          </p>
           <br><br>
 
           <form id="form_c3"
@@ -55,7 +57,7 @@
                   <tr>
                     <td style="text-align:left; vertical-align:top;">
                       <b>0</b><br>
-                      Didn’t Learn Anything at All
+                      Didn't Learn Anything at All
                     </td>
                     <td style="text-align:right; vertical-align:top;">
                       <b>100</b><br>
@@ -68,7 +70,7 @@
             <input type="hidden" name="fid" value="{{ fid }}">
             <input type="hidden" name="savepassid" value="{{ passID }}">
             <br>
-            <input type="image" src="{{ url_for('static', filename='images/next_button.gif') }}" alt="Next">
+            <input type="image" src="{{ url_for('static', filename='images/continue_button.gif') }}" alt="continue">
             <input type="hidden" name="qid" value="c3">
           </form>
         </div>

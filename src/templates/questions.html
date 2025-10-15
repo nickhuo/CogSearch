@@ -11,6 +11,12 @@
   <body>
   <div class="container">
       <h2>Comprehension Questions</h2>
+      <div class="cl2">
+        <p>
+          The multiple-choice questions here are based on the passage you read in the formal task. Please do your best to answer each question carefully. Try to rely on your memory and understanding of the passage.
+        </p>
+        <br>
+      </div>
   
       {% if not questions_by_passage %}
         <p>No comprehension questions are available at this time.</p>
@@ -65,14 +71,18 @@
           {% endfor %}
           </div>
         <nav class="d-flex justify-content-between align-items-center mt-3" aria-label="Question pagination">
-          <button type="button" class="btn btn-secondary" id="prevPage">Previous</button>
+          <button type="button" class="image-btn" id="prevPage" aria-label="Back">
+            <img src="{{ url_for('static', filename='images/back_button.gif') }}" alt="Back">
+          </button>
           <span id="pageIndicator" class="mx-3"></span>
-          <button type="button" class="btn btn-secondary" id="nextPage">Next</button>
+          <button type="button" class="image-btn" id="nextPage" aria-label="Next">
+            <img src="{{ url_for('static', filename='images/nextpage_button.gif') }}" alt="Next">
+          </button>
         </nav>
 
-        <div class="mt-4">
-            <button type="submit" class="btn btn-primary btn-lg">
-                Submit Answers and Finish
+        <div class="mt-4 d-flex justify-content-center">
+            <button type="submit" class="image-btn" aria-label="Done">
+                <img src="{{ url_for('static', filename='images/done_button.gif') }}" alt="Done">
             </button>
         </div>
     </form>
@@ -125,8 +135,24 @@ document.addEventListener('DOMContentLoaded', function() {
       visibleCards[k].style.minHeight = maxHeight + 'px';
     }
 
-    if (prevBtn) prevBtn.disabled = currentPage === 1;
-    if (nextBtn) nextBtn.disabled = currentPage === totalPages;
+    if (prevBtn) {
+      if (currentPage === 1) {
+        prevBtn.style.visibility = 'hidden';
+        prevBtn.disabled = true;
+      } else {
+        prevBtn.style.visibility = 'visible';
+        prevBtn.disabled = false;
+      }
+    }
+    if (nextBtn) {
+      if (currentPage === totalPages) {
+        nextBtn.style.visibility = 'hidden';
+        nextBtn.disabled = true;
+      } else {
+        nextBtn.style.visibility = 'visible';
+        nextBtn.disabled = false;
+      }
+    }
     if (indicator) {
       indicator.textContent = 'Page ' + currentPage + ' of ' + totalPages;
     }

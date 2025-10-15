@@ -17,7 +17,9 @@
             <div id="c1" style="text-align: center;">
                 <br>
                 <div id="passQ">
-                    <p><b>1. How easy was this article to read?</b></p>
+                    <p class="question-text">
+                      <b>1. How easy was this article to read?</b>
+                    </p>
                     <br><br>
                     <form id="form_c1" action="{{ url_for('core.task_c1', fid=fid) }}" method="POST" onsubmit="return saveAns()">
                         <table style="width:100%;">
@@ -59,8 +61,8 @@
                           </table>
                         <input type="hidden" name="fid" value="{{ fid }}">
                         <br>
-                        <input type="image" name="submit" src="{{ url_for('static', filename='images/next_button.gif') }}" 
-                               alt="Next">
+                        <input type="image" name="submit" src="{{ url_for('static', filename='images/continue_button.gif') }}" 
+                               alt="continue">
                                <input type="hidden" name="qid" value="c1">
                     </form>
                 </div>
