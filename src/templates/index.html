@@ -28,7 +28,7 @@
   </style>
 </head>
 <body>
-  <iframe id="warning-frame" src="{{ url_for('core.warning') }}"></iframe>
-  <iframe id="consent-frame" src="{{ url_for('core.consent') }}"></iframe>
+  <iframe id="warning-frame" src="{{ warning_url or url_for('core.warning') }}"></iframe>
+  <iframe id="consent-frame" src="{{ consent_url or url_for('core.consent') }}"></iframe>
 </body>
 </html>
