@@ -10,16 +10,12 @@
   <br><br>
   <div id="k2" style="text-align:center;">
     <h2 style="color:#0B3861;">Practice Complete</h2>
-    <p>You’ve finished the practice round. Now, write briefly what you learned, then continue to the formal task.</p>
+    <p>
+      You've finished the practice round.
+    </p>
     <div class="passQ">
       <p>
-        Now, please tell us about what you have learned today about
-        <b>{{ topicTitle }}</b>.
-      </p>
-      <p>
-        You can either make a list of facts or write a paragraph,
-        but try to be as specific as you can and tell us as much
-        as you can about {{ subtopString }}.
+        Now, please tell us about what you have learned today about Animals. You can recall anything you remember from any of the topics you read today. You don't need to remember the information word for word. Please say as much as you can!
       </p>
 
       <form id="form_k2" name="form_k2" action="{{ url_for('core.instruction') }}" method="POST" onsubmit="return saveAns();">
