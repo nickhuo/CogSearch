@@ -13,7 +13,7 @@
   <p><strong>TIME REMAINS:</strong></p>
   <script>
     // These variables mirror your PHP echoes:
-    var RemainingTime = Number({{ remaining_time }});
+    var RemainingTime = JSON.parse('{{ remaining_time|default(0)|tojson }}');
     var BackColor = "white";
     var ForeColor = "navy";
     var CountActive = true;
@@ -21,7 +21,7 @@
     var LeadingZero = true;
     var DisplayFormat = "%%M%% Minutes, %%S%% Seconds.";
     var FinishMessage = "Time is UP!";
-    var RedirectPage = "{{ redirect_page }}";
+    var RedirectPage = JSON.parse('{{ redirect_page|tojson }}');
   </script>
   <!-- Countdown script goes here. Place countdown.js in /static/js -->
   <script src="{{ url_for('static', filename='js/countdown.js') }}"></script>

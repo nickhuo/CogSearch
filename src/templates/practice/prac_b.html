@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <title>{{ pageTitle if pageTitle else "Practice B" }}</title>
   <base target="_top">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/task_b_style.css') }}">
 </head>
+
 <body>
   <div class="b_up">
     <div id="timer" class="timer" data-remaining-time="{{ session.get('remainingTime', 0) }}" data-redirect="{{ session.get('redirectPage', '') }}">
@@ -48,9 +50,14 @@
     </div>
 
     <div class="nextArt" style="border: 1px solid #ccc; padding: 10px; display: flex; align-items: center; justify-content: space-between; gap: 24px;">
-      <a href="{{ url_for('practice.prac_c1', fid='back') }}" target="_top" style="color:#0a0000;">Go to other topics</a>
+      <a href="{{ url_for('practice.prac_c1', fid='back') }}" target="_top" style="color:#0a0000;">
+        Go to Other Topics
+      </a>
       {% if passOrder != 5 %}
-      <a href="{{ url_for('practice.prac_c1', fid='same') }}" target="_top" style="color:#0a0000;">Continue to next article</a>
+
+      <a href="{{ url_for('practice.prac_c1', fid='same') }}" target="_top" style="color:#0a0000;">
+        Read the Next Article
+      </a>
       {% endif %}
     </div>
   </div>

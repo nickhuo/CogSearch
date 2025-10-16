@@ -1,0 +1,89 @@
+  body {
+    font-family: "Times New Roman", "Times New Roman Regular", Times, serif;
+    background-color: #f8fafc;
+    color: #222;
+    margin: 0;
+    padding: 16px;
+  }
+  
+  .artText {
+    font-size: 1.1rem;  
+    line-height: 1.5;    
+    font-weight: normal;
+    max-width: 1500px;            /* 限制最大宽度，大约为一屏舒适宽度 */
+    margin: 0 auto;              /* 居中对齐 */
+    padding: 0 16px; 
+    text-align: justify;   
+  }
+
+  .nextArt {
+    border: 1px solid #e2e8f0;
+    padding: 16px 20px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    background-color: #ffffff;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+    margin-top: 20px;
+  }
+  
+  .nextArt a {
+    text-decoration: none;
+    background: linear-gradient(145deg, #95c2fa, #71a5f9);
+    color: #ffffff;
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.25);
+    transition: all 0.25s ease-in-out;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .nextArt a:hover {
+    background: linear-gradient(145deg, #5491f3, #3b82f6);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  }
+  
+  .nextArt a:active {
+    transform: scale(0.97);
+    box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3);
+  }
+  
+  .nextArt a::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease, opacity 0.5s ease;
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  .nextArt a:active::after {
+    width: 200%;
+    height: 200%;
+    opacity: 1;
+    transition: none;
+  }
+  
+  @media (max-width: 600px) {
+    .nextArt {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  
+    .nextArt a {
+      width: 100%;
+      text-align: center;
+    }
+  }
+  

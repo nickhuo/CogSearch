@@ -18,10 +18,11 @@
       <div id="c2" style="text-align:center;">
         <br>
         <div id="passQ" class="passQ">
-          <p><b>
-            2. Including the other articles that you have read today, 
-            how much new information was in this article?
-          </b></p>
+          <p class="question-text">
+            <b>
+            2. Including the other articles that you have read today, how much new information was in this article?
+          </b>
+        </p>
           <br><br>
 
           <!-- The form posts to /task_c3?fid={{ fid }} in Flask -->
@@ -74,8 +75,8 @@
             <input type="image"
                    name="submit"
                    id="submit"
-                   src="{{ url_for('static', filename='images/next_button.gif') }}"
-                   alt="Next">
+                   src="{{ url_for('static', filename='images/continue_button.gif') }}"
+                   alt="continue">
                    <input type="hidden" name="qid" value="c2">
           </form>
         </div>

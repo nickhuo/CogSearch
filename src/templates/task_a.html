@@ -65,17 +65,9 @@
 
   {% if all_completed %}
   <div style="margin-top: 24px; text-align: center;">
-    <button type="button" style="
-      padding: 10px 24px;
-      font-size: 16px;
-      background-color: #0B3861;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    " onclick="window.top.location.href='{{ next_section_url }}';">
-      Go to next section
-    </button>
+    <a href="{{ next_section_url }}" style="display: inline-block;">
+      <img src="{{ url_for('static', filename='images/next_button.gif') }}" alt="Next Task">
+    </a>
   </div>
   {% endif %}
 </body>

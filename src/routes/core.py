@@ -15,6 +15,13 @@ from src.db import get_db_connection, get_time_stamp_cdt, save_url
 from src.services.utils import list_order, format_pass_id, save_pass_answer
 
 
+FORMAL_DURATION_DEFAULT_MINUTES = 15
+FORMAL_DURATION_MINUTES_TO_SECONDS = {
+    15: 15 * 60,
+    25: 25 * 60,
+}
+
+
 LETTER_COMPARISON_ROUNDS = {
     1: [
         {"left": "PRDBZTYFN", "right": "PRDBZTYFN", "answer": "S"},
@@ -59,6 +66,36 @@ def safe_int_param(value, default=0):
 FORMAL_REQUIRED_STAGES = {"c1", "c2", "c3", "c4"}
 
 
+def _is_valid_formal_duration(minutes: int) -> bool:
+    return minutes in FORMAL_DURATION_MINUTES_TO_SECONDS
+
+
+def get_formal_duration_minutes() -> int:
+    minutes = session.get("formal_duration_minutes")
+    if isinstance(minutes, int) and _is_valid_formal_duration(minutes):
+        return minutes
+    session["formal_duration_minutes"] = FORMAL_DURATION_DEFAULT_MINUTES
+    return FORMAL_DURATION_DEFAULT_MINUTES
+
+
+def get_formal_duration_seconds() -> int:
+    minutes = get_formal_duration_minutes()
+    return FORMAL_DURATION_MINUTES_TO_SECONDS.get(minutes, FORMAL_DURATION_MINUTES_TO_SECONDS[FORMAL_DURATION_DEFAULT_MINUTES])
+
+
+def set_formal_duration(minutes: int | None) -> int:
+    if isinstance(minutes, int) and _is_valid_formal_duration(minutes):
+        session["formal_duration_minutes"] = minutes
+        return minutes
+    return get_formal_duration_minutes()
+
+
+def apply_formal_duration_from_request() -> int:
+    requested = request.args.get("duration")
+    minutes = safe_int_param(requested, default=None)
+    return set_formal_duration(minutes)
+
+
 def _formal_pending_redirect():
     """Return the URL that routes the participant back to outstanding formal questions."""
     stage = session.get("formal_pending_stage")
@@ -96,18 +133,31 @@ def _is_formal_rating_submission() -> bool:
 
 @core_bp.route("/")
 def index():
-    return render_template("index.html")
+    apply_formal_duration_from_request()
+    duration_minutes = get_formal_duration_minutes()
+    warning_url = url_for("core.warning", duration=duration_minutes)
+    consent_url = url_for("core.consent", duration=duration_minutes)
+    return render_template(
+        "index.html",
+        warning_url=warning_url,
+        consent_url=consent_url,
+    )
 
 
 @core_bp.route("/warning")
 def warning():
+    apply_formal_duration_from_request()
     return render_template("warning.html")
 
 
 @core_bp.route("/consent", methods=["GET"])
 def consent():
+    preserved_duration = session.get("formal_duration_minutes")
     if "sid" in session:
         session.clear()
+        if isinstance(preserved_duration, int) and _is_valid_formal_duration(preserved_duration):
+            session["formal_duration_minutes"] = preserved_duration
+    apply_formal_duration_from_request()
     return render_template("consent.html")
 
 
@@ -362,7 +412,9 @@ def instruction():
             cursor.close()
             link.close()
 
-    return render_template("instruction.html")
+    duration_minutes = get_formal_duration_minutes()
+    template_name = "instruction_25min.html" if duration_minutes == 25 else "instruction.html"
+    return render_template(template_name)
 
 
 # --- Non-practice task routes migrated from app.py ---
@@ -396,7 +448,7 @@ def task_a():
         if fid == "begin":
             session['startUnixTime'] = int(time.time())
             session['startTimeStamp'] = get_time_stamp_cdt()
-            session['remainingTime'] = 900  
+            session['remainingTime'] = get_formal_duration_seconds()
             session['lastPageSwitchUnixTime'] = int(time.time())
             session.pop('formal_pending_stage', None)
             session.pop('formal_pending_passID', None)
