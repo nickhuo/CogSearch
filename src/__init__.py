@@ -16,6 +16,7 @@ def create_app() -> Flask:
         template_folder=template_folder,
         static_folder=static_folder,
         instance_path=instance_folder,
+        instance_relative_config=True,  # ensure from_pyfile reads from instance folder
     )
 
     # Defaults (kept to avoid breaking current local dev)
