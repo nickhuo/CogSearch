@@ -807,7 +807,7 @@ def task_c1():
     passID = session.get('passID', '')
     passTitle = session.get('passTitle', '')
     topID = "1"
-    conID = "1"
+    conID = str(session.get('conID', '1'))
     pageTypeID = "c1"
     pageTitle = f"C1: {passTitle}"
 
@@ -847,7 +847,7 @@ def task_c1():
         else:
             return "No answer provided.", 400
 
-    return render_template("task_c1.html", fid=fid)
+    return render_template("task_c1.html", fid=fid, conID=conID)
 
 
 @core_bp.route('/task_c2', methods=['GET', 'POST'])
@@ -863,7 +863,7 @@ def task_c2():
     passTitle = session.get('passTitle', '')
     # passOrder kept in session for other routes; not needed locally here
     topID = "1"
-    conID = "1"
+    conID = str(session.get('conID', '1'))
     pageTypeID = "c2"
     pageTitle = f"C2: {passTitle}"
 
@@ -895,7 +895,7 @@ def task_c2():
         else:
             return "No answer provided.", 400
 
-    return render_template("task_c2.html", fid=fid)
+    return render_template("task_c2.html", fid=fid, conID=conID)
 
 
 @core_bp.route('/task_c3', methods=['GET', 'POST'])
@@ -910,7 +910,7 @@ def task_c3():
     passID = session.get('passID', '')
     passTitle = session.get('passTitle', '')
     topID = "1"
-    conID = "1"
+    conID = str(session.get('conID', '1'))
     # nextPassOrder not used in this scope; keep session value usage elsewhere
     # and avoid an unused local variable warning
     _next_pass_order = session.get('nextPassOrder', 2)
@@ -946,7 +946,7 @@ def task_c3():
         else:
             return "No answer provided.", 400
 
-    return render_template("task_c3.html", fid=fid, passID=passID)
+    return render_template("task_c3.html", fid=fid, passID=passID, conID=conID)
 
 
 @core_bp.route('/task_c4', methods=['GET', 'POST'])
