@@ -694,6 +694,14 @@ def task_b():
             ),
         )
         passResult = cursor.fetchone()
+
+        # if the current article is not found (e.g. the next article does not exist), clear the pending state and redirect to task_a
+        if not passResult:
+            session.pop('formal_pending_stage', None)
+            session.pop('formal_pending_passID', None)
+            session.pop('formal_pending_fid', None)
+            session.pop('formal_last_page', None)
+            return redirect(url_for('core.task_a', fid='back', subtop=str(subtopID), lastPage='b'))
         if passResult and 'passTitle' in passResult:
             session['passTitle'] = passResult['passTitle']
 
@@ -753,30 +761,37 @@ def task_b():
                         (ans_to_save, sid, uid, passid_to_save),
                     )
         elif lastPage == "c4" and request.method == 'POST':
+
+            # classify the form submission as "next" or "back/done"
+            fid_in_form = request.form.get('fid', '')
+
+            # clear the pending state after completing a C4 submission
             session.pop('formal_pending_stage', None)
             session.pop('formal_pending_passID', None)
             session.pop('formal_pending_fid', None)
             session.pop('formal_last_page', None)
 
-            current_subtop = str(subtopID)
-            visited = [x for x in session.get('visitedSub', '').split(',') if x]
-            if current_subtop and current_subtop not in visited:
-                visited.append(current_subtop)
-            session['visitedSub'] = ','.join(visited)
+            # if the form submission is not "next", mark the current subtopic as visited and check if all subtopics are completed
+            if fid_in_form != 'same':
+                current_subtop = str(subtopID)
+                visited = [x for x in session.get('visitedSub', '').split(',') if x]
+                if current_subtop and current_subtop not in visited:
+                    visited.append(current_subtop)
+                session['visitedSub'] = ','.join(visited)
 
-            visited_sorted = sorted(
-                (str(x) for x in visited if str(x)),
-                key=lambda value: int(value) if value.isdigit() else value,
-            )
-            formal_all = session.get('formal_all_subtops') or []
-            if formal_all and visited_sorted == formal_all:
-                redirect_to_next_section = url_for(
-                    'core.task_a',
-                    fid='complete',
-                    subtop=current_subtop,
-                    lastPage='c4',
-                    completed='1',
+                visited_sorted = sorted(
+                    (str(x) for x in visited if str(x)),
+                    key=lambda value: int(value) if value.isdigit() else value,
                 )
+                formal_all = session.get('formal_all_subtops') or []
+                if formal_all and visited_sorted == formal_all:
+                    redirect_to_next_section = url_for(
+                        'core.task_a',
+                        fid='complete',
+                        subtop=current_subtop,
+                        lastPage='c4',
+                        completed='1',
+                    )
 
         link.commit()
 
@@ -1609,13 +1624,13 @@ def questions():
 
         cursor.execute(
             """
-            SELECT passID, subtopID, passOrder
+            SELECT passID, MIN(CAST(subtopID AS UNSIGNED)) AS subtopID, MIN(CAST(passOrder AS UNSIGNED)) AS passOrder
             FROM tb5_passQop
-            WHERE uid=%s AND sid=%s AND topID=%s
-            GROUP BY passID, subtopID, passOrder
-            ORDER BY CAST(subtopID AS UNSIGNED), CAST(passOrder AS UNSIGNED)
+            WHERE uid=%s AND sid=%s
+            GROUP BY passID
+            ORDER BY MIN(CAST(subtopID AS UNSIGNED)), MIN(CAST(passOrder AS UNSIGNED))
             """,
-            (uid, sid, q_top),
+            (uid, sid),
         )
         pass_rows = cursor.fetchall()
         pass_ids = [row['passID'] for row in pass_rows if row.get('passID')]
@@ -1704,13 +1719,13 @@ def done():
         pass_cursor = pass_conn.cursor(dictionary=True)
         pass_cursor.execute(
             """
-            SELECT passID, subtopID, passOrder
+            SELECT passID, MIN(CAST(subtopID AS UNSIGNED)) AS subtopID, MIN(CAST(passOrder AS UNSIGNED)) AS passOrder
             FROM tb5_passQop
-            WHERE uid=%s AND sid=%s AND topID=%s
-            GROUP BY passID, subtopID, passOrder
-            ORDER BY CAST(subtopID AS UNSIGNED), CAST(passOrder AS UNSIGNED)
+            WHERE uid=%s AND sid=%s
+            GROUP BY passID
+            ORDER BY MIN(CAST(subtopID AS UNSIGNED)), MIN(CAST(passOrder AS UNSIGNED))
             """,
-            (uid, sid, topID),
+            (uid, sid),
         )
         for row in pass_cursor.fetchall():
             pid = row.get('passID')
