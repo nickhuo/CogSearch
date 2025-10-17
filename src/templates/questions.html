@@ -63,6 +63,16 @@
                       {{ q.choiceD }}
                     </label>
                     {% endif %}
+                    
+                    {% if q.choiceE %}
+                    <label class="form-check-label">
+                      <input class="form-check-input" type="radio" 
+                             name="q_{{ q.questionID }}" value="E"
+                             {% if existing_answers.get(q.questionID) == 'E' %}checked{% endif %}>
+                      {{ q.choiceE }}
+                    </label>
+                    {% endif %}
+
                 </div>
               </div>
             </div>
