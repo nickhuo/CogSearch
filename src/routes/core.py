@@ -216,16 +216,17 @@ def demographic():
             eduv = request.form.get("demog_edu", "").strip()
             natengv = request.form.get("demog_eng", "").strip()
             firlanv = request.form.get("demog_firlan", "").strip()
-            ageengv = request.form.get("demog_ageeng", "").strip()
+            readingv = request.form.get("demog_eng_read", "").strip()
+            writingv = request.form.get("demog_eng_write", "").strip()
             hislatv = request.form.get("demog_hislat", "").strip()
             racev = request.form.get("demog_race", "").strip()
 
             cursor.execute(
                 """
                 INSERT INTO tb11_profile
-                    (uid, sid, dobMonth, dobDay, dobYear, dobSum, age, gender, edu, natEng, firLan, ageEng, hisLat, race)
+                    (uid, sid, dobMonth, dobDay, dobYear, dobSum, age, gender, edu, natEng, firLan, reading, writing, hisLat, race)
                 VALUES
-                    (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """,
                 (
                     session["uid"],
@@ -239,7 +240,8 @@ def demographic():
                     eduv,
                     natengv,
                     firlanv,
-                    ageengv,
+                    readingv,
+                    writingv,
                     hislatv,
                     racev,
                 ),

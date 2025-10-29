@@ -5,7 +5,36 @@
   <title>Demographic Information</title>
   <base target="_top">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+  <style>
+    .question-title {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .question-desc {
+      margin-bottom: 10px;
+      font-style: italic;
+    }
+    .rating-table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 700px;
+    }
+    .rating-table th, .rating-table td {
+      text-align: center;
+      padding: 4px;
+    }
+    .rating-table th:first-child, .rating-table td:first-child {
+      text-align: left;
+      padding-right: 12px;
+    }
+    .rating-table input[type="radio"] {
+      margin: 0 3px;
+    }
+  </style>
 </head>
+
+
+
 <body>
   <div class="cl0">
     <h2><b>Demographic Information</b></h2>
@@ -91,6 +120,7 @@
 
           <tr>
             <td class="cl0"></td>
+
             <td class="cl0" colspan="3">
               - What is your first language?
               <input type="text" name="demog_firlan" id="demog_firlan" style="width:300px;" />
@@ -100,9 +130,39 @@
           <tr>
             <td class="cl0"></td>
             <td class="cl0" colspan="3">
-              - At what age did you begin to acquire English?
-              <input type="number" name="demog_ageeng" id="demog_ageeng" min="1" /> Years Old
+              - How would you rate your overall proficiency in English? Please rate your proficiency in the following areas:
+              <br>
+                &nbsp;&nbsp;(1 = Not proficient at all, 7 = Native-level proficiency)<br>
+                
+                <table class="rating-table">
+                  <tr>
+                    <th></th>
+                    <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th>
+                  </tr>
+                  <tr>
+                    <td>Reading</td>
+                    <td><input type="radio" name="demog_eng_read" value="1"></td>
+                    <td><input type="radio" name="demog_eng_read" value="2"></td>
+                    <td><input type="radio" name="demog_eng_read" value="3"></td>
+                    <td><input type="radio" name="demog_eng_read" value="4"></td>
+                    <td><input type="radio" name="demog_eng_read" value="5"></td>
+                    <td><input type="radio" name="demog_eng_read" value="6"></td>
+                    <td><input type="radio" name="demog_eng_read" value="7"></td>
+                  </tr>
+
+                  <tr>
+                    <td>Writing</td>
+                    <td><input type="radio" name="demog_eng_write" value="1"></td>
+                    <td><input type="radio" name="demog_eng_write" value="2"></td>
+                    <td><input type="radio" name="demog_eng_write" value="3"></td>
+                    <td><input type="radio" name="demog_eng_write" value="4"></td>
+                    <td><input type="radio" name="demog_eng_write" value="5"></td>
+                    <td><input type="radio" name="demog_eng_write" value="6"></td>
+                    <td><input type="radio" name="demog_eng_write" value="7"></td>
+                  </tr>
+                </table>
             </td>
+            
           </tr>
 
           <tr><td class="cl0" colspan="4"></td></tr>
@@ -142,6 +202,120 @@
             </td>
           </tr>
         </table>
+        <br>
+        <br>
+
+        <h3>Prior knowledge question</h3>
+        <p>
+          How much do you already know about each of the following topics?<br>
+          (1 = I don’t know anything about this topic, 7 = I know a lot about this topic)
+        </p>
+        <table class="rating-table">
+          <tr>
+            <th>Topic</th>
+            <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th>
+          </tr>
+          <tr>
+            <td>Bone grafts</td>
+            <td><input type="radio" name="bone_grafts" value="1" required></td>
+            <td><input type="radio" name="bone_grafts" value="2"></td>
+            <td><input type="radio" name="bone_grafts" value="3"></td>
+            <td><input type="radio" name="bone_grafts" value="4"></td>
+            <td><input type="radio" name="bone_grafts" value="5"></td>
+            <td><input type="radio" name="bone_grafts" value="6"></td>
+            <td><input type="radio" name="bone_grafts" value="7"></td>
+          </tr>
+          <tr>
+            <td>Hypertension</td>
+            <td><input type="radio" name="hypertension" value="1" required></td>
+            <td><input type="radio" name="hypertension" value="2"></td>
+            <td><input type="radio" name="hypertension" value="3"></td>
+            <td><input type="radio" name="hypertension" value="4"></td>
+            <td><input type="radio" name="hypertension" value="5"></td>
+            <td><input type="radio" name="hypertension" value="6"></td>
+            <td><input type="radio" name="hypertension" value="7"></td>
+          </tr>
+          <tr>
+            <td>Blood donation</td>
+            <td><input type="radio" name="blood_donation" value="1" required></td>
+            <td><input type="radio" name="blood_donation" value="2"></td>
+            <td><input type="radio" name="blood_donation" value="3"></td>
+            <td><input type="radio" name="blood_donation" value="4"></td>
+            <td><input type="radio" name="blood_donation" value="5"></td>
+            <td><input type="radio" name="blood_donation" value="6"></td>
+            <td><input type="radio" name="blood_donation" value="7"></td>
+          </tr>
+          <tr>
+            <td>Multiple sclerosis</td>
+            <td><input type="radio" name="multiple_sclerosis" value="1" required></td>
+            <td><input type="radio" name="multiple_sclerosis" value="2"></td>
+            <td><input type="radio" name="multiple_sclerosis" value="3"></td>
+            <td><input type="radio" name="multiple_sclerosis" value="4"></td>
+            <td><input type="radio" name="multiple_sclerosis" value="5"></td>
+            <td><input type="radio" name="multiple_sclerosis" value="6"></td>
+            <td><input type="radio" name="multiple_sclerosis" value="7"></td>
+          </tr>
+          <tr>
+            <td>Corneal transplants</td>
+            <td><input type="radio" name="corneal_transplants" value="1" required></td>
+            <td><input type="radio" name="corneal_transplants" value="2"></td>
+            <td><input type="radio" name="corneal_transplants" value="3"></td>
+            <td><input type="radio" name="corneal_transplants" value="4"></td>
+            <td><input type="radio" name="corneal_transplants" value="5"></td>
+            <td><input type="radio" name="corneal_transplants" value="6"></td>
+            <td><input type="radio" name="corneal_transplants" value="7"></td>
+          </tr>
+          <tr>
+            <td>Kidney dialysis</td>
+            <td><input type="radio" name="kidney_dialysis" value="1" required></td>
+            <td><input type="radio" name="kidney_dialysis" value="2"></td>
+            <td><input type="radio" name="kidney_dialysis" value="3"></td>
+            <td><input type="radio" name="kidney_dialysis" value="4"></td>
+            <td><input type="radio" name="kidney_dialysis" value="5"></td>
+            <td><input type="radio" name="kidney_dialysis" value="6"></td>
+            <td><input type="radio" name="kidney_dialysis" value="7"></td>
+          </tr>
+          <tr>
+            <td>Liver cancer</td>
+            <td><input type="radio" name="liver_cancer" value="1" required></td>
+            <td><input type="radio" name="liver_cancer" value="2"></td>
+            <td><input type="radio" name="liver_cancer" value="3"></td>
+            <td><input type="radio" name="liver_cancer" value="4"></td>
+            <td><input type="radio" name="liver_cancer" value="5"></td>
+            <td><input type="radio" name="liver_cancer" value="6"></td>
+            <td><input type="radio" name="liver_cancer" value="7"></td>
+          </tr>
+          <tr>
+            <td>Vaccine</td>
+            <td><input type="radio" name="vaccine" value="1" required></td>
+            <td><input type="radio" name="vaccine" value="2"></td>
+            <td><input type="radio" name="vaccine" value="3"></td>
+            <td><input type="radio" name="vaccine" value="4"></td>
+            <td><input type="radio" name="vaccine" value="5"></td>
+            <td><input type="radio" name="vaccine" value="6"></td>
+            <td><input type="radio" name="vaccine" value="7"></td>
+          </tr>
+          <tr>
+            <td>Colorectal cancer</td>
+            <td><input type="radio" name="colorectal_cancer" value="1" required></td>
+            <td><input type="radio" name="colorectal_cancer" value="2"></td>
+            <td><input type="radio" name="colorectal_cancer" value="3"></td>
+            <td><input type="radio" name="colorectal_cancer" value="4"></td>
+            <td><input type="radio" name="colorectal_cancer" value="5"></td>
+            <td><input type="radio" name="colorectal_cancer" value="6"></td>
+            <td><input type="radio" name="colorectal_cancer" value="7"></td>
+          </tr>
+          <tr>
+            <td>Alzheimer’s disease</td>
+            <td><input type="radio" name="alzheimers_disease" value="1" required></td>
+            <td><input type="radio" name="alzheimers_disease" value="2"></td>
+            <td><input type="radio" name="alzheimers_disease" value="3"></td>
+            <td><input type="radio" name="alzheimers_disease" value="4"></td>
+            <td><input type="radio" name="alzheimers_disease" value="5"></td>
+            <td><input type="radio" name="alzheimers_disease" value="6"></td>
+            <td><input type="radio" name="alzheimers_disease" value="7"></td>
+          </tr>
+        </table>
 
         <br>
         <input type="image" name="submit" id="submit" src="{{ url_for('static', filename='images/nextpage_button.gif') }}" alt="Next" />
@@ -159,7 +333,6 @@
       var edu    = document.getElementById('demog_edu').value;
       var nateng = getRadioVal(document.getElementById('form_demog'), 'demog_eng');
       var firlan = document.getElementById('demog_firlan').value;
-      var ageeng = document.getElementById('demog_ageeng').value;
       var hislat = getRadioVal(document.getElementById('form_demog'), 'demog_hislat');
       var race   = getRadioVal(document.getElementById('form_demog'), 'demog_race');
 

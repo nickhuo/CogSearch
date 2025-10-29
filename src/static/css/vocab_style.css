@@ -6,6 +6,7 @@
     margin: 0;
     padding: 0;
     line-height: 1.6;
+    font-size: 14pt;
   }
   
   .vocab-container {
@@ -77,7 +78,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 12pt;
+    font-size: 14pt;
     padding: 12px 16px;
     border: 1px solid #d0d0d0;
     border-radius: 8px;

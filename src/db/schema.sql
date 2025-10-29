@@ -174,7 +174,8 @@ CREATE TABLE `tb11_profile` (
     `edu` varchar(8) NOT NULL,
     `natEng` varchar(2) NOT NULL,
     `firLan` varchar(100) NOT NULL,
-    `ageEng` varchar(4) NOT NULL,
+    `reading` varchar(2) NOT NULL DEFAULT '',
+    `writing` varchar(2) NOT NULL DEFAULT '',
     `hisLat` varchar(2) NOT NULL,
     `race` varchar(2) NOT NULL,
     `lc1` varchar(2) NOT NULL DEFAULT '',
@@ -217,6 +218,17 @@ CREATE TABLE `tb11_profile` (
     `voc14` varchar(2) NOT NULL DEFAULT '',
     `voc15` varchar(2) NOT NULL DEFAULT '',
     `vocScore` decimal(10,1) NOT NULL DEFAULT 0.0,
+    -- Prior knowledge per-topic ratings (1-7)
+    `pk_bone_grafts` varchar(2) NOT NULL DEFAULT '',
+    `pk_hypertension` varchar(2) NOT NULL DEFAULT '',
+    `pk_blood_donation` varchar(2) NOT NULL DEFAULT '',
+    `pk_multiple_sclerosis` varchar(2) NOT NULL DEFAULT '',
+    `pk_corneal_transplants` varchar(2) NOT NULL DEFAULT '',
+    `pk_kidney_dialysis` varchar(2) NOT NULL DEFAULT '',
+    `pk_liver_cancer` varchar(2) NOT NULL DEFAULT '',
+    `pk_vaccine` varchar(2) NOT NULL DEFAULT '',
+    `pk_colorectal_cancer` varchar(2) NOT NULL DEFAULT '',
+    `pk_alzheimers_disease` varchar(2) NOT NULL DEFAULT '',
     PRIMARY KEY (`tb11id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

@@ -6,13 +6,13 @@
   <base target="_top">
   <style>
     body { font-family: "Times New Roman", "Times New Roman Regular", Times, serif; }
-    .lc-container { max-width: 720px; margin: 40px auto; }
+    .lc-container { max-width: 1400px; margin: 40px auto; overflow-x: auto; }
     .lc-header { margin-bottom: 24px; }
-    table { width: 100%; border-collapse: collapse; }
-    td { padding: 12px 8px; font-size: 20px; }
-    td.choice { text-align: center; }
+    table { width: 100%; border-collapse: collapse; table-layout: auto; }
+    td { padding: 12px 8px; font-size: 20px; white-space: normal; }
+    td.choice { text-align: center; white-space: nowrap; }
     .actions { margin-top: 24px; text-align: center; }
-    .progress { font-size: 18px; margin-bottom: 12px; }
+    .progress { font-size: 14pt; margin-bottom: 12px; }
     .option-label { 
       margin: 0 8px; 
       font-size: 20px; 
@@ -29,7 +29,7 @@
     .option-label input[type="radio"] { margin: 0; }
     .option-label input[type="radio"]:checked + span { color: #4CAF50; font-weight: 700; }
     .option-label:has(input[type="radio"]:checked) { border-color: #4CAF50; background-color: #e8f5e8; }
-    .strings { font-weight: 600; }
+    .strings { font-weight: 600; white-space: normal; }
   </style>
 </head>
 <body>

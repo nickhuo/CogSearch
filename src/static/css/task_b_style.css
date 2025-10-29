@@ -7,7 +7,7 @@
   }
   
   .artText {
-    font-size: 1.1rem;  
+    font-size: 14pt;  
     line-height: 1.5;    
     font-weight: normal;
     max-width: 1500px;            /* 限制最大宽度，大约为一屏舒适宽度 */

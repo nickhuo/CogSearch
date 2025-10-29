@@ -4,12 +4,13 @@ body {
   background-color: #f5f5f5;
 }
 .lc-container {
-  max-width: 960px;
+  max-width: 1400px;
   margin: 12px auto;
   padding: 20px 28px 24px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  overflow-x: auto; /* 字符很长时允许横向滚动，保证不丢字 */
 }
 .lc-header {
   margin-bottom: 16px;
@@ -24,12 +25,12 @@ body {
   letter-spacing: 0.5px;
 }
 .progress {
-  font-size: 15px;
+  font-size: 14pt;
   color: #666;
   margin-bottom: 6px;
 }
 .instructions {
-  font-size: 14px;
+  font-size: 14pt;
   color: #555;
   margin-bottom: 0;
 }
@@ -41,7 +42,7 @@ body {
   border-radius: 6px;
   margin: 12px auto 16px;
   text-align: center;
-  font-size: 14px;
+  font-size: 14pt;
   line-height: 1.4;
 }
 .items-container {
@@ -69,15 +70,23 @@ body {
 .item-number {
   font-weight: 600;
   color: #0066ff;
-  font-size: 15px;
+  font-size: 14pt;
   text-align: center;
 }
 .strings {
   font-family: "Times New Roman", "Times New Roman Regular", Times, serif;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 14pt;
   letter-spacing: 1.5px;
   color: #222;
+  /* 显示完整内容，不做省略 */
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+.item > .strings {
+  /* 允许 Grid 下的 1fr 列收缩，避免默认 min-content 导致溢出 */
+  min-width: 0;
 }
 .choice-container {
   display: flex;
@@ -96,7 +105,7 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
   background-color: #fff;
-  font-size: 14px;
+  font-size: 14pt;
   user-select: none;
 }
 .choice-option:hover {
@@ -146,7 +155,7 @@ body {
     gap: 8px;
   }
   .strings {
-    font-size: 15px;
+    font-size: 14pt;
     letter-spacing: 1.2px;
   }
 }

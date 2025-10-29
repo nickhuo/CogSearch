@@ -93,7 +93,8 @@ def prac_instruction():
             eduv = request.form.get("demog_edu", "")
             natengv = request.form.get("demog_eng", "")
             firlanv = request.form.get("demog_firlan", "")
-            ageengv = request.form.get("demog_ageeng", "")
+            readingv = request.form.get("demog_eng_read", "")
+            writingv = request.form.get("demog_eng_write", "")
             hislatv = request.form.get("demog_hislat", "")
             racev = request.form.get("demog_race", "")
 
@@ -103,8 +104,8 @@ def prac_instruction():
                     uid, sid,
                     dobMonth, dobDay, dobYear, dobSum,
                     age, gender, edu, natEng, firLan,
-                    ageEng, hisLat, race
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    reading, writing, hisLat, race
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """,
                 (
                     uid,
@@ -118,10 +119,33 @@ def prac_instruction():
                     eduv,
                     natengv,
                     firlanv,
-                    ageengv,
+                    readingv,
+                    writingv,
                     hislatv,
                     racev,
                 ),
+            )
+            # Save prior knowledge topic ratings into tb11_profile
+            pk_fields = {
+                "pk_bone_grafts": request.form.get("bone_grafts", "").strip(),
+                "pk_hypertension": request.form.get("hypertension", "").strip(),
+                "pk_blood_donation": request.form.get("blood_donation", "").strip(),
+                "pk_multiple_sclerosis": request.form.get("multiple_sclerosis", "").strip(),
+                "pk_corneal_transplants": request.form.get("corneal_transplants", "").strip(),
+                "pk_kidney_dialysis": request.form.get("kidney_dialysis", "").strip(),
+                "pk_liver_cancer": request.form.get("liver_cancer", "").strip(),
+                "pk_vaccine": request.form.get("vaccine", "").strip(),
+                "pk_colorectal_cancer": request.form.get("colorectal_cancer", "").strip(),
+                "pk_alzheimers_disease": request.form.get("alzheimers_disease", "").strip(),
+            }
+
+            cursor.execute(
+                f"""
+                UPDATE tb11_profile
+                SET {', '.join([f"{k}=%s" for k in pk_fields.keys()])}
+                WHERE uid=%s AND sid=%s
+                """,
+                (*pk_fields.values(), uid, sid),
             )
             link.commit()
 

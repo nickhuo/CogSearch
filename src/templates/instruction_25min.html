@@ -12,6 +12,7 @@
       font-family: "Times New Roman", "Times New Roman Regular", Times, serif;
       max-width: 100%;
       overflow-x: hidden;
+      font-size: 14pt;
     }
     
     .cl2 {
@@ -55,142 +56,156 @@
 <body>
     <div class='cl2'>
         <p style='line-height:130%'>
-            Now, here is the formal task! You will receive bonus money based on your overall learning performance in the formal task.
+          Now, it's time for the formal task! You will receive a bonus based on your overall learning performance in the formal task.
         </p>
     
         <p style='line-height:130%'>
-          Your task is to learn about health. There are articles about five health topics. The goal is to learn as much about health as possible instead of memorizing the articles word for word. You will have 25 minutes to learn about these health topics before answering some questions. It is very important for you to pay attention to the articles and do your best to learn from them.  Some health topics are more difficult than others. You will need to do your best to optimize your learning outcome as a whole within the time limit. 
+          Your task is to learn about health. There are articles about five health-related topics. The goal is to learn as much as you can about health instead of memorizing the articles word for word. You will have 25 minutes to read and learn about these topics before answering some questions. It is very important for you to pay attention to the articles and do your best to learn from them. Some health topics are more difficult than others, so please try to manage your time effectively to optimize your learning within the time limit.
         </p>
     
         <p style='line-height:130%'>
-          During the 25 minutes, you will select one health topic at a time and read a collection of articles about it. You will see one article at a time, and you can read at your own pace. After you read each article, you have a <b>choice</b>. You can either continue reading about this health topic by pressing the <b>“Read the Next Article”</b> button OR you can switch to a new topic by pressing <b>“Go to Other Topics”</b>. You only have 25 minutes to learn about health, so <b>do your best to concentrate and stay with a topic only as long as you feel you are still learning something</b>. If the articles in the topic are either too hard or not helping you to learn anything, you might want to decide to switch to a new topic. This is your choice.
+          During the 25 minutes, you will select one health topic at a time and read a collection of articles about it. You will see one article at a time and can read at your own pace.
+        </p>
+
+        <p>After reading each article, you will have a choice:</p>
+        <ul>
+          <li>To continue reading about the same animal topic, click <b>“Read the Next Article.”</b></li>
+          <li>To switch to a new topic, click <b>“Go to Other Topics.”</b></li>
+        </ul>
+    
+        <p style='line-height:130%'>
+          You only have <b>25 minutes</b> to learn about health, so <b>do your best to concentrate and stay with a topic only as long as you feel you are still learning something</b>. If the articles for the topic seem too difficult or not helping you learn, you might want to choose to switch to another topic. The choice is yours.
+        </p>
+
+        <p style='line-height:130%'>
+          Note that there are more articles than you can read fully within 25 minutes, so choose carefully when you continue or switch topics so that you can learn as much information as possible about health.
         </p>
     
         <p style='line-height:130%'>
-          Note that there are more articles than you can read fully within 25 minutes so you should make your decisions about whether to continue or stop reading carefully so that you can learn as much information as possible. 
-        </p>
-    
-        <p style='line-height:130%'>
-          After reading each article, you will be asked to rate how easy the article was, how much new information you thought was in the article, how much you learned from this article, AND how much you learned from all the articles you read so far today. You will be asked to make these ratings on a scale from 0 to 100 by moving the circle:
+          After reading each article, you will be asked to rate how easy the article was, how much new information you thought was in the article, how much you learned from the article, AND how much you learned from all the articles you read so far today. You will be asked to make these ratings on a scale from 0 to 100 by moving the circle:
         </p>
         <!-- <center> -->
         <div>
-            <table>
-                <tr>
-                    <td style='font-size:14pt; color:#0B3861; text-align:left;'>
-                        <b>1. How easy was this article to read?</b>
-                    </td>
-                </tr>
-                <tr>
-                    <td style='text-align:center;'>
-                        <form id='form_c1' name='form_c1'> 		
-                           <table style="width: 100%;">
-                             <tr>
-                               <td colspan='2' style='text-align:center;'><input type='range' name='ans_range' id='ans_range' min='0' max='100'/></td>
-                             </tr>
-                             <tr>
-                               <td style='font-size:16pt; color:#0B3861; text-align:left;'><b>0</b></td>
-                               <td style='font-size:16pt; color:#0B3861; text-align:right;'><b>100</b></td>
-                             </tr>
-                             <tr>
-                               <td style='font-size:13pt; color:#0B3861; text-align:left;'>Very Difficult</td>
-                               <td style='font-size:13pt; color:#0B3861; text-align:right;'>Very Easy</td>
-                             </tr> 				
-                           </table> 		
-                        </form>
-                      </td>
-                </tr>
-                <tr>
-                    <td style='font-size:14pt; color:#0B3861; text-align:left;'>
-                        <b><br>2. Including the other articles that you have read today, how much new information was in this article?</b>
-                    </td>
-                </tr>
-
-
-                <tr>
-                    <td style='text-align:center;'>
-                        <form id='form_c2' name='form_c2'> 		
-                           <table style="width: 100%;">
-                             <tr>
-                               <td colspan='2' style='text-align:center;'><input type='range' name='ans_range' id='ans_range' min='0' max='100'/></td>
-                             </tr>
-                             <tr>
-                               <td style='font-size:16pt; color:#0B3861; text-align:left;'><b>0</b></td>
-                               <td style='font-size:16pt; color:#0B3861; text-align:right;'><b>100</b></td>
-                             </tr>
-                             <tr>
-                               <td style='font-size:13pt; color:#0B3861; text-align:left;'>No New Information</td>
-                               <td style='font-size:13pt; color:#0B3861; text-align:right;'>Completely New Information</td>
-                             </tr> 				
-                           </table> 		
-                        </form>
-                      </td>
-                </tr>
-
-
-                <tr>
-                    <td style='font-size:14pt; color:#0B3861; text-align:left;'>
-                        <b><br>3. How much did you learn from this particular article?</b>
-                    </td>
-                </tr>
-                <tr>
-                    <td style='text-align:center;'>
-                        <form id='form_c3' name='form_c3'> 		
-                           <table style="width: 100%;">
-                             <tr>
-                               <td colspan='2' style='text-align:center;'><input type='range' name='ans_range' id='ans_range' min='0' max='100'/></td>
-                            </tr>
-                             <tr>
-                               <td style='font-size:16pt; color:#0B3861; text-align:left;'><b>0</b></td>
-                               <td style='font-size:16pt; color:#0B3861; text-align:right;'><b>100</b></td>
-                             </tr>
-                             <tr>
-                               <td style='font-size:13pt; color:#0B3861; text-align:left;'>Didn't Learn Anything at All</td>
-                               <td style='font-size:13pt; color:#0B3861; text-align:right;'>Learned a Lot</td>
-                             </tr> 				
-                           </table> 		
-                        </form>
-                      </td>
-                </tr>
-
-
-                <tr>
-                  <td style='font-size:14pt; color:#0B3861; text-align:left;'>
-                      <b><br>4. How much did you learn overall from the articles?</b>
-                  </td>
-              </tr>
-              <tr>
-                  <td style='text-align:center;'>
-                      <form id='form_c3' name='form_c3'> 		
-                         <table style="width: 100%;">
-                           <tr>
-                             <td colspan='2' style='text-align:center;'><input type='range' name='ans_range' id='ans_range' min='0' max='100'/></td>
-                          </tr>
-                           <tr>
-                             <td style='font-size:16pt; color:#0B3861; text-align:left;'><b>0</b></td>
-                             <td style='font-size:16pt; color:#0B3861; text-align:right;'><b>100</b></td>
-                           </tr>
-                           <tr>
-                             <td style='font-size:13pt; color:#0B3861; text-align:left;'>Didn't Learn Anything at All</td>
-                             <td style='font-size:13pt; color:#0B3861; text-align:right;'>Learned a Lot</td>
-                           </tr> 				
-                         </table> 		
-                      </form>
-                    </td>
-              </tr>
-
-            </table>
+          <table>
+          <!-- quesation 1-->
+          <tr>
+            <td style='font-size:14pt; color:#0B3861; text-align:left;'>
+            <b>1. Compared to the other articles that you have read today, how much new information was in this article?</b>
+            </td>
+          </tr>
+          <tr>
+            <td style='text-align:center;'>
+              <form id='form_c1' name='form_c1'>
+                  <table style="width: 100%;">
+                    <tr>
+                      <td colspan='2' style='text-align:center;'><input type='range' name='ans_range' id='ans_range' min='0' max='100'/></td>
+                    </tr>
+                    <!-- 分数-->
+                    <tr>
+                      <td style='font-size:16pt; color:#0B3861; text-align:left;'><b>0</b></td>
+                      <td style='font-size:16pt; color:#0B3861; text-align:right;'><b>100</b></td>
+                    </tr>
+                    <!-- 分数解释-->
+                    <tr>
+                      <td style='font-size:14pt; color:#0B3861; text-align:left;'>No New Information</td>
+                      <td style='font-size:14pt; color:#0B3861; text-align:right;'>Completely New Information</td>
+                    </tr>
+                  </table>
+              </form>
+            </td>
+          </tr>
+      
+      
+          <!-- question 2--> 
+          <tr>
+            <td style='font-size:14pt; color:#0B3861; text-align:left;'>
+            <b><br>2. How easy was this article to read?</b>
+            </td>
+          </tr>
+          <tr>
+            <td style='text-align:center;'>
+              <form id='form_c2' name='form_c2'>
+                  <table style="width: 100%;">
+                    <tr>
+                      <td colspan='2' style='text-align:center;'><input type='range' name='ans_range' id='ans_range' min='0' max='100'/></td>
+                    </tr>
+                    <tr>
+                      <td style='font-size:14pt; color:#0B3861; text-align:left;'><b>0</b></td>
+                      <td style='font-size:14pt; color:#0B3861; text-align:right;'><b>100</b></td>
+                    </tr>
+                    <tr>
+                      <td style='font-size:14pt; color:#0B3861; text-align:left;'>Very Difficult</td>
+                      <td style='font-size:14pt; color:#0B3861; text-align:right;'>Very Easy</td>
+                    </tr>
+                  </table>
+              </form>
+            </td>
+          </tr>
+      
+          <!-- question 3-->
+          <tr>
+            <td style='font-size:14pt; color:#0B3861; text-align:left;'>
+            <b><br>3. How much did you learn from this article?</b>
+            </td>
+          </tr>
+          <tr>
+            <td style='text-align:center;'>
+              <form id='form_c3' name='form_c3'>
+                  <table style="width: 100%;">
+                    <tr>
+                      <td colspan='2' style='text-align:center;'><input type='range' name='ans_range' id='ans_range' min='0' max='100'/></td>
+                  </tr>
+                    <tr>
+                      <td style='font-size:14pt; color:#0B3861; text-align:left;'><b>0</b></td>
+                      <td style='font-size:14pt; color:#0B3861; text-align:right;'><b>100</b></td>
+                    </tr>
+                    <tr>
+                      <td style='font-size:14pt; color:#0B3861; text-align:left;'>Didn't Learn Anything at All</td>
+                      <td style='font-size:14pt; color:#0B3861; text-align:right;'>Learned a Lot</td>
+                    </tr>
+                  </table>
+              </form>
+            </td>
+          </tr>
+      
+          <!-- question 4-->
+          <tr>
+            <td style='font-size:14pt; color:#0B3861; text-align:left;'>
+            <b><br>4. How much did you learn overall from the articles you have read so far today (including this article)?</b>
+            </td>
+          </tr>
+          <tr>
+            <td style='text-align:center;'>
+              <form id='form_c4' name='form_c4'>
+                  <table style="width: 100%;">
+                    <tr>
+                      <td colspan='2' style='text-align:center;'><input type='range' name='ans_range' id='ans_range' min='0' max='100'/></td>
+                  </tr>
+                    <tr>
+                      <td style='font-size:14pt; color:#0B3861; text-align:left;'><b>0</b></td>
+                      <td style='font-size:14pt; color:#0B3861; text-align:right;'><b>100</b></td>
+                    </tr>
+                    <tr>
+                      <td style='font-size:14pt; color:#0B3861; text-align:left;'>Didn't Learn Anything at All</td>
+                      <td style='font-size:14pt; color:#0B3861; text-align:right;'>Learned a Lot</td>
+                    </tr>
+                  </table>
+              </form>
+            </td>
+          </tr>
+          
+          </table>
         </div>
         <!-- </center> -->
     
         <p style='line-height:130%'>
-          Again, after reading each article, you can decide to keep reading about this health topic by moving to the next article, or go back to the main page to choose another health topic. <b>Once you decide to leave a topic, you will not be able to return.</b>
+          <b>Again, after reading each article, you can decide to keep reading about this health topic by moving to the next article, or go back to the main page to choose another health topic. Once you decide to leave a topic, you will not be able to return.</b>
         </p>
         <p style='line-height:130%'>
           You will be asked what you have learned at the end of the task. Please try your best to learn as much information about health in 25 minutes.
         </p>
         <p style='line-height:130%'>
-          When you are ready, please go to the next page by pressing the “Start” button .
+          When you are ready, please go to the next page by pressing the <b>“Start”</b> button.
         </p>
     </div>
 

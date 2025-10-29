@@ -5,6 +5,14 @@
   <title>Practice K2</title>
   <base target="_top">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+  <style>
+    body {
+      font-family: "Times New Roman", "Times New Roman Regular", Times, serif;
+      font-size: 14pt;
+    }
+    td { font-size: 14pt; }
+    .question-text { font-size: 14pt; text-align: center; }
+  </style>
 </head>
 <body>
   <br><br>
@@ -15,7 +23,7 @@
     </p>
     <div class="passQ">
       <p>
-        Now, please tell us about what you have learned today about Animals. You can recall anything you remember from any of the topics you read today. You don't need to remember the information word for word. Please say as much as you can!
+        Now, please tell us about what you have learned about Animals today. You can recall anything you remember from any of the topics you read today. You don't need to remember the information word for word. Please say as much as you can!
       </p>
 
       <form id="form_k2" name="form_k2" action="{{ url_for('core.instruction') }}" method="POST" onsubmit="return saveAns();">
