@@ -30,6 +30,12 @@
     .rating-table input[type="radio"] {
       margin: 0 3px;
     }
+    body {
+        font-family: "Times New Roman", "Times New Roman Regular", Times, serif;
+        font-size: 14pt;
+      }
+      td { font-size: 14pt; }
+      .question-text { font-size: 14pt; text-align: center; }
   </style>
 </head>
 
@@ -85,23 +91,23 @@
           <tr>
             <td class="cl0" colspan="4">
               Using the scale below, how many years of formal education did you complete?
-              <input type="text" name="demog_edu" id="demog_edu" required />(Years)
+              (Years)
             </td>
           </tr>
 
           <tr>
             <td class="cl0"></td>
             <td class="cl0">
-              Fewer than 8 years (1-7.5)<br>
-              Some high school (9-11.5)<br>
-              Some college (12.5-15.5)<br>
-              Master's degree (18)
+              <label><input type="radio" name="demog_edu" value="1" required /> Fewer than 8 years (1)</label><br>
+              <label><input type="radio" name="demog_edu" value="3" /> Some high school (3)</label><br>
+              <label><input type="radio" name="demog_edu" value="5" /> Some college (5)</label><br>
+              <label><input type="radio" name="demog_edu" value="7" /> Master's degree (7)</label>
             </td>
             <td class="cl0">
-              Completed 8th grade (8)<br>
-              Graduated high school (12)<br>
-              Graduated college (16)<br>
-              Doctoral or medical degree (20)
+              <label><input type="radio" name="demog_edu" value="2" /> Completed 8th grade (2)</label><br>
+              <label><input type="radio" name="demog_edu" value="4" /> Graduated high school (4)</label><br>
+              <label><input type="radio" name="demog_edu" value="6" /> Graduated college (6)</label><br>
+              <label><input type="radio" name="demog_edu" value="8" /> Doctoral or medical degree (8)</label>
             </td>
             <td class="cl0"></td>
           </tr>
@@ -306,7 +312,7 @@
             <td><input type="radio" name="colorectal_cancer" value="7"></td>
           </tr>
           <tr>
-            <td>Alzheimer’s disease</td>
+            <td>Alzheimer's disease</td>
             <td><input type="radio" name="alzheimers_disease" value="1" required></td>
             <td><input type="radio" name="alzheimers_disease" value="2"></td>
             <td><input type="radio" name="alzheimers_disease" value="3"></td>
@@ -330,7 +336,7 @@
       var by     = document.getElementById('demog_by').value;
       var age    = document.getElementById('demog_age').value;
       var gen    = getRadioVal(document.getElementById('form_demog'), 'demog_gen');
-      var edu    = document.getElementById('demog_edu').value;
+      var edu    = getRadioVal(document.getElementById('form_demog'), 'demog_edu');
       var nateng = getRadioVal(document.getElementById('form_demog'), 'demog_eng');
       var firlan = document.getElementById('demog_firlan').value;
       var hislat = getRadioVal(document.getElementById('form_demog'), 'demog_hislat');

@@ -50,12 +50,12 @@
     </div>
 
     <div class="nextArt" style="border: 1px solid #ccc; padding: 10px; display: flex; align-items: center; justify-content: space-between; gap: 24px;">
-      <a href="{{ url_for('practice.prac_c1', fid='back') }}" target="_top" style="color:#0a0000;">
+      <a href="{{ url_for('practice.prac_c1', fid='back') }}" target="_top" style="background: transparent !important; color:#0040f1 !important; box-shadow: none; border: 2px solid #000000; font-weight: 700 !important; text-decoration: underline !important; font-size: 16pt !important;">
         Go to Other Topics
       </a>
       {% if passOrder != 5 %}
 
-      <a href="{{ url_for('practice.prac_c1', fid='same') }}" target="_top" style="color:#0a0000;">
+      <a href="{{ url_for('practice.prac_c1', fid='same') }}" target="_top" style="background: transparent !important; color:#0040f1 !important; box-shadow: none; border: 2px solid #000; font-weight: 700 !important; text-decoration: underline !important; font-size: 16pt !important;">
         Read the Next Article
       </a>
       {% endif %}
