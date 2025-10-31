@@ -2,7 +2,7 @@
 html, body {
   font-family: "Times New Roman", "Times New Roman Regular", Times, serif;
   font-size: 16pt;
-  margin: 1in;
+  margin: 0.25in 1in 0.25in 1in;
   box-sizing: border-box;
 }
 
