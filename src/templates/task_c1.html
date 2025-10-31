@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+
     <title>{{ page_title }}</title>
     <base target="_top">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <style>
-      body {
-        font-family: "Times New Roman", "Times New Roman Regular", Times, serif;
-        font-size: 14pt;
+      .question-text {
+        text-align: center;
       }
-      td { font-size: 14pt; }
-      .question-text { font-size: 14pt; text-align: center; }
     </style>
 </head>
 <body>

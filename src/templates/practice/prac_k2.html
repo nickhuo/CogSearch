@@ -2,16 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+
   <title>Practice K2</title>
   <base target="_top">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
   <style>
-    body {
-      font-family: "Times New Roman", "Times New Roman Regular", Times, serif;
-      font-size: 14pt;
+    #k2 {
+      text-align: center;
     }
-    td { font-size: 14pt; }
-    .question-text { font-size: 14pt; text-align: center; }
+    .reminder {
+      font-size: 18pt;
+    }
+    .next-link {
+      display: inline-block;
+      margin-top: 24px;
+      padding: 14px 28px;
+      background-color: #0B3861;
+      color: #fff;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .next-link:hover,
+    .next-link:focus {
+      background-color: #07264a;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -25,20 +41,8 @@
       <p>
         Now, please tell us about what you have learned about Animals today. You can recall anything you remember from any of the topics you read today. You don't need to remember the information word for word. Please say as much as you can!
       </p>
-
-      <form id="form_k2" name="form_k2" action="{{ url_for('core.instruction') }}" method="POST" onsubmit="return saveAns();">
-        <textarea id="textarea_k2" name="textarea_k2" rows="10" cols="60" required></textarea>
-        <br><br>
-        <input type="image" name="submit" id="submit" src="{{ url_for('static', filename='images/next_button.gif') }}" alt="Next" />
-      </form>
+      <a class="next-link" href="{{ url_for('core.instruction') }}">Please inform the researcher before pressing here.</a>
     </div>
   </div>
-
-  <script>
-    function saveAns() {
-      var input = document.getElementById('textarea_k2');
-      return input.value !== '';
-    }
-  </script>
 </body>
 </html>

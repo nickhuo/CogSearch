@@ -2,17 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+
     <title>Comprehension Questions</title>
     <base target="_top">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/questions_style.css') }}">
     <style>
-      body {
-        font-family: "Times New Roman", "Times New Roman Regular", Times, serif;
-        font-size: 14pt;
+      .question-text {
+        text-align: center;
       }
-      td { font-size: 14pt; }
-      .question-text { font-size: 14pt; text-align: center; }
     </style>
   </head>
   

@@ -3,10 +3,10 @@
     font-family: "Times New Roman", "Times New Roman Regular", Times, serif;
     background-color: #f0f0f0;
     color: #333333;
-    margin: 0;
+    margin: 1in;
     padding: 0;
     line-height: 1.6;
-    font-size: 14pt;
+    font-size: 16pt;
   }
   
   .vocab-container {
@@ -61,7 +61,7 @@
   }
   
   .vocab-question {
-    font-size: 14pt;
+    font-size: 16pt;
     font-weight: 600;
     margin-bottom: 12px;
     color: #333333;
@@ -78,7 +78,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 14pt;
+    font-size: 16pt;
     padding: 12px 16px;
     border: 1px solid #d0d0d0;
     border-radius: 8px;
@@ -120,7 +120,7 @@
     display: block;
     margin: 40px auto 0 auto;
     padding: 14px 40px;
-    font-size: 14pt;
+    font-size: 16pt;
     font-weight: 600;
     background: none;
     border: none;
@@ -141,11 +141,11 @@
   /* ====== RESPONSIVE ====== */
   @media (max-width: 768px) {
     .vocab-question {
-      font-size: 14pt;
+      font-size: 16pt;
     }
   
     .option-label {
-      font-size: 14pt;
+      font-size: 16pt;
     }
   }
   

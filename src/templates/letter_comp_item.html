@@ -2,17 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+
   <title>Letter Comparison Round {{ round_number }}</title>
   <base target="_top">
   <style>
-    body { font-family: "Times New Roman", "Times New Roman Regular", Times, serif; }
     .lc-container { max-width: 1400px; margin: 40px auto; overflow-x: auto; }
     .lc-header { margin-bottom: 24px; }
     table { width: 100%; border-collapse: collapse; table-layout: auto; }
     td { padding: 12px 8px; font-size: 20px; white-space: normal; }
     td.choice { text-align: center; white-space: nowrap; }
     .actions { margin-top: 24px; text-align: center; }
-    .progress { font-size: 14pt; margin-bottom: 12px; }
+    .progress { font-size: 16pt; margin-bottom: 12px; }
     .option-label { 
       margin: 0 8px; 
       font-size: 20px; 

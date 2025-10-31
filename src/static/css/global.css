@@ -1,0 +1,36 @@
+/* Base styling applied across the app */
+html, body {
+  font-family: "Times New Roman", "Times New Roman Regular", Times, serif;
+  font-size: 16pt;
+  margin: 1in;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+body {
+  line-height: 1.5;
+  color: #000;
+}
+
+p,
+td,
+li,
+label,
+input,
+select,
+textarea,
+button {
+  font-size: 1em;
+}
+
+main, section, article, div {
+  max-width: 100%;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}

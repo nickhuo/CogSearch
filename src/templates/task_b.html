@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+
   <title>{{ passResult['passTitle'] if passResult else "Task B" }}</title>
   <base target="_top">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/task_b_style.css') }}">

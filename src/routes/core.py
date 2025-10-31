@@ -357,19 +357,6 @@ def instruction():
         link = get_db_connection()
         cursor = link.cursor()
 
-        if request.method == "POST":
-            ans_to_save = request.form.get("textarea_k2", "").strip()
-            if ans_to_save:
-                cursor.execute(
-                    """
-                    INSERT INTO tb18_prac_topicIdeas 
-                        (uid, sid, topID, quesID, quesAns)
-                    VALUES 
-                        (%s, %s, %s, 'prac_k2', %s)
-                    """,
-                    (uid, sid, topID, ans_to_save),
-                )
-
         strDomain = "01#"
         # Ensure uid is an integer before modulo operation to avoid runtime errors
         try:
@@ -1072,27 +1059,6 @@ def let_comp_one_inst():
     pageTypeID = "inst_lci1"
     pageTitle = "Instruction for Letter Comparison One"
     save_url(uid, sid, topID, "", "", "", pageTypeID, pageTitle, request.url)
-
-    if request.method == "POST":
-        ans_to_save = request.form.get("textarea_k2", "").strip()
-        try:
-            link = get_db_connection()
-            cursor = link.cursor()
-            cursor.execute(
-                """
-                INSERT INTO tb8_topicIdeas (uid, sid, topID, quesID, quesAns)
-                VALUES (%s, %s, %s, %s, %s)
-                """,
-                (uid, sid, topID, "k2", ans_to_save),
-            )
-            link.commit()
-        except Exception as e:
-            print(f"Error inserting topic idea: {e}")
-            return f"Database error: {e}", 500
-        finally:
-            if link and link.is_connected():
-                cursor.close()
-                link.close()
 
     return render_template("let_comp_one_inst.html")
 

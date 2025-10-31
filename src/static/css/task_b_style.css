@@ -2,12 +2,12 @@
     font-family: "Times New Roman", "Times New Roman Regular", Times, serif;
     background-color: #f8fafc;
     color: #222;
-    margin: 0;
+    margin: 1in;
     padding: 16px;
   }
   
   .artText {
-    font-size: 14pt;  
+    font-size: 16pt;  
     line-height: 1.5;    
     font-weight: normal;
     max-width: 1500px;            /* 限制最大宽度，大约为一屏舒适宽度 */
