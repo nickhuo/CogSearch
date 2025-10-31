@@ -7,11 +7,22 @@
   <title>Letter Comparison Round {{ round_number }} - All Items</title>
   <base target="_top">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/letter_style.css') }}">
+  <style>
+    body {
+      font-family: "Times New Roman", "Times New Roman Regular", Times, serif;
+      font-size: 16pt;
+    }
+    td { font-size: 16pt; }
+    .question-text { font-size: 14pt; text-align: center; }
+  </style>
 </head>
 <body>
   <div class="lc-container">
     <div class="lc-header">
-      <h2>Letter Comparison Round {{ round_number }}</h2>
+      <h1>Letter Comparison Round {{ round_number }}</h1>
+      <p>
+        Please do as fast as you can.
+        </p>
     </div>
     
     <form method="post" action="{{ action_url }}" id="letterCompForm">

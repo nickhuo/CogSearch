@@ -21,7 +21,7 @@
       <div id="c1" style="text-align:center;">
         <br>
         <div id="passQ" class="passQ">
-          <p class="question-text"><b>1. How easy was this article to read?</b></p>
+          <p class="question-text"><b>1. Compared to the other articles that you have read today, how much new information was in this article?</b></p>
           <br><br>
 
           <form id="form_c1" name="form_c1" action="{{ url_for('practice.prac_c1', fid=fid) }}" method="POST" onsubmit="return saveAns();">
@@ -37,8 +37,8 @@
                 </td>
               </tr>
               <tr>
-                <td style="text-align:left; vertical-align:top;"><b>0</b><br>Didn’t Learn<br>Anything at All</td>
-                <td style="text-align:right; vertical-align:top;"><b>100</b><br>Learned a Lot</td>
+                <td style="text-align:left; vertical-align:top;"><b>0</b><br>No New Information</td>
+                <td style="text-align:right; vertical-align:top;"><b>100</b><br>Completely New Information</td>
               </tr>
             </table>
             <br>
