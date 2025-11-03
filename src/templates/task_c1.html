@@ -1,98 +1,132 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+    <head>
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', filename='css/global.css') }}"
+        />
 
-    <title>{{ page_title }}</title>
-    <base target="_top">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <style>
-      .question-text {
-        text-align: center;
-      }
-    </style>
-</head>
-<body>
-    <div class="b_up">
-        <div class="task_c_up">
-            Please make a rating from 0 to 100 by moving the circle on the scale.
+        <title>{{ page_title }}</title>
+        <base target="_top" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <style>
+            .question-text {
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="b_up">
+            <div class="task_c_up">
+                Please rate from 0 to 100 by moving the circle along the scale..
+            </div>
         </div>
-    </div>
 
-    <div class="b_down">
-        <div class="article">
-            <div id="c1" style="text-align: center;">
-                <br>
-                <div id="passQ">
-                    <p class="question-text">
-                      <b>1. Compared to the other articles that you have read today, how much new information was in this article?</b>
-                    </p>
-                    <br><br>
-                    <form id="form_c1" action="{{ url_for('core.task_c1', fid=fid) }}" method="POST" onsubmit="return saveAns()">
-                        <table style="width:100%;">
-                            <!-- Textbox row (full width) -->
-                            <tr>
-                              <td colspan="2" style="text-align:center;">
-                                <input type="text"
-                                       name="ans"
-                                       id="ans"
-                                       readonly="readonly"
-                                       class="readonly" />
-                              </td>
-                            </tr>
-                            
-                            <!-- Slider row (full width) -->
-                            <tr>
-                              <td colspan="2" style="text-align:center;">
-                                <input type="range"
-                                       name="ans_range"
-                                       id="ans_range"
-                                       min="0"
-                                       max="100"
-                                       style="width:100%;"
-                                       onchange="printValue()" />
-                              </td>
-                            </tr>
-                            
-                            <!-- Scale labels with descriptions in two side-by-side cells -->
-                            <tr>
-                              <td style="text-align:left; vertical-align:top;">
-                                <b>0</b><br>
-                                No New Information
-                              </td>
-                              <td style="text-align:right; vertical-align:top;">
-                                <b>100</b><br>
-                                Completely New Information
-                              </td>
-                            </tr>
-                          </table>
-                        <input type="hidden" name="fid" value="{{ fid }}">
-                        <input type="hidden" name="conID" value="{{ conID }}">
-                        <br>
-                        <input type="image" name="submit" src="{{ url_for('static', filename='images/continue_button.gif') }}" 
-                               alt="continue">
-                               <input type="hidden" name="qid" value="c1">
-                    </form>
+        <div class="b_down">
+            <div class="article">
+                <div id="c1" style="text-align: center">
+                    <br />
+                    <div id="passQ">
+                        <p class="question-text">
+                            <b
+                                >1. Compared to the other articles that you have
+                                read today, how much new information was in this
+                                article?</b
+                            >
+                        </p>
+                        <br /><br />
+                        <form
+                            id="form_c1"
+                            action="{{ url_for('core.task_c1', fid=fid) }}"
+                            method="POST"
+                            onsubmit="return saveAns()"
+                        >
+                            <table style="width: 100%">
+                                <!-- Textbox row (full width) -->
+                                <tr>
+                                    <td colspan="2" style="text-align: center">
+                                        <input
+                                            type="text"
+                                            name="ans"
+                                            id="ans"
+                                            readonly="readonly"
+                                            class="readonly"
+                                        />
+                                    </td>
+                                </tr>
+
+                                <!-- Slider row (full width) -->
+                                <tr>
+                                    <td colspan="2" style="text-align: center">
+                                        <input
+                                            type="range"
+                                            name="ans_range"
+                                            id="ans_range"
+                                            min="0"
+                                            max="100"
+                                            style="width: 100%"
+                                            onchange="printValue()"
+                                        />
+                                    </td>
+                                </tr>
+
+                                <!-- Scale labels with descriptions in two side-by-side cells -->
+                                <tr>
+                                    <td
+                                        style="
+                                            text-align: left;
+                                            vertical-align: top;
+                                        "
+                                    >
+                                        <b>0</b><br />
+                                        No New Information
+                                    </td>
+                                    <td
+                                        style="
+                                            text-align: right;
+                                            vertical-align: top;
+                                        "
+                                    >
+                                        <b>100</b><br />
+                                        Completely New Information
+                                    </td>
+                                </tr>
+                            </table>
+                            <input type="hidden" name="fid" value="{{ fid }}" />
+                            <input
+                                type="hidden"
+                                name="conID"
+                                value="{{ conID }}"
+                            />
+                            <br />
+                            <input
+                                type="image"
+                                name="submit"
+                                src="{{ url_for('static', filename='images/continue_button.gif') }}"
+                                alt="continue"
+                            />
+                            <input type="hidden" name="qid" value="c1" />
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script>
-        function printValue() {
-            const x = document.getElementById('ans_range');
-            const y = document.getElementById('ans');
-            y.value = x.value;
-        }
-
-        function saveAns() {
-            const input = document.getElementById('ans');
-            if (!input.value) {
-                alert('Please provide a rating before submitting!');
-                return false;
+        <script>
+            function printValue() {
+                const x = document.getElementById("ans_range");
+                const y = document.getElementById("ans");
+                y.value = x.value;
             }
-            return true;
-        }
-    </script>
-</body>
+
+            function saveAns() {
+                const input = document.getElementById("ans");
+                if (!input.value) {
+                    alert("Please provide a rating before submitting!");
+                    return false;
+                }
+                return true;
+            }
+        </script>
+    </body>
 </html>
