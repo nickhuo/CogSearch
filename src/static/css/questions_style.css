@@ -1,122 +1,139 @@
-/* ===== Theme aligned to vocab_style.css ===== */
-body {
-  font-family: "Times New Roman", "Times New Roman Regular", Times, serif;
-  background-color: #ffffff;
-  color: #333333;
+/* ===== Theme aligned to vocab_style.css (base font = 19px) ===== */
+:root {
+  --font-serif: "Times New Roman", "Times New Roman Regular", Times, serif;
+  --base-font-size: 19px;
+
+  --bg: #ffffff;
+  --text: #333333;
+  --text-strong: #000000;
+
+  --accent: #0066ff;
+  --accent-hover: #0057e6;
+
+  --border: #e0e0e0;
+  --border-muted: #d0d0d0;
+  --hover-bg: #e6f0ff;
+
+  --radius: 8px;
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 6px 16px rgba(0, 0, 0, 0.08);
 }
 
+html { font-size: var(--base-font-size); }
+
+body {
+  font-family: var(--font-serif);
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ===== Cards ===== */
 .card {
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
   transition: box-shadow 0.2s ease;
 }
 
-.card:hover {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-}
+.card:hover { box-shadow: var(--shadow-lg); }
 
 .card-header {
   font-weight: 600;
-  color: #333333;
-  background-color: #ffffff !important; /* override bootstrap */
-  border-bottom: 1px solid #e0e0e0;
-  border-left: 5px solid #0066ff;
+  color: var(--text);
+  background-color: var(--bg) !important; /* override bootstrap */
+  border-bottom: 1px solid var(--border);
+  border-left: 5px solid var(--accent);
 }
 
 .card-text {
-  color: #000000;
-  font-size: 16pt;
+  color: var(--text-strong);
+  /* inherit 19px from body/html */
+  font-size: 1rem;
 }
 
-/* Make the entire option line clickable, match vocab option style */
+/* ===== Options (radio rows) ===== */
 .form-check-label {
   display: flex;
   align-items: flex-start;
   gap: 10px;
   width: 100%;
   padding: 12px 16px;
-  border-radius: 8px;
-  border: 1px solid #d0d0d0;
-  background-color: #ffffff;
-  font-size: 16pt;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-muted);
+  background-color: var(--bg);
+  font-size: 1rem;           /* 19px via root */
   cursor: pointer;
   user-select: none;
-  transition: all 0.2s ease;
-  white-space: normal;            /* allow wrapping */
-  overflow-wrap: anywhere;        /* break long words/URLs if needed */
-  word-break: break-word;         /* compatibility */
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+  white-space: normal;       /* allow wrapping */
+  overflow-wrap: anywhere;   /* break long words/URLs if needed */
+  word-break: break-word;    /* compatibility */
 }
 
 .form-check-label:hover {
-  background-color: #e6f0ff;
-  border-color: #0066ff;
+  background-color: var(--hover-bg);
+  border-color: var(--accent);
 }
 
-.form-check-label:active {
-  transform: scale(0.98);
-}
+.form-check-label:active { transform: scale(0.98); }
 
 /* Highlight when selected (modern browsers support :has) */
 .form-check-label:has(input[type="radio"]:checked) {
-  border-color: #0066ff;
-  background-color: #e6f0ff;
-  color: #0066ff;
+  border-color: var(--accent);
+  background-color: var(--hover-bg);
+  color: var(--accent);
   font-weight: 600;
 }
 
 /* Spacing between adjacent options */
-.card-body .form-check-label + .form-check-label {
-  margin-top: 10px;
-}
+.card-body .form-check-label + .form-check-label { margin-top: 10px; }
 
-/* Adjust radio appearance to match theme */
+/* Radio appearance */
 .form-check-input {
   position: static !important; /* override Bootstrap absolute positioning */
   display: inline-block;
-  margin: 0 10px 0 0; /* spacing to text */
+  margin: 0 10px 0 0;          /* spacing to text */
   transform: scale(1.3);
   transform-origin: left center;
   cursor: pointer;
-  accent-color: #0066ff;
+  accent-color: var(--accent);
   flex-shrink: 0;
 }
 
-/* Buttons to match theme */
+/* ===== Buttons ===== */
 .btn-primary {
-  background-color: #0066ff !important;
-  border-color: #0066ff !important;
+  background-color: var(--accent) !important;
+  border-color: var(--accent) !important;
   color: #ffffff !important;
 }
 
 .btn-primary:hover,
 .btn-primary:focus {
-  background-color: #0057e6 !important;
-  border-color: #0057e6 !important;
+  background-color: var(--accent-hover) !important;
+  border-color: var(--accent-hover) !important;
 }
 
 .btn-secondary {
-  background-color: #ffffff !important;
-  color: #333333 !important;
-  border: 1px solid #d0d0d0 !important;
+  background-color: var(--bg) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border-muted) !important;
 }
 
 .btn-secondary:hover,
 .btn-secondary:focus {
-  background-color: #e6f0ff !important;
-  border-color: #0066ff !important;
-  color: #333333 !important;
+  background-color: var(--hover-bg) !important;
+  border-color: var(--accent) !important;
+  color: var(--text) !important;
 }
 
-#pageIndicator {
-  color: #333333;
-}
+#pageIndicator { color: var(--text); }
 
-/* Equal height cards per page */
-.question-item {
-  display: flex;
-}
+/* ===== Equal height cards per page ===== */
+.question-item { display: flex; }
+
 .question-item .card {
   display: flex;
   flex-direction: column;
@@ -124,7 +141,7 @@ body {
   min-height: 0; /* JS will set min-height per page; card can grow */
 }
 
-/* Image-only buttons for nav/submit */
+/* ===== Image-only buttons for nav/submit ===== */
 .image-btn {
   background: transparent !important;
   border: none !important;
@@ -143,4 +160,10 @@ body {
 .image-btn img {
   display: block;
   height: 40px; /* unified visual size */
+}
+
+/* ===== Respect reduced motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+  .form-check-label:active { transform: none !important; }
 }

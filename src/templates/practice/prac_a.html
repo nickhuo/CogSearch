@@ -13,7 +13,7 @@
 
   <!-- TIMER SECTION -->
   <div id="timer" class="timer" data-remaining-time="{{ session.get('remainingTime', 0) }}" data-redirect="{{ session.get('redirectPage', '') }}">
-    <p><strong>TIME REMAINS:</strong></p>
+    <h3><strong>TIME REMAINS:</strong></h3>
     <script>
       /*
         We pull the needed variables from Flask session/context.
@@ -67,7 +67,7 @@
         {% if subtop_id_str in visited_subtop %}
           <!-- Already visited -->
           <td class="cl6">
-            <div style="width: 100%; border: 1px solid #ccc; padding: 10px; background-color: #f5f5f5; font-size: 16pt; color: #0B3861; border-radius: 4px;">
+            <div style="width: 100%; border: 1px solid #ccc; padding: 10px; background-color: #f5f5f5; font-size: 19px; color: #0B3861; border-radius: 4px;">
               {{ subtop_title }}
             </div>
           </td>
@@ -75,7 +75,7 @@
           <!-- Not visited yet => display as a clickable text box -->
           <td class="cl5">
             <a href="{{ url_for('practice.prac_b', subtop=subtop_id, passOrd='01', lastPage='a') }}" target="_top" style="text-decoration: none;">
-              <div style="width: 100%; border: 1px solid #007BFF; padding: 10px; background-color: #e9f5ff; font-size: 16pt; color: #0B3861; border-radius: 4px; cursor: pointer;">
+              <div style="width: 100%; border: 1px solid #007BFF; padding: 10px; background-color: #e9f5ff; font-size: 19px; color: #0B3861; border-radius: 4px; cursor: pointer;">
                 {{ subtop_title }}
               </div>
             </a>

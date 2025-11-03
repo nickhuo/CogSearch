@@ -29,7 +29,7 @@
     <table id="subtopic" width="100%" style="table-layout:fixed;">
       <tr>
         <td class="cl4" colspan="2" style="text-align:left;">
-          <p style="font-size: 24px; font-weight: bold;">{{ topicResult[1] if topicResult else "Unknown Topic" }}</p>
+          <h2>{{ topicResult[1] if topicResult else "Unknown Topic" }}</h2>
         </td>
       </tr>
       {% set i = 0 %}
@@ -44,14 +44,14 @@
         {% if (subtop_id|string) in visited_subtop %}
           <!-- Already visited -->
           <td class="cl6">
-            <div style="width: 100%; border: 1px solid #ccc; padding: 10px; background-color: #f5f5f5; font-size: 16pt; color: #0B3861; border-radius: 4px;">
+            <div style="width: 100%; border: 1px solid #ccc; padding: 10px; background-color: #f5f5f5; font-size: 19px; color: #0B3861; border-radius: 4px;">
               {{ subtop_title }}
             </div>
           </td>
         {% else %}
           <!-- Not visited yet => display as a clickable text box -->
           <td class="cl5">
-            <a href="{{ url_for('core.task_b', subtop=subtop_id, passOrd='01', lastPage='a') }}" style="display:block; width: 100%; border: 1px solid #007BFF; padding: 10px; background-color: #e9f5ff; font-size: 16pt; color: #0B3861; border-radius: 4px; text-decoration: none;">
+            <a href="{{ url_for('core.task_b', subtop=subtop_id, passOrd='01', lastPage='a') }}" style="display:block; width: 100%; border: 1px solid #007BFF; padding: 10px; background-color: #e9f5ff; font-size: 19px; color: #0B3861; border-radius: 4px; text-decoration: none;">
               {{ subtop_title }}
             </a>
           </td>

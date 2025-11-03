@@ -1,6 +1,6 @@
 body {
     font-family: "Times New Roman", "Times New Roman Regular", Times, serif;
-    font-size: 16pt;
+    font-size: 19px;
     margin: 1in;
 }
 
@@ -12,7 +12,7 @@ body {
 }
 
 .user-info {
-    font-size: 16pt;
+    font-size: 19px;
     color: #333;
     margin-bottom: 20px;
 }

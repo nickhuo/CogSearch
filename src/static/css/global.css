@@ -1,7 +1,7 @@
 /* Base styling applied across the app */
 html, body {
   font-family: "Times New Roman", "Times New Roman Regular", Times, serif;
-  font-size: 16pt;
+  font-size: 19px;
   margin: 0.25in 1in 1in 1in;
   box-sizing: border-box;
 }
@@ -14,6 +14,7 @@ body {
   line-height: 1.5;
   color: #000;
 }
+
 
 p,
 td,
@@ -34,3 +35,14 @@ img {
   max-width: 100%;
   height: auto;
 }
+/* ===== Title styling (added) ===== */
+h1, h2, h3, h4, h5, h6 {
+  font-family: inherit;
+  font-weight: bold;
+  line-height: 1.2;
+  margin: 0.5em 0;
+}
+
+h1 { font-size: 2em; }    /* 约 28pt */
+h2 { font-size: 1.5em; }  /* 约 21pt */
+h3 { font-size: 1.17em; } /* 约 16.4pt */
