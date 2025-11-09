@@ -727,9 +727,11 @@ def task_b():
         )
 
         now = int(time.time())
+        last_switch = session.get('lastPageSwitchUnixTime', now)
         if lastPage == "a":
-            used_time = now - session.get('lastPageSwitchUnixTime', now)
-            session['remainingTime'] = session.get('remainingTime', 0) - used_time
+            used_time = max(0, now - last_switch)
+            remaining = session.get('remainingTime', 0) - used_time
+            session['remainingTime'] = max(0, remaining)
             session['lastPageSwitchUnixTime'] = now
             session['redirectPage'] = url_for('core.task_c1', fid='done')
         elif lastPage == "c3":
@@ -749,38 +751,42 @@ def task_b():
                         """,
                         (ans_to_save, sid, uid, passid_to_save),
                     )
-        elif lastPage == "c4" and request.method == 'POST':
+        elif lastPage == "c4":
+            session['lastPageSwitchUnixTime'] = now
+            session['redirectPage'] = url_for('core.task_c1', fid='done')
 
-            # classify the form submission as "next" or "back/done"
-            fid_in_form = request.form.get('fid', '')
+            if request.method == 'POST':
 
-            # clear the pending state after completing a C4 submission
-            session.pop('formal_pending_stage', None)
-            session.pop('formal_pending_passID', None)
-            session.pop('formal_pending_fid', None)
-            session.pop('formal_last_page', None)
+                # classify the form submission as "next" or "back/done"
+                fid_in_form = request.form.get('fid', '')
 
-            # if the form submission is not "next", mark the current subtopic as visited and check if all subtopics are completed
-            if fid_in_form != 'same':
-                current_subtop = str(subtopID)
-                visited = [x for x in session.get('visitedSub', '').split(',') if x]
-                if current_subtop and current_subtop not in visited:
-                    visited.append(current_subtop)
-                session['visitedSub'] = ','.join(visited)
+                # clear the pending state after completing a C4 submission
+                session.pop('formal_pending_stage', None)
+                session.pop('formal_pending_passID', None)
+                session.pop('formal_pending_fid', None)
+                session.pop('formal_last_page', None)
 
-                visited_sorted = sorted(
-                    (str(x) for x in visited if str(x)),
-                    key=lambda value: int(value) if value.isdigit() else value,
-                )
-                formal_all = session.get('formal_all_subtops') or []
-                if formal_all and visited_sorted == formal_all:
-                    redirect_to_next_section = url_for(
-                        'core.task_a',
-                        fid='complete',
-                        subtop=current_subtop,
-                        lastPage='c4',
-                        completed='1',
+                # if the form submission is not "next", mark the current subtopic as visited and check if all subtopics are completed
+                if fid_in_form != 'same':
+                    current_subtop = str(subtopID)
+                    visited = [x for x in session.get('visitedSub', '').split(',') if x]
+                    if current_subtop and current_subtop not in visited:
+                        visited.append(current_subtop)
+                    session['visitedSub'] = ','.join(visited)
+
+                    visited_sorted = sorted(
+                        (str(x) for x in visited if str(x)),
+                        key=lambda value: int(value) if value.isdigit() else value,
                     )
+                    formal_all = session.get('formal_all_subtops') or []
+                    if formal_all and visited_sorted == formal_all:
+                        redirect_to_next_section = url_for(
+                            'core.task_a',
+                            fid='complete',
+                            subtop=current_subtop,
+                            lastPage='c4',
+                            completed='1',
+                        )
 
         link.commit()
 
@@ -838,7 +844,10 @@ def task_c1():
 
     now = int(time.time())
     last_switch = session.get('lastPageSwitchUnixTime', now)
-    session['remainingTime'] = session.get('remainingTime', 0) - (now - last_switch)
+    if request.method == "GET":
+        used_time = max(0, now - last_switch)
+        remaining = session.get('remainingTime', 0) - used_time
+        session['remainingTime'] = max(0, remaining)
     session['lastPageSwitchUnixTime'] = now
 
     if request.method == "POST":

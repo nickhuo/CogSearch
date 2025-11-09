@@ -705,6 +705,14 @@ def prac_c1():
             request.url,
         )
 
+    now = int(time.time())
+    last_switch = session.get("lastPageSwitchUnixTime", now)
+    if request.method == "GET":
+        used_time = max(0, now - last_switch)
+        remaining = session.get("remainingTime", 0) - used_time
+        session["remainingTime"] = max(0, remaining)
+    session["lastPageSwitchUnixTime"] = now
+
     if request.method == "POST":
         ans = request.form.get("ans", "").strip()
         qid = request.form.get("qid", "c1")
