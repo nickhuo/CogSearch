@@ -996,8 +996,6 @@ def task_c4():
     else:
         action_url = url_for('core.k2', lastPage='unknown')
 
-    _subtopID = session.get('subtopID', '')
-    _passID = session.get('passID', '')
     pageTypeID = "c4"
     passTitle = session.get('passTitle', '')
     pageTitle = f"C4: {passTitle}"
@@ -1018,8 +1016,13 @@ def task_c4():
     if request.method == "POST":
         ans = request.form.get("ans", "").strip()
         qid = request.form.get("qid", "c4")
+        passid_override = request.form.get("savepassid", "").strip()
+        target_pass_id = passid_override or passID
+        if passid_override:
+            passID = passid_override
+            session['passID'] = passID
         if ans:
-            save_pass_answer(qid, ans, table="tb5_passQop")
+            save_pass_answer(qid, ans, table="tb5_passQop", pass_id=target_pass_id)
             try:
                 link = get_db_connection()
                 cursor = link.cursor()
@@ -1038,6 +1041,10 @@ def task_c4():
                         str(session.get('topID', 1)),
                     ),
                 )
+                cursor.execute(
+                    "UPDATE tb1_user SET conDone = conDone + 1 WHERE sid = %s AND uid = %s",
+                    (sid, uid),
+                )
                 link.commit()
             except Exception as e:
                 print(f"DB error in task_c4 POST: {e}")
@@ -1054,7 +1061,7 @@ def task_c4():
         else:
             return "No answer provided.", 400
 
-    return render_template("task_c4.html", fid=fid, action_url=action_url)
+    return render_template("task_c4.html", fid=fid, passID=passID)
 
 
 @core_bp.route('/let_comp_one_inst', methods=['GET', 'POST'])
@@ -1496,7 +1503,7 @@ def k2():
                 cursor.execute(
                     """
                     UPDATE tb5_passQop 
-                    SET c3Ans = %s 
+                    SET c4Ans = %s 
                     WHERE sid = %s AND uid = %s AND passID = %s
                     """,
                     (ans_to_save, sid, uid, passid_to_save),
@@ -1504,7 +1511,7 @@ def k2():
                 cursor.execute("UPDATE tb1_user SET conDone = conDone + 1 WHERE sid = %s AND uid = %s", (sid, uid))
                 link.commit()
             except Exception as e:
-                print(f"Error updating c3Ans in /k2: {e}")
+                print(f"Error updating c4Ans in /k2: {e}")
                 return f"Database error: {e}", 500
             finally:
                 if link and link.is_connected():

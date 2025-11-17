@@ -39,7 +39,7 @@
                         <form
                             id="form_c4"
                             name="form_c4"
-                            action="{{ action_url }}"
+                            action="{{ url_for('core.task_c4', fid=fid) }}"
                             method="POST"
                             onsubmit="return saveAns();"
                         >
@@ -95,6 +95,11 @@
                                 </tr>
                             </table>
                             <input type="hidden" name="fid" value="{{ fid }}" />
+                            <input
+                                type="hidden"
+                                name="savepassid"
+                                value="{{ passID }}"
+                            />
                             <br />
                             <input
                                 type="image"
