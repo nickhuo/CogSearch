@@ -92,8 +92,13 @@ def set_formal_duration(minutes: int | None) -> int:
 
 def apply_formal_duration_from_request() -> int:
     requested = request.args.get("duration")
-    minutes = safe_int_param(requested, default=None)
-    return set_formal_duration(minutes)
+    # Only update if duration parameter is explicitly provided in URL
+    if requested is not None:
+        minutes = safe_int_param(requested, default=None)
+        if minutes is not None:
+            return set_formal_duration(minutes)
+    # If no duration parameter in URL, preserve existing session value
+    return get_formal_duration_minutes()
 
 
 def _formal_pending_redirect():
@@ -157,6 +162,7 @@ def consent():
         session.clear()
         if isinstance(preserved_duration, int) and _is_valid_formal_duration(preserved_duration):
             session["formal_duration_minutes"] = preserved_duration
+    # Apply duration from URL parameter if provided, otherwise preserve existing session value
     apply_formal_duration_from_request()
     return render_template("consent.html")
 
@@ -350,6 +356,9 @@ def instruction():
     sid = session.get("sid", "")
     if not uid:
         return "No user session found; please start from the beginning.", 400
+
+    # Apply duration from URL parameter if provided, otherwise preserve existing session value
+    apply_formal_duration_from_request()
 
     link = None
     topID = "1"
@@ -548,9 +557,6 @@ def task_a():
         pageTitle = f"a Task: {topic_result[1]}" if topic_result else "a Task"
         save_url(uid, sid, topID, "", "", "", pageTypeID, pageTitle, request.url)
 
-        # define redirect if timer runs out
-        session['redirectPage'] = url_for('core.task_b', lastPage='a')
-
         if not visited_subtop:
             visited_sub = session.get('visitedSub', '')
             visited_subtop = [x for x in visited_sub.split(',') if x]
@@ -560,6 +566,12 @@ def task_a():
             key=lambda value: int(value) if value.isdigit() else value,
         )
         all_completed = visited_sorted == all_subtops_sorted and bool(all_subtops_sorted)
+
+        # If all subtopics are completed, redirect to k2 when timer runs out
+        if all_completed:
+            session['redirectPage'] = url_for('core.k2', lastPage='complete')
+        else:
+            session['redirectPage'] = url_for('core.task_b', lastPage='a')
 
         return render_template(
             'task_a.html',
